@@ -1,0 +1,83 @@
+# Agent Collaboration Protocol
+
+How the GloberBooks agents work together. Both agent definitions (`.claude/agents/`) refer to this file.
+
+## 1. Roles
+
+| Role | Who | Owns | Does NOT do |
+|---|---|---|---|
+| **Sponsor / HITL** | The human | Final approval at every phase gate; the Constitution; business risk, ethics, compliance; all ASK FIRST items | Write implementation code |
+| **Product Manager (PM agent)** | `sdd-product-manager` | Business analysis, requirements, `spec.md`, Decision Log, backlog (`tasks.md` organization, priority, sequencing), traceability, change control | Decide technology or architecture; approve its own work; write code |
+| **Spec Liaison** | `sdd-spec-liaison` | SDD doctrine and governance: reviews every artifact against the course, the Constitution and the spec; Clarify Loop; task audits; Test Gate; drift forensics; briefs for the coding agent | Decide business questions; author the spec; write code |
+| **Coding agent** | CODA or any coding agent | Implementation of ONE approved task at a time, with tests | Anything outside the task |
+| **Orchestrator** | The main Claude session | Invoking the agents in the right order, relaying handoff files, stopping at gates | Overriding a verdict or skipping a gate |
+
+Subagents cannot invoke each other. All collaboration therefore happens through **handoff files** that the orchestrator relays.
+
+## 2. Authority order (highest first)
+1. `docs/sdd/constitution.md`
+2. `docs/sdd/spec.md`
+3. `docs/sdd/plan.md`
+4. `docs/sdd/tasks.md`
+5. Code and tests
+
+`docs/sdd/exercise-brief.md` (BRD and exercise instructions) is the source for scope. `docs/course/` is the theoretical framework.
+
+## 3. Handoff files
+Location: `docs/sdd/handoffs/`
+Name: `NNN-<from>-to-<to>-<topic>.md` (NNN = zero-padded sequence, e.g. `001-pm-to-liaison-spec-review.md`).
+A handoff is append-only. Never rewrite an earlier one; add a new file.
+
+Template:
+
+```markdown
+# Handoff NNN: <topic>
+- From: <pm | liaison | sponsor | coding-agent>
+- To: <pm | liaison | sponsor | coding-agent>
+- Phase: <1-6>   Round: <n of max 3>
+- Artifacts: <paths and versions or commit>
+- Type: <REVIEW_REQUEST | REVIEW_REPORT | CLARIFICATION | DECISION_REQUEST | DECISION | TASK_BRIEF | TASK_DELIVERY | AUDIT_REPORT | CHANGE_REQUEST>
+
+## Summary
+## Content
+## Open items / decisions needed
+## Requested response
+```
+
+## 4. Standard loop for every artifact
+
+```
+PM drafts artifact
+   └─► handoff REVIEW_REQUEST ─► Liaison
+Liaison reviews (BLOCKER / MAJOR / MINOR findings, questions, verdict)
+   └─► handoff REVIEW_REPORT ─► PM
+PM resolves findings:
+   - what it can resolve from the brief, the constitution or prior decisions: fix and log
+   - business questions it cannot answer: DECISION_REQUEST ─► Sponsor
+   └─► new REVIEW_REQUEST (next round)
+Repeat until verdict = APPROVED (max 3 rounds; then escalate the unresolved items to the Sponsor)
+   └─► Sponsor gate: approve / change / reject
+```
+
+Rules:
+- No artifact moves to the next phase without **Liaison verdict APPROVED** and **Sponsor approval**.
+- The PM never edits its own artifact to "get around" a finding: it fixes the cause or records an explicit decision.
+- The Liaison never edits `spec.md` or `tasks.md`; it proposes text in the review report.
+- Decisions are written to the spec's Decision Log (DEC-NNN) by the PM only after the Sponsor, or an earlier Sponsor-approved rule, has confirmed them.
+- A rejected or ambiguous item is resolved by changing the spec, never by patching code.
+
+## 5. Phase gates
+
+| Phase | Producer | Reviewer | Gate |
+|---|---|---|---|
+| 1. Constitution | Sponsor (drafted with Liaison help) | Liaison (Mode A) | Sponsor approval |
+| 2. Specify | PM | Liaison (Modes B, C) | Liaison APPROVED, then Sponsor |
+| 3. Plan and tasks | Coding agent drafts `plan.md`; PM organizes `tasks.md` | Liaison (Mode D) | Liaison APPROVED, then Sponsor |
+| 4. Implement | Coding agent, one task at a time (Liaison writes the brief) | Liaison (Modes F, G) | ACCEPT recommendation, then Sponsor or PM acceptance |
+| 5. Drift / change | PM (change request and impact analysis) | Liaison (Mode H) | Liaison APPROVED, then Sponsor |
+| 6. Contrast | Sponsor / any | n/a | Written comparison |
+
+## 6. Escalation to the Sponsor
+Escalate (do not decide) when: a business rule, scope or priority is unknown; a compliance, security or privacy trade-off appears; an ASK FIRST item is needed (new dependency, schema change, new entity, architectural change); two review rounds fail to converge; the brief and the Constitution conflict.
+
+Every escalation must be decision-ready: context, options, consequences, recommendation.

@@ -11,11 +11,13 @@ This repository follows **Spec-Driven Development (SDD)** with a Human-in-the-Lo
 
 If a lower document conflicts with a higher one, the higher one wins. Update the spec first; never hand-patch code to hide drift.
 
-## Spec Liaison agent
-Use the `sdd-spec-liaison` subagent (`.claude/agents/sdd-spec-liaison.md`) as the intermediate layer between the PM and the coding agent. It analyzes specs, runs the Clarify Loop, reviews plan and tasks, audits delivered tasks, reviews the Test Gate and investigates drift. It does not write code.
+## Agents
+- `sdd-product-manager` (`.claude/agents/sdd-product-manager.md`): business analysis, requirements, `spec.md`, decision log, backlog organization, traceability and change control. Escalates unknown business decisions to the human Sponsor.
+- `sdd-spec-liaison` (`.claude/agents/sdd-spec-liaison.md`): SDD theory and governance. Reviews every artifact, runs the Clarify Loop, audits tasks, reviews the Test Gate, investigates drift, writes task briefs for the coding agent.
+- Neither agent writes code or chooses technology. Subagents cannot call each other, so the orchestrator (main session) relays handoff files per `docs/sdd/agent-protocol.md`: PM drafts, Liaison reviews, PM resolves, repeat (max 3 rounds), then Sponsor gate.
 
 ## Knowledge base
-Course modules are in `docs/course/` (modules 1 to 5).
+Course modules are in `docs/course/` (modules 1 to 5). The BRD and exercise instructions are in `docs/sdd/exercise-brief.md`.
 
 ## Workflow rules
 - One task at a time; stop after each task and wait for PM approval.
