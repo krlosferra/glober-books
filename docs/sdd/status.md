@@ -33,7 +33,7 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 
 | Phase | State | Liaison verdict | Security verdict | Sponsor approval | Date |
 |---|---|---|---|---|---|
-| 1 Constitution | v0.2 applied (round 2 review pending) | round 1: REJECTED v0.1; round 2 pending | pending | not yet | |
+| 1 Constitution | v0.2 applied; fixes pending | round 2: APPROVED WITH CHANGES (handoff 002) | round 1: FAIL, 3 HIGH (handoff 003) | not yet | |
 | 2 Specify | not started | | | | |
 | 3 Plan and tasks | not started | | | | |
 | 4 Implement | not started | | | | |
