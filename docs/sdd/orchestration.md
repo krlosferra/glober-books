@@ -9,7 +9,7 @@ The main Claude Code session is the **orchestrator** of the whole analysis, deve
 | PM | `sdd-product-manager` | Business analysis, spec, decision log, backlog, business acceptance, change control |
 | Spec Liaison | `sdd-spec-liaison` | SDD theory and governance, reviews, Clarify Loop, task briefs, audits, Test Gate, drift forensics |
 | Java Architect | `sdd-java-architect` | Backend implementation with unit, slice, integration and contract tests |
-| Frontend Developer | `sdd-frontend-developer` | UI implementation against the API contract, accessibility, UI verification |
+| Frontend Developer | `sdd-frontend-developer` | UI implementation against the API contract, accessibility, Playwright E2E suite and exploratory verification (Playwright MCP, scoped to this agent) |
 | Sponsor | the human | Final approval at every gate; constitution; ASK FIRST decisions |
 
 ## 2. Orchestrator responsibilities
@@ -42,13 +42,13 @@ Phase 6  Contrast       Sponsor
 3. Liaison reviews the backlog; Sponsor approves.
 
 ### Phase 4 detail (per task)
-1. **Select:** orchestrator picks the next ready tasks (Definition of Ready met, dependencies done).
+1. **Select:** orchestrator reads `docs/sdd/status.md` and picks tasks that are `READY` (Definition of Ready met, dependencies `DONE`). It also lists remote branches (`git ls-remote --heads origin 'feature/*' 'fix/*' 'test/*'`) to make sure no one already holds the item. `DONE`, `IN_PROGRESS`, `IN_REVIEW` and `BLOCKED` items are never dispatched. On dispatch it sets the row to `IN_PROGRESS` with agent and branch.
 2. **Brief:** Liaison writes a TASK_BRIEF per task (Mode E).
 3. **Implement:** Java Architect and/or Frontend Developer work **in parallel** when the tasks are independent (see section 4). Each works on its own branch and delivers a TASK_DELIVERY.
-4. **Verify independently:** orchestrator checks out the branch and runs the build and tests (`./mvnw verify` for backend; the approved frontend checks) and compares real output with the report.
+4. **Verify independently:** orchestrator checks out the branch and runs the build and tests (`./mvnw verify` for backend; `npx playwright test` from `e2e/` for frontend, per `docs/sdd/frontend-testing.md`) and compares real output with the report.
 5. **Audit:** Liaison runs the semantic audit (Mode F) and Test Gate review (Mode G) and returns ACCEPT or REJECT with evidence.
 6. **Business acceptance:** PM verifies the acceptance criteria and invariants from the spec's point of view.
-7. **Gate:** Sponsor approves; orchestrator updates `progress.md`, then merges following git-workflow section 4 (PR only if the Sponsor asked for one).
+7. **Gate:** Sponsor approves; orchestrator updates `progress.md`, merges following git-workflow section 4 (PR only if the Sponsor asked for one), then sets the row to `DONE` with the merge commit and updates the Spec coverage table (the PM confirms `IMPLEMENTED` / `VERIFIED`). A `DONE` item is never re-dispatched; changes to it require an approved change request (PM sets `REOPENED`).
 8. **Integration checkpoint:** after foundation tasks and after the first end-to-end feature (and after each slice that joins backend and frontend), run the integration checks in the exercise and record the logs.
 9. On REJECT: return the audit report to the same agent for correction. Count attempts (target average ≤ 2 per task).
 

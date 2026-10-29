@@ -2,6 +2,9 @@
 
 This repository follows **Spec-Driven Development (SDD)** with a Human-in-the-Loop (HITL) PM. Do not write implementation code unless a task from `docs/sdd/tasks.md` is being executed.
 
+## Start here
+Read `docs/sdd/README.md` (document map, owners, edit rights) and `docs/sdd/status.md` (live board) before anything else. Load only the sections you need, found by ID. Never start work on an item that is not `READY` in `status.md`; `DONE` items are not redone.
+
 ## Authority order
 1. `docs/sdd/constitution.md`
 2. `docs/sdd/spec.md`

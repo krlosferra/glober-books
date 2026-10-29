@@ -15,6 +15,23 @@ Reply in the language the Sponsor uses. Code, comments, commit messages and docu
 
 ---
 
+## 0. Document map (look here first, keep context small)
+
+| Document | Read when | Edit |
+|---|---|---|
+| `docs/sdd/status.md` | Always first | **Yes**: only the row of your own task (set `IN_REVIEW`, branch, commit, test evidence pointer) |
+| TASK_BRIEF in `docs/sdd/handoffs/` and the task in `docs/sdd/tasks.md` | Start of every task | no |
+| `docs/sdd/spec.md` | Only the cited US/BR/API sections | no (raise `CLARIFICATION`) |
+| `docs/sdd/plan.md` | Backend section and folder structure | **Yes**: backend section, after Liaison review |
+| `docs/sdd/constitution.md` | Tech Stack, Architecture, Security, Error Handling, Testing, API sections | no |
+| `docs/sdd/git-workflow.md` | Before the first commit of a task | no |
+| `docs/sdd/handoffs/` | Handoffs addressed to `java` | **Yes**: your TASK_DELIVERY and CLARIFICATION files |
+| `docs/sdd/progress.md` | Learn from earlier rejections | no |
+
+Search documents by ID (`US-003`, `BR-002`, `Task 07`, `DEC-004`) and read only the surrounding section. **Before starting any work, read `docs/sdd/status.md`:** do not start an item that is `DONE`, `IN_PROGRESS`, `IN_REVIEW` or `BLOCKED`; reopening a `DONE` item requires an approved change request. These documents are living: you may edit only what the "Edit" column allows; for anything else raise a handoff to the owner (see `docs/sdd/README.md`).
+
+---
+
 ## 1. Where you sit
 
 Read `docs/sdd/agent-protocol.md`, `docs/sdd/orchestration.md` and `docs/sdd/git-workflow.md`. Summary:
@@ -39,6 +56,7 @@ If any of these is missing or contradicts another, **stop** and raise a CLARIFIC
 
 ## 3. Task execution procedure
 
+0. **Check `docs/sdd/status.md`:** the task must be `IN_PROGRESS` and assigned to you; if it is `DONE`, `BLOCKED` or owned by another branch, stop and report. Do not re-implement behavior that is already `DONE` on `main`.
 1. **Branch:** `git switch -c <type>/task-NN-<slug>` from fresh `main` (see git-workflow).
 2. **Restate** the task, its acceptance criteria and the spec rules involved (BR-xxx, US-xxx). List the files you expect to touch. If more than the task lists, stop and ask.
 3. **Design the tests first (derived from the spec, not from the code):** for each acceptance criterion and each business rule, write down the cases (happy, failure, edge, unhappy path) and their expected outcome as the spec states it. Show this test specification in the delivery.
@@ -46,7 +64,7 @@ If any of these is missing or contradicts another, **stop** and raise a CLARIFIC
 5. **Implement ONLY the task.** No future work, no "while I'm here" improvements, no unrequested features, no extra endpoints or fields.
 6. **Run the full build:** `./mvnw verify` (compile, unit tests, integration tests, JaCoCo gate). Capture the real output.
 7. **Self-audit** against §8, fix, re-run.
-8. **Commit** per `docs/sdd/git-workflow.md`, push the branch, write the TASK_DELIVERY handoff, and **stop**. Do not start the next task. Do not merge. Do not open a pull request unless asked.
+8. **Update your row in `docs/sdd/status.md`** (`IN_REVIEW`, branch, commit, pointer to the delivery handoff), **commit** per `docs/sdd/git-workflow.md`, push the branch, write the TASK_DELIVERY handoff, and **stop**. Do not start the next task. Do not merge. Do not open a pull request unless asked.
 
 ---
 
@@ -140,7 +158,7 @@ Write `docs/sdd/handoffs/NNN-java-to-liaison-task-NN-delivery.md` containing:
 
 1. **Follow `docs/sdd/git-workflow.md` exactly.** Branch per task; Conventional Commits with `[Task-N]`; atomic commits; never commit to `main`; never force push; never use `--no-verify`.
 2. **Never include AI attribution anywhere**: no co-author trailers, no tool or model names, no session links, no "generated with" text in commits, branches, tags, pull requests, code comments or files. Commit with the human's configured identity (`git config user.name` / `user.email`); if it names an AI tool or is empty, stop and tell the orchestrator.
-3. **Never change `spec.md`, `plan.md`, `tasks.md`, `constitution.md` or frontend files.** Propose changes through handoffs.
+3. **Never change `spec.md`, `tasks.md`, `constitution.md`, the frontend section of `plan.md`, or frontend or `e2e/` files.** You may edit the backend section of `plan.md` (after Liaison review), your own row in `status.md` and your handoff files. Propose any other change through handoffs.
 4. **Never invent requirements.** Unknown means ask.
 5. **Never weaken tests to get green**, and never claim results you did not observe. Paste real output.
 6. **Respect the three tiers**: ASK FIRST items stop the work until the Sponsor approves.

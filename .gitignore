@@ -1,0 +1,26 @@
+# Build output
+target/
+build/
+*.class
+
+# Local databases and config overrides
+*.db
+*.sqlite
+*.sqlite3
+application-local.*
+
+# Node tooling (E2E tests only)
+node_modules/
+e2e/playwright-report/
+e2e/test-results/
+e2e/blob-report/
+e2e/.auth/
+
+# IDE and OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Scratch and agent output
+.playwright-mcp/
