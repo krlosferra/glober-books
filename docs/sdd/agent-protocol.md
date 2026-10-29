@@ -9,8 +9,11 @@ How the GloberBooks agents work together. Both agent definitions (`.claude/agent
 | **Sponsor / HITL** | The human | Final approval at every phase gate; the Constitution; business risk, ethics, compliance; all ASK FIRST items | Write implementation code |
 | **Product Manager (PM agent)** | `sdd-product-manager` | Business analysis, requirements, `spec.md`, Decision Log, backlog (`tasks.md` organization, priority, sequencing), traceability, change control | Decide technology or architecture; approve its own work; write code |
 | **Spec Liaison** | `sdd-spec-liaison` | SDD doctrine and governance: reviews every artifact against the course, the Constitution and the spec; Clarify Loop; task audits; Test Gate; drift forensics; briefs for the coding agent | Decide business questions; author the spec; write code |
-| **Coding agent** | CODA or any coding agent | Implementation of ONE approved task at a time, with tests | Anything outside the task |
-| **Orchestrator** | The main Claude session | Invoking the agents in the right order, relaying handoff files, stopping at gates | Overriding a verdict or skipping a gate |
+| **Java Architect** | `sdd-java-architect` | Backend implementation of ONE approved task at a time, with unit, slice, integration and contract tests | Anything outside the task; frontend; changing the spec |
+| **Frontend Developer** | `sdd-frontend-developer` | UI implementation of ONE approved task at a time against the API contract | Anything outside the task; backend; changing the contract |
+| **Orchestrator** | The main Claude session | Invoking the agents in the right order (in parallel when allowed), relaying handoff files, routing feedback, stopping at gates, repository hygiene | Overriding a verdict, skipping a gate, deciding business questions |
+
+The two implementing agents are the "coding agents" referred to elsewhere. Details of the flow, parallelism and feedback routing are in `docs/sdd/orchestration.md`; branches, commits and the no-AI-attribution rule are in `docs/sdd/git-workflow.md`.
 
 Subagents cannot invoke each other. All collaboration therefore happens through **handoff files** that the orchestrator relays.
 
@@ -32,8 +35,8 @@ Template:
 
 ```markdown
 # Handoff NNN: <topic>
-- From: <pm | liaison | sponsor | coding-agent>
-- To: <pm | liaison | sponsor | coding-agent>
+- From: <pm | liaison | java | frontend | sponsor | orchestrator>
+- To: <pm | liaison | java | frontend | sponsor | orchestrator>
 - Phase: <1-6>   Round: <n of max 3>
 - Artifacts: <paths and versions or commit>
 - Type: <REVIEW_REQUEST | REVIEW_REPORT | CLARIFICATION | DECISION_REQUEST | DECISION | TASK_BRIEF | TASK_DELIVERY | AUDIT_REPORT | CHANGE_REQUEST>
@@ -72,7 +75,7 @@ Rules:
 |---|---|---|---|
 | 1. Constitution | Sponsor (drafted with Liaison help) | Liaison (Mode A) | Sponsor approval |
 | 2. Specify | PM | Liaison (Modes B, C) | Liaison APPROVED, then Sponsor |
-| 3. Plan and tasks | Coding agent drafts `plan.md`; PM organizes `tasks.md` | Liaison (Mode D) | Liaison APPROVED, then Sponsor |
+| 3. Plan and tasks | Java Architect (backend) and Frontend Developer (frontend) draft `plan.md`; PM organizes `tasks.md` | Liaison (Mode D) | Liaison APPROVED, then Sponsor |
 | 4. Implement | Coding agent, one task at a time (Liaison writes the brief) | Liaison (Modes F, G) | ACCEPT recommendation, then Sponsor or PM acceptance |
 | 5. Drift / change | PM (change request and impact analysis) | Liaison (Mode H) | Liaison APPROVED, then Sponsor |
 | 6. Contrast | Sponsor / any | n/a | Written comparison |

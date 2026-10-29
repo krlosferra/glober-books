@@ -60,6 +60,8 @@ Only the following are approved. Anything else falls under ASK FIRST.
 - Never serialize JPA entities directly in API responses
 - Never modify files outside the scope of the current task
 - Never commit code that fails the test suite or the coverage gate
+- Never include AI attribution of any kind in commits, branches, tags, pull requests, code comments or files
+- Never bypass git hooks (`--no-verify`) or force push `main`
 
 ## Code Style
 - Naming: camelCase for variables, fields and methods; PascalCase for classes, interfaces, enums and records; UPPER_SNAKE_CASE for constants
@@ -130,5 +132,6 @@ Status codes:
 - Governance order of authority: `constitution.md` → `spec.md` → `plan.md` → `tasks.md` → code.
 - No code is written for behavior that is not in `spec.md`. A new idea means update `spec.md` first, then `plan.md`, then `tasks.md`, then implement.
 - Work proceeds one task at a time from `tasks.md`. The agent stops after each task and waits for human approval.
-- One commit per accepted task, message format: `[Task-N] Description - ACCEPTED`.
+- One branch per task and one squashed commit per accepted task, following `docs/sdd/git-workflow.md` (trunk-based branches `<type>/task-NN-<slug>`, Conventional Commits with `[Task-N]`, no direct commits to `main`).
+- No commit, branch, tag, pull request or file may reveal the use of an AI tool or agent (no co-author trailers, tool or model names, session links). Commits use the human contributor's own identity.
 - Documentation (`spec.md`, `plan.md`, `tasks.md`, `progress.md`) must be updated in the same change as any code that affects it.
