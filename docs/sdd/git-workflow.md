@@ -21,7 +21,11 @@ git config user.email "<your email>"
 git config core.hooksPath .githooks     # enables the commit-msg guard (once per clone)
 ```
 
-The guard `.githooks/commit-msg` rejects messages that match known AI-related patterns. It is a safety net, not a substitute for the rule. Do not bypass it (`--no-verify` is forbidden).
+Two guards live in `.githooks/` and are enabled by `core.hooksPath`:
+- `commit-msg` rejects messages that match specific AI-attribution patterns (trailers, tool, model and vendor names, session links).
+- `pre-push` rejects a push when any outgoing commit has an author or committer identity that matches those patterns, when the branch or tag name does, or when the configured identity is empty.
+
+They are a safety net, not a substitute for the rule. Do not bypass them (`--no-verify` is forbidden). The orchestrator checks `git config core.hooksPath`, the executable bit of the hooks and the identity before dispatching any work.
 
 If a violating commit is found in history, report it to the Sponsor; rewriting shared history requires the Sponsor's explicit approval.
 
@@ -29,7 +33,7 @@ If a violating commit is found in history, report it to the Sponsor; rewriting s
 
 - `main` is always releasable: builds, all tests green, coverage gate met, docs in sync.
 - No direct commits to `main`, with one exception: the initial bootstrap of the repository.
-- All work happens on a short-lived branch created from the latest `main`, merged back through a pull request, then deleted.
+- All work happens on a short-lived branch created from the latest `main`. The branch is pushed and integrated into `main` by a squash merge that the Sponsor approves: through a pull request when the Sponsor asks for one (section 4), otherwise by the orchestrator performing the same squash merge after the Sponsor's approval. Branches are deleted after merging.
 - One branch per task (or per tightly related set of spec changes). Target lifetime: under one day.
 
 ### Branch names
@@ -96,8 +100,8 @@ Note on the original exercise: the exercise suggests `[Task-N] [Description] - A
 ## 4. Pull requests and merging
 
 1. Push the branch: `git push -u origin <branch>`.
-2. A pull request is opened only when the Sponsor asks for it (or approves the orchestrator proposing it). Title follows the commit convention. The description lists: task, spec references, acceptance criteria status, test evidence (command and result), deviations. No AI attribution lines.
-3. Merge requirements: build and tests green, coverage ≥ 80%, Liaison `ACCEPT`, PM business acceptance (feature work), Sponsor approval.
+2. A pull request is opened only when the Sponsor asks for it (or approves the orchestrator proposing it). Without a pull request the orchestrator squash-merges the approved branch, using the same message rules. Title follows the commit convention. The description lists: task, spec references, acceptance criteria status, test evidence (command and result), deviations. No AI attribution lines.
+3. Merge requirements: build and tests green, coverage ≥ 80%, Liaison `ACCEPT`, Security verdict `PASS` (or `PASS WITH CONDITIONS` with every condition closed), PM business acceptance (feature work), Sponsor approval.
 4. **Squash merge** into `main`, so history shows one commit per accepted task. The squashed message follows section 3.
 5. Delete the branch after merging.
 
@@ -108,4 +112,4 @@ Note on the original exercise: the exercise suggests `[Task-N] [Description] - A
 Tag messages follow the same no-attribution rule.
 
 ## 6. Forbidden operations (without explicit Sponsor approval)
-`git push --force` (and `--force-with-lease`) on `main`; history rewriting on shared branches; `git reset --hard` outside a `drift/` branch; `--no-verify`; deleting tags or branches that are not yours.
+`git push --force` (and `--force-with-lease`) on any shared branch, and always on `main`; history rewriting on shared branches; `git reset --hard` outside a `drift/` branch; `--no-verify`; deleting tags or branches that are not yours.

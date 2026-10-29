@@ -17,9 +17,10 @@ If a lower document conflicts with a higher one, the higher one wins. Update the
 ## Agents
 - `sdd-product-manager` (`.claude/agents/sdd-product-manager.md`): business analysis, requirements, `spec.md`, decision log, backlog organization, traceability and change control. Escalates unknown business decisions to the human Sponsor.
 - `sdd-spec-liaison` (`.claude/agents/sdd-spec-liaison.md`): SDD theory and governance. Reviews every artifact, runs the Clarify Loop, audits tasks, reviews the Test Gate, investigates drift, writes task briefs for the coding agent.
+- `sdd-security-reviewer` (`.claude/agents/sdd-security-reviewer.md`): application security specialist with a **veto** at every phase gate (threat model and controls in `docs/sdd/security.md`; read-only checks; Security verdict PASS / PASS WITH CONDITIONS / FAIL). Only the Sponsor can accept a residual risk.
 - `sdd-java-architect` (`.claude/agents/sdd-java-architect.md`): senior Java architect; implements ONE approved backend task at a time with unit, slice, integration and contract tests.
 - `sdd-frontend-developer` (`.claude/agents/sdd-frontend-developer.md`): implements ONE approved UI task at a time (plain HTML/CSS/JS) against the API contract. Works in parallel with the Java architect.
-- PM and Liaison do not write code or choose technology. Subagents cannot call each other, so **this session is the orchestrator**: follow `docs/sdd/orchestration.md` (flow, parallelism, feedback routing, checklists) and `docs/sdd/agent-protocol.md` (handoffs, review loop: PM drafts, Liaison reviews, PM resolves, max 3 rounds, then Sponsor gate).
+- PM and Liaison do not write code or choose technology. Subagents cannot call each other, so **this session is the orchestrator**: follow `docs/sdd/orchestration.md` (flow, parallelism, feedback routing, checklists) and `docs/sdd/agent-protocol.md` (handoffs, review loop: PM drafts, Liaison reviews, PM resolves, max 3 rounds, then Sponsor gate). Every gate needs a Liaison verdict, a Security verdict and Sponsor approval. Security is non-negotiable: no secrets, no AI attribution, bind to localhost, defense in depth; see the Security Standards in the constitution.
 
 ## Knowledge base
 Course modules are in `docs/course/` (modules 1 to 5). The BRD and exercise instructions are in `docs/sdd/exercise-brief.md`.

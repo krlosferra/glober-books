@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Rejects pushes whose commits, branch or tag names reveal the use of an AI tool,
+# or when no human identity is configured.
+# Activate once per clone: git config core.hooksPath .githooks
+remote="$1"
+pattern='\bclaude\b|anthropic|openai|chatgpt|\bgpt-?[0-9]|copilot|\bcoda\b|noreply@anthropic|co-authored-by|claude\.ai'
+zero='0000000000000000000000000000000000000000'
+fail=0
+if [ -z "$(git config user.name)" ] || [ -z "$(git config user.email)" ]; then
+  echo "pre-push: git user.name and user.email must be configured with the human identity." >&2
+  fail=1
+fi
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue
+  if echo "$remote_ref" | grep -qiE "$pattern"; then
+    echo "pre-push: ref name '$remote_ref' reveals an AI tool." >&2; fail=1
+  fi
+  if [ "$remote_sha" = "$zero" ]; then range="$local_sha"; else range="$remote_sha..$local_sha"; fi
+  if git log "$range" --format='%an <%ae>%n%cn <%ce>' 2>/dev/null | grep -qiE "$pattern"; then
+    echo "pre-push: a commit in '$local_ref' has an author or committer identity that reveals an AI tool." >&2; fail=1
+  fi
+  if git log "$range" --format='%B' 2>/dev/null | grep -v '^#' | grep -qiE "$pattern|generated (with|by)|session_[0-9a-z]{8,}"; then
+    echo "pre-push: a commit message in '$local_ref' reveals an AI tool." >&2; fail=1
+  fi
+done
+exit $fail

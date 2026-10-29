@@ -2,7 +2,7 @@
 # Rejects commit messages that reveal the use of an AI tool.
 # Activate once per clone: git config core.hooksPath .githooks
 msg_file="$1"
-pattern='co-authored-by|generated (with|by)|claude|anthropic|openai|chatgpt|\bgpt-?[0-9]|copilot|gemini|codex|cursor|\bcoda\b|\bllm\b|ai[- ](generated|assisted|agent)|noreply@anthropic|claude\.ai|session_[0-9a-z]+'
+pattern='co-authored-by|generated (with|by)|\bclaude\b|anthropic|openai|chatgpt|\bgpt-?[0-9]|copilot|\bcoda\b|ai[- ](generated|assisted|agent)|claude\.ai|session_[0-9a-z]{8,}'
 if grep -v '^#' "$msg_file" | grep -qiE "$pattern"; then
   echo "commit-msg: rejected. The message mentions an AI tool, agent or co-author." >&2
   echo "See docs/sdd/git-workflow.md (section 'No AI attribution')." >&2

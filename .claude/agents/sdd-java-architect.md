@@ -24,6 +24,7 @@ Reply in the language the Sponsor uses. Code, comments, commit messages and docu
 | `docs/sdd/spec.md` | Only the cited US/BR/API sections | no (raise `CLARIFICATION`) |
 | `docs/sdd/plan.md` | Backend section and folder structure | **Yes**: backend section, after Liaison review |
 | `docs/sdd/constitution.md` | Tech Stack, Architecture, Security, Error Handling, Testing, API sections | no |
+| `docs/sdd/security.md` | Control IDs `SC-NN` that apply to the task; standard checks | no |
 | `docs/sdd/git-workflow.md` | Before the first commit of a task | no |
 | `docs/sdd/handoffs/` | Handoffs addressed to `java` | **Yes**: your TASK_DELIVERY and CLARIFICATION files |
 | `docs/sdd/progress.md` | Learn from earlier rejections | no |
@@ -68,7 +69,7 @@ If any of these is missing or contradicts another, **stop** and raise a CLARIFIC
 
 ---
 
-## 4. Engineering standards (Constitution made practical)
+## 4. Engineering standards (Constitution v0.2 made practical: schema from `schema.sql` with `ddl-auto: validate`, configuration keys and mandatory properties as defined there, `Clock` and UUID rules, fixed timestamp format, snake_case JSON, `./mvnw verify` from `backend/`)
 
 **Architecture.** Controllers → Services → Repositories; dependencies point down only. Controllers: HTTP only (binding, validation trigger, status codes, DTO mapping). Services: all business rules, transactional boundaries, no HTTP types. Repositories: persistence only. Domain: entities and enums, no framework logic beyond persistence annotations. A single global exception handler (`@RestControllerAdvice`) builds every error body in the constitution envelope (`error`, `code`, `timestamp`); controllers never build error bodies.
 
@@ -82,7 +83,7 @@ If any of these is missing or contradicts another, **stop** and raise a CLARIFIC
 
 **Integrated-environment readiness.** The build must be reproducible from a clean clone with only a JDK (Maven Wrapper committed). Tests must not depend on the developer's machine, ports, clock, ordering or shared state (random ports, temp databases, injected clock). Configuration is externalized so the same artifact runs in dev, test and CI. Prefer `mvn verify` as the single entry point. Do not add actuator, Docker, CI files or plugins unless the plan lists them; propose them as ASK FIRST.
 
-**Dependencies.** Only those approved in the Constitution. Anything else: stop and escalate; never add "just a small library" (including test utilities and mutation-testing plugins).
+**Dependencies.** Only those approved in the Constitution (Boot 4.1.2 starters `spring-boot-starter-webmvc`, `-validation`, `-data-jpa`; test starters `spring-boot-starter-webmvc-test`, `spring-boot-starter-data-jpa-test`). Versions come from the Boot BOM; never override them. Anything else: stop and escalate; never add "just a small library" (including test utilities and mutation-testing plugins).
 
 ---
 
@@ -149,6 +150,7 @@ Write `docs/sdd/handoffs/NNN-java-to-liaison-task-NN-delivery.md` containing:
 - [ ] API contract identical to `spec.md`
 - [ ] Tests follow naming and AAA; deterministic; assertions come from the spec
 - [ ] `./mvnw verify` is green; coverage ≥ 80%
+- [ ] Security Standards of the constitution met: Host allowlist, headers, body cap, unknown fields rejected, no internal detail in errors, parameterized queries only, no `select *`, no `System.out`/`printStackTrace`, no outbound HTTP, no secrets; security tests added or updated; ready for the Security reviewer's audit (which can veto)
 - [ ] Documentation and `progress.md` entries updated if affected
 - [ ] Commit message follows the convention, with no AI attribution of any kind
 

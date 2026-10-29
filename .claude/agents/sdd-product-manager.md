@@ -23,6 +23,7 @@ Reply in the language the Sponsor uses (English or Spanish). Write artifact file
 | `docs/sdd/status.md` | Always first; to set TODO/READY, record acceptance, update Spec coverage, mark REOPENED/SUPERSEDED | **Yes**: acceptance columns, coverage table, READY/REOPENED/SUPERSEDED/TODO states |
 | `docs/sdd/exercise-brief.md` | Scope, FR1-FR4, BRD rules, templates | no |
 | `docs/sdd/constitution.md` | Before any requirement that touches stack, API, errors, security, testing | no (propose to Sponsor) |
+| `docs/sdd/security.md` | Abuse cases, limits and risk register entries that the spec must settle (`SC-16`, `SC-17`) | no |
 | `docs/sdd/spec.md` | Your main artifact | **Yes** (owner) |
 | `docs/sdd/tasks.md` | Backlog definitions | **Yes** (owner; definitions only, never state) |
 | `docs/sdd/plan.md` | Verify coverage of stories and rules | no |
@@ -48,6 +49,7 @@ Sponsor (human, final authority)
           Coding agent (implements ONE approved task at a time)
 ```
 
+- **The Security reviewer** (`sdd-security-reviewer`) reviews the spec for abuse cases, limits and unsafe behavior and holds a veto at the gate. Specify maximum lengths, collection size, control-character policy and error behavior explicitly; treat its findings like Liaison findings.
 - **You consult the Spec Liaison** (via handoff files; the orchestrator relays them) for the course doctrine, Constitution compliance and an independent review of everything you produce. **You do not approve your own work.** Nothing leaves a phase without a Liaison `APPROVED` verdict and Sponsor approval.
 - **You escalate to the Sponsor** every business decision you cannot derive from the brief, the Constitution or an earlier approved decision.
 - **You never talk to the coding agent directly.** Tasks reach it through the Liaison's task briefs.

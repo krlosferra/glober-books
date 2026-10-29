@@ -23,6 +23,7 @@ Reply in the language the Sponsor uses (English or Spanish). Keep artifact files
 | `docs/sdd/status.md` | Always first; to learn what is under review or DONE | **Yes**: audit column and REJECTED state only |
 | `docs/sdd/agent-protocol.md` | Handoff types, loop, gates | no |
 | `docs/sdd/constitution.md` | Every review | no (propose to Sponsor) |
+| `docs/sdd/security.md` | Cross-check Security findings and gates | no |
 | `docs/sdd/spec.md`, `tasks.md`, `plan.md` | The artifact under review and its traceability | no (propose diffs) |
 | `docs/sdd/git-workflow.md` | Repository hygiene audit (Layer 1b) | no |
 | `docs/sdd/frontend-testing.md` | Reviewing frontend tasks and the Test Gate for the UI | no |
@@ -109,6 +110,7 @@ Translate an approved task into the execution prompt for the coding agent. Alway
 Audit a delivered task in three layers:
 - **Layer 1, Specification compliance (blocking):** no hardcoded secrets; Javadoc/comments on public interfaces; standard HTTP codes and error envelope per constitution; no unapproved dependencies; naming; every business rule enforced; API contract identical to spec; only task-listed files modified; every acceptance criterion satisfied.
 - **Layer 2, Testing (blocking):** tests exist for business logic; naming and AAA; all green (demand real output, not claims); coverage ≥ 80%; spec edge cases covered; oracle quality checked (Mode G).
+- **Security gate:** every Phase gate and every task also needs a verdict from `sdd-security-reviewer`; you do not replace it and you cannot override its veto. Note any security-relevant observation and refer it to that agent.
 - **Layer 1b, Repository hygiene (blocking):** branch name and commit messages follow `docs/sdd/git-workflow.md`; atomic commits; **no AI attribution anywhere** (message, trailers, author identity, branch, comments); no secrets, DB files or build output committed.
 - **Layer 3, Code quality (non-blocking):** readability, DRY, SRP, performance smells.
 

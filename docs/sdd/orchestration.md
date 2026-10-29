@@ -7,6 +7,7 @@ The main Claude Code session is the **orchestrator** of the whole analysis, deve
 | Agent | File | Responsibility |
 |---|---|---|
 | PM | `sdd-product-manager` | Business analysis, spec, decision log, backlog, business acceptance, change control |
+| Security Reviewer | `sdd-security-reviewer` | Security veto at every gate; threat model and controls in `security.md`; audits code, configuration, dependencies and agent risks with read-only checks |
 | Spec Liaison | `sdd-spec-liaison` | SDD theory and governance, reviews, Clarify Loop, task briefs, audits, Test Gate, drift forensics |
 | Java Architect | `sdd-java-architect` | Backend implementation with unit, slice, integration and contract tests |
 | Frontend Developer | `sdd-frontend-developer` | UI implementation against the API contract, accessibility, Playwright E2E suite and exploratory verification (Playwright MCP, scoped to this agent) |
@@ -46,7 +47,7 @@ Phase 6  Contrast       Sponsor
 2. **Brief:** Liaison writes a TASK_BRIEF per task (Mode E).
 3. **Implement:** Java Architect and/or Frontend Developer work **in parallel** when the tasks are independent (see section 4). Each works on its own branch and delivers a TASK_DELIVERY.
 4. **Verify independently:** orchestrator checks out the branch and runs the build and tests (`./mvnw verify` for backend; `npx playwright test` from `e2e/` for frontend, per `docs/sdd/frontend-testing.md`) and compares real output with the report.
-5. **Audit:** Liaison runs the semantic audit (Mode F) and Test Gate review (Mode G) and returns ACCEPT or REJECT with evidence.
+5. **Audit:** Liaison runs the semantic audit (Mode F) and Test Gate review (Mode G) and returns ACCEPT or REJECT with evidence. **In parallel, the Security Reviewer audits the task** (mandatory for any task that touches input, output, configuration, dependencies, headers or the frontend; the orchestrator asks it to confirm when a task does not) and returns PASS, PASS WITH CONDITIONS or FAIL.
 6. **Business acceptance:** PM verifies the acceptance criteria and invariants from the spec's point of view.
 7. **Gate:** Sponsor approves; orchestrator updates `progress.md`, merges following git-workflow section 4 (PR only if the Sponsor asked for one), then sets the row to `DONE` with the merge commit and updates the Spec coverage table (the PM confirms `IMPLEMENTED` / `VERIFIED`). A `DONE` item is never re-dispatched; changes to it require an approved change request (PM sets `REOPENED`).
 8. **Integration checkpoint:** after foundation tasks and after the first end-to-end feature (and after each slice that joins backend and frontend), run the integration checks in the exercise and record the logs.
@@ -72,6 +73,8 @@ Phase 6  Contrast       Sponsor
 | ASK FIRST item needed (dependency, schema, entity, architecture, frontend tooling) | Governance | Sponsor decision; if approved, update constitution or plan first |
 | Drift found (code not in spec) | Drift | Stop; Liaison forensics (Mode H); PM change request; spec-first recovery |
 | Coverage below gate or weak oracle found | Test defect | Back to implementer; Liaison Test Gate review |
+| Security finding CRITICAL or HIGH | Security veto | Back to the implementer with the finding and remediation; Security re-verifies; the Sponsor alone may accept the residual risk in `security.md` |
+| Security finding that needs a spec or constitution change | Security design gap | CHANGE_REQUEST to the PM (spec) or proposal to the Sponsor (constitution) with the Security report attached |
 | Two review rounds without convergence | Escalation | Sponsor decides |
 
 The default response to any spec/code disagreement is to **fix the spec first**, then regenerate or correct the code. Never patch code to hide a spec problem.
@@ -87,7 +90,7 @@ The default response to any spec/code disagreement is to **fix the spec first**,
 - [ ] Commits follow the convention; no AI attribution anywhere (`git log --format=%B` and author fields reviewed)
 - [ ] Build and tests re-run by the orchestrator; output matches the report
 - [ ] Only the task's files changed (`git diff --stat main...HEAD`)
-- [ ] Liaison ACCEPT and PM acceptance recorded; `progress.md` updated
+- [ ] Liaison ACCEPT, Security verdict PASS and PM acceptance recorded; `progress.md` updated
 
 **Before merging**
 - [ ] Sponsor approval; squash message follows the convention; branch up to date with `main`; full build green after the merge
