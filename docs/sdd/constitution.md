@@ -9,7 +9,8 @@
 - **Build tool:** Maven (single module, Maven Wrapper committed)
 - **Database:** SQLite (file-based, path set by configuration) accessed through Spring Data JPA / Hibernate
 - **Frontend:** Plain HTML + CSS + vanilla JavaScript, served as static resources by the Spring Boot application. No frontend build step and no frontend framework.
-- **Testing:** JUnit 5, Mockito, AssertJ, Spring Boot Test; JaCoCo for coverage
+- **Backend testing:** JUnit 5, Mockito, AssertJ, Spring Boot Test; JaCoCo for coverage
+- **Frontend / end-to-end testing:** Playwright (`@playwright/test`) in a development-only `e2e/` directory; see Amendment 1 and `docs/sdd/frontend-testing.md`
 
 ### Approved dependencies
 Only the following are approved. Anything else falls under ASK FIRST.
@@ -20,6 +21,7 @@ Only the following are approved. Anything else falls under ASK FIRST.
 - `org.hibernate.orm:hibernate-community-dialects` (SQLite dialect)
 - `spring-boot-starter-test` (JUnit 5, Mockito, AssertJ)
 - `jacoco-maven-plugin`
+- Development-only tooling (never a runtime or build dependency of the application): Node.js LTS, `@playwright/test`, Playwright browsers (Chromium). See Amendment 1.
 
 ## Architecture Principles
 - Layered architecture: Controllers → Services → Repositories (Data Access). Dependencies point downward only.
@@ -60,6 +62,8 @@ Only the following are approved. Anything else falls under ASK FIRST.
 - Never serialize JPA entities directly in API responses
 - Never modify files outside the scope of the current task
 - Never commit code that fails the test suite or the coverage gate
+- Never include AI attribution of any kind in commits, branches, tags, pull requests, code comments or files
+- Never bypass git hooks (`--no-verify`) or force push `main`
 
 ## Code Style
 - Naming: camelCase for variables, fields and methods; PascalCase for classes, interfaces, enums and records; UPPER_SNAKE_CASE for constants
@@ -130,5 +134,18 @@ Status codes:
 - Governance order of authority: `constitution.md` → `spec.md` → `plan.md` → `tasks.md` → code.
 - No code is written for behavior that is not in `spec.md`. A new idea means update `spec.md` first, then `plan.md`, then `tasks.md`, then implement.
 - Work proceeds one task at a time from `tasks.md`. The agent stops after each task and waits for human approval.
-- One commit per accepted task, message format: `[Task-N] Description - ACCEPTED`.
+- One branch per task and one squashed commit per accepted task, following `docs/sdd/git-workflow.md` (trunk-based branches `<type>/task-NN-<slug>`, Conventional Commits with `[Task-N]`, no direct commits to `main`).
+- No commit, branch, tag, pull request or file may reveal the use of an AI tool or agent (no co-author trailers, tool or model names, session links). Commits use the human contributor's own identity.
 - Documentation (`spec.md`, `plan.md`, `tasks.md`, `progress.md`) must be updated in the same change as any code that affects it.
+
+## Amendments
+
+### Amendment 1: Frontend end-to-end testing with Playwright (requested by the Sponsor, 2026-10-29)
+Status: pending Liaison review and formal Sponsor confirmation of the pinned versions.
+- Approved development-only tooling: Node.js (current LTS), `@playwright/test`, Chromium via `npx playwright install`.
+- Approved agent-side exploration tooling: the official Playwright MCP server (`@playwright/mcp`), defined inline in the frontend agent only. It adds nothing to the repository or the application.
+- Not yet approved (ASK FIRST): `@axe-core/playwright`, additional browsers, reporters or plugins, Playwright CLI mode, any other test library.
+- The frontend remains plain HTML + CSS + vanilla JavaScript with **no build step**; Node.js must never be required to build or run the application.
+- Versions are pinned (exact) with a lockfile in the first frontend task and recorded in `plan.md`.
+- The process, configuration standards and test rules are defined in `docs/sdd/frontend-testing.md`.
+- Frontend tests are subject to the same rules as backend tests: spec-derived oracles, deterministic, never weakened or skipped without Sponsor approval.
