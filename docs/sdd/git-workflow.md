@@ -34,7 +34,7 @@ If a violating commit is found in history, report it to the Sponsor; rewriting s
 
 - `main` is always releasable: builds, all tests green, coverage gate met, docs in sync.
 - No direct commits to `main`, with one exception: the initial bootstrap of the repository.
-- All work happens on a short-lived branch created from the latest `main`. The branch is pushed and integrated into `main` only through a pull request and a squash merge (section 4). `main` is protected on the server: pull request required, no force pushes, required `hygiene` check, CODEOWNERS review of protected paths. Branches are deleted after merging.
+- All work happens on a short-lived branch created from the latest `main`. The branch is pushed and integrated into `main` only through a pull request and a squash merge (section 4). `main` is protected on the server: pull request required, no force pushes or deletion, required `hygiene` check. While the Sponsor is the only maintainer, code-owner review is not a required rule: the orchestrator lists protected-path changes at the top of every pull request description and the Sponsor reads them before merging. Branches are deleted after merging.
 - One branch per task (or per tightly related set of spec changes). Target lifetime: under one day.
 
 ### Branch names
@@ -102,7 +102,7 @@ Note on the original exercise: the exercise suggests `[Task-N] [Description] - A
 
 1. Push the branch: `git push -u origin <branch>`.
 2. Every merge into `main` goes through a pull request. The Sponsor's approval of a task at its gate is the request to open and merge it; no pull request is opened before that approval. Title follows the commit convention. The description lists: task, spec references, acceptance criteria status, test evidence (command and result), deviations. No AI attribution lines.
-3. Merge requirements: build and tests green, coverage ≥ 80%, Liaison `ACCEPT`, Security verdict `PASS` (or `PASS WITH CONDITIONS` with every condition closed), PM business acceptance (feature work), Sponsor approval.
+3. Merge requirements: required `hygiene` check green, build and tests green, coverage ≥ 80%, Liaison `ACCEPT`, Security verdict `PASS` (or `PASS WITH CONDITIONS` with every condition closed), PM business acceptance (feature work), Sponsor approval.
 4. **Squash merge** into `main`, so history shows one commit per accepted task. The squashed message follows section 3.
 5. Delete the branch after merging.
 

@@ -49,7 +49,7 @@ Phase 6  Contrast       Sponsor
 4. **Verify independently:** orchestrator checks out the branch and runs the build and tests (`./mvnw verify` for backend; `npx playwright test` from `e2e/` for frontend, per `docs/sdd/frontend-testing.md`) and compares real output with the report.
 5. **Audit:** Liaison runs the semantic audit (Mode F) and Test Gate review (Mode G) and returns ACCEPT or REJECT with evidence. **In parallel, the Security Reviewer audits the task** (mandatory for any task that touches input, output, configuration, dependencies, headers or the frontend; the orchestrator asks it to confirm when a task does not) and returns PASS, PASS WITH CONDITIONS or FAIL.
 6. **Business acceptance:** PM verifies the acceptance criteria and invariants from the spec's point of view.
-7. **Gate:** Sponsor approves; orchestrator updates `progress.md`, merges following git-workflow section 4 (PR only if the Sponsor asked for one), then sets the row to `DONE` with the merge commit and updates the Spec coverage table (the PM confirms `IMPLEMENTED` / `VERIFIED`). A `DONE` item is never re-dispatched; changes to it require an approved change request (PM sets `REOPENED`).
+7. **Gate:** Sponsor approves; orchestrator updates `progress.md` in the task's branch, opens the pull request (the Sponsor's approval is the request) listing the protected-path changes at the top of its description, and squash-merges it after the required `hygiene` check and the Sponsor's review, following git-workflow section 4, then sets the row to `DONE` with the merge commit and updates the Spec coverage table (the PM confirms `IMPLEMENTED` / `VERIFIED`). A `DONE` item is never re-dispatched; changes to it require an approved change request (PM sets `REOPENED`).
 8. **Integration checkpoint:** after foundation tasks and after the first end-to-end feature (and after each slice that joins backend and frontend), run the integration checks in the exercise and record the logs.
 9. On REJECT: return the audit report to the same agent for correction. Count attempts (target average ≤ 2 per task).
 
@@ -83,13 +83,13 @@ The default response to any spec/code disagreement is to **fix the spec first**,
 
 **Before invoking an implementer**
 - [ ] Task ready; brief written by the Liaison; branch name per git-workflow
-- [ ] `git config user.name` / `user.email` are the human's identity; `core.hooksPath` is `.githooks`; the hooks are executable (`git ls-files -s .githooks` shows `100755`); `.claude/settings.json` is present
+- [ ] `git config user.name` / `user.email` are the human's identity; `core.hooksPath` is `.githooks`; the hooks and the guard are executable (`git ls-files -s .githooks .claude/hooks` shows `100755`); `.claude/settings.json` is present and `.claude/settings.local.json` does not exist or is empty (`ls -la .claude`)
 - [ ] Context limited to constitution, spec, plan, the task and relevant code
 
 **Before accepting a delivery**
 - [ ] Commits follow the convention; no AI attribution anywhere (`git log --format=%B` and author fields reviewed)
 - [ ] Build and tests re-run by the orchestrator; output matches the report
-- [ ] Only the task's files changed (`git diff --stat main...HEAD`)
+- [ ] Only the task's files changed (`git diff --stat main...HEAD`); a heuristic grep of the new handoffs for `curl`, `wget`, `base64`, `http`, "ignore previous" and "system prompt" found nothing unexplained; the diff was read for AI attribution in file content (the CI check covers messages, identities and names only)
 - [ ] Liaison ACCEPT, Security verdict PASS and PM acceptance recorded; `progress.md` updated
 
 **Before merging**

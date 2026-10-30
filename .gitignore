@@ -53,7 +53,7 @@ application-*.properties
 *.p12
 *.jks
 id_rsa*
-.mvn/settings*.xml
-playwright/.auth/
+**/.mvn/settings*.xml
+**/playwright/.auth/
 *.har
 !.env.example

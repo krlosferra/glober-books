@@ -1,8 +1,11 @@
-# Protected paths: changes need the owner's review (docs/sdd/security.md, SC-25).
+# Protected paths (docs/sdd/security.md, SC-25). Ownership requests the Sponsor's review; while the Sponsor is the
+# only maintainer, code-owner review is not a required rule and the Sponsor reads these changes before merging.
 /docs/sdd/constitution.md   @krlosferra
 /docs/sdd/security.md       @krlosferra
 /docs/sdd/git-workflow.md   @krlosferra
 /docs/sdd/agent-protocol.md @krlosferra
+/docs/sdd/orchestration.md  @krlosferra
+/docs/sdd/frontend-testing.md @krlosferra
 /.githooks/                 @krlosferra
 /.claude/                   @krlosferra
 /.github/                   @krlosferra

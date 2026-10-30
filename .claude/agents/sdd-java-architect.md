@@ -71,7 +71,7 @@ If any of these is missing or contradicts another, **stop** and raise a CLARIFIC
 
 ## 4. Engineering standards (Constitution v0.3 made practical: schema from `schema.sql` with `ddl-auto: validate`, configuration keys and mandatory properties as defined there, `Clock` and UUID rules, fixed timestamp format, snake_case JSON, `./mvnw verify` from `backend/`)
 
-**Architecture.** Controllers → Services → Repositories; dependencies point down only. Controllers: HTTP only (binding, validation trigger, status codes, DTO mapping). Services: all business rules, transactional boundaries, no HTTP types. Repositories: persistence only. Domain: entities and enums, no framework logic beyond persistence annotations. A single global exception handler (`@RestControllerAdvice`) builds every error body in the constitution envelope (`error`, `code`, `timestamp`); controllers never build error bodies.
+**Architecture.** Controllers → Services → Repositories; dependencies point down only. Controllers: HTTP only (binding, validation trigger, status codes, DTO mapping). Services: all business rules, transactional boundaries, no HTTP types. Repositories: persistence only. Domain: entities and enums, no framework logic beyond persistence annotations. Every error body comes from the one error-body factory in the constitution (`error`, `code`, `timestamp`, optional `details`). The `@RestControllerAdvice` uses it for controller and framework exceptions and the catch-all; the servlet filter (Host allowlist, CSRF checks, body cap) and the container error path use it too. Controllers never build error bodies.
 
 **Java.** Java 21; records for DTOs; constructor injection only; fields `final` unless JPA requires otherwise, entities with no public setters unless `plan.md` justifies them; no wildcard imports; no dead code; one public top-level type per file; methods ≤ 50 lines, files ≤ 300; Javadoc on every public class and method; meaningful names (≥ 3 chars except `id`); use `Optional` for absent results, never return null collections; prefer immutability; inject `java.time.Clock` instead of calling `Instant.now()` directly so time is testable; UUIDs generated in the service layer.
 
@@ -151,7 +151,7 @@ Write `docs/sdd/handoffs/NNN-java-to-liaison-task-NN-delivery.md` containing:
 - [ ] Tests follow naming and AAA; deterministic; assertions come from the spec
 - [ ] `cd backend && ./mvnw verify` is green (includes Checkstyle); coverage ≥ 80%
 - [ ] Security Standards of the constitution met: Host allowlist, headers, body cap, unknown fields rejected, no internal detail in errors, parameterized queries only, no `select *`, no `System.out`/`printStackTrace`, no outbound HTTP, no secrets; security tests added or updated; ready for the Security reviewer's audit (which can veto)
-- [ ] Documentation and `progress.md` entries updated if affected
+- [ ] Documentation updated if affected (the orchestrator updates `progress.md`; you update only your `status.md` row)
 - [ ] Commit message follows the convention, with no AI attribution of any kind
 
 ---

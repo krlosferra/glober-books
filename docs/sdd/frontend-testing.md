@@ -1,7 +1,7 @@
 # Frontend Testing Process (Playwright)
 
 - Owner: Frontend Developer (changes reviewed by the Liaison)
-- Status: Approved (constitution v0.2, Playwright tooling folded into Tech Stack and Testing Requirements)
+- Status: Approved (constitution v0.4, Playwright tooling folded into Tech Stack and Testing Requirements)
 - Last updated: 2026-10-29
 
 Defines how the GloberBooks UI and its end-to-end flows are tested in a real browser. It fills the gap left by the Constitution, which required plain HTML/JS with no build step but defined no frontend test tooling.
@@ -51,7 +51,7 @@ e2e/
 - `reporter`: `list` locally and `html` (not auto-opened) plus a machine-readable one in CI; reports are git-ignored.
 - `expect` timeout kept at the default or lower; never use fixed sleeps (`waitForTimeout`).
 
-Cloud-session note: the orchestrator's cloud environment ships a preinstalled Chromium and Playwright. Do not reinstall; if the project pins a different Playwright version, point `launchOptions.executablePath` at the preinstalled browser instead of downloading another.
+Cloud-session note: the orchestrator's cloud environment ships a preinstalled Chromium and Playwright (and Node 22). They may be used for exploration only; evidence for a task comes from the pinned versions (`.nvmrc`, `package-lock.json`, the Chromium installed by `npx playwright install chromium`), and `engine-strict` makes other Node versions fail by design.
 
 ## 4. Test design rules
 
@@ -81,6 +81,8 @@ Cloud-session note: the orchestrator's cloud environment ships a preinstalled Ch
 7. **Deliver** evidence: command, pass/fail counts, list of test titles mapped to acceptance criteria, trace or screenshot paths for any failures that were fixed, and the exploration notes.
 
 ## 6. Using the Playwright MCP safely
+
+- Start procedure: the application is started by hand on port 18080 with a temporary database directory (`SERVER_ADDRESS=127.0.0.1 SERVER_PORT=18080 SPRING_DATASOURCE_URL=jdbc:sqlite:<temporary directory>/exploration.db`); the exploration server is stopped before `npx playwright test` runs, because the suite fails on a busy port.
 
 - Configure with `--headless` and `--isolated` (in-memory profile), restrict with `--allowed-origins http://127.0.0.1:18080` (the dedicated E2E origin) (this is a convenience, **not** a security boundary), and write screenshots and logs to a scratch output directory that is git-ignored.
 - Only the local GloberBooks application is a valid target. No real accounts, no secrets, no external sites.
