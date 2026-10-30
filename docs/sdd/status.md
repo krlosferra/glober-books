@@ -2,7 +2,7 @@
 
 - Owner: Orchestrator (see `README.md` for edit rights per column)
 - Last updated: 2026-10-30
-- Phase: 1 (Constitution v0.4 applied; Security round 3 re-check pending). Open Sponsor settings: enable `main` protection and Dependabot alerts (evidence in `security.md` section 10). No spec, plan or tasks exist yet.
+- Phase: 1 (Constitution v0.4 applied; Security round 3 re-check pending). `main` ruleset and Dependabot security updates verified (security.md section 10); open: first pull request and `hygiene` run, agent session credentials. No spec, plan or tasks exist yet.
 
 **Check this file before taking any work.** Definitions of stories, rules and tasks live in `spec.md` and `tasks.md`; this file only tracks state.
 
