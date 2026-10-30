@@ -124,32 +124,32 @@ Copy `.githooks/` into a scratch repository with a scratch bare remote; set a hu
 
 | ID | Risk | Likelihood / impact | Decision | Sponsor approval |
 |---|---|---|---|---|
-| R-01 | SQLite file unencrypted at rest | Low / low (personal reading list, local machine), conditional on SC-13 | Proposed: accept | Pending |
-| R-02 | Unbounded number of books (availability) and unbounded response size | Low / low (single user) | Proposed: do not accept; the spec defines a maximum and a response-size bound (SC-17) | Pending |
-| R-03 | Browser support verified on Chromium only | Medium / low | Proposed: accept | Pending |
-| R-04 | No CI: the gates depend on the orchestrator running the checks; local hooks are not enforceable | Medium / medium | Proposed: do not accept for the attribution and secrets gates; allow one read-only workflow or enable the platform equivalents (SC-35); revisit before any release tag | Pending |
-| R-05 | Maven vulnerability scanning is manual until a scanner is approved | Medium / medium | Open: see proposal P-01 (Dependabot alerts recommended) | Pending |
-| R-06 | Duplicate check-then-insert race under concurrent requests | Low / low (single user, pool size 1; a unique index is impossible because duplicates are allowed with confirmation) | Proposed: serialize through the single connection held for the whole transaction; verify by a concurrent-request test | Pending |
-| R-07 | Plain HTTP on loopback (no TLS) | Low / low | Proposed: accept | Pending |
-| R-08 | Malware running as the same user, root, physical access and browser zero-days are out of scope | n/a | Proposed: accept | Pending |
-| R-09 | Pattern-based AI-attribution hooks are incomplete by nature (homoglyphs, new tool names) | Medium / low | Proposed: accept with the server-side check and a human read of the squash message | Pending |
-| R-10 | Chromium runs without its sandbox in containers; the cloud environment's preinstalled Chromium has an unverified build | Low / low (local content only) | Proposed: accept | Pending |
-| R-11 | Maven advisories cannot be machine-checked from the review environment | Medium / medium | Proposed: accept as interim until Dependabot alerts or P-01 | Pending |
-| R-12 | Playwright MCP runs through `npx` with an exact pin and an alpha Playwright build until installed from a lockfile | Low / medium | Proposed: accept as interim | Pending |
+| R-01 | SQLite file unencrypted at rest | Low / low (personal reading list, local machine), conditional on SC-13 | Proposed: accept | Accepted by the Sponsor 2026-10-30, conditional on SC-13 |
+| R-02 | Unbounded number of books (availability) and unbounded response size | Low / low (single user) | Proposed: do not accept; the spec defines a maximum and a response-size bound (SC-17) | Not accepted (Sponsor 2026-10-30): the spec defines a maximum collection size and a response bound (SC-17) |
+| R-03 | Browser support verified on Chromium only | Medium / low | Proposed: accept | Accepted by the Sponsor 2026-10-30 |
+| R-04 | No CI: the gates depend on the orchestrator running the checks; local hooks are not enforceable | Medium / medium | Proposed: do not accept for the attribution and secrets gates; allow one read-only workflow or enable the platform equivalents (SC-35); revisit before any release tag | Sponsor 2026-10-30: not accepted for the attribution and secrets gates, covered by the `hygiene` workflow (first run pending) and repository push protection (enabled); accepted for the remaining gates |
+| R-05 | Maven vulnerability scanning is manual until a scanner is approved | Medium / medium | Open: see proposal P-01 (Dependabot alerts recommended) | Accepted as interim by the Sponsor 2026-10-30; Dependabot alerts to be enabled (repository setting, currently disabled) |
+| R-06 | Duplicate check-then-insert race under concurrent requests | Low / low (single user, pool size 1; a unique index is impossible because duplicates are allowed with confirmation) | Proposed: serialize through the single connection held for the whole transaction; verify by a concurrent-request test | Accepted by the Sponsor 2026-10-30, with a concurrent-request test |
+| R-07 | Plain HTTP on loopback (no TLS) | Low / low | Proposed: accept | Accepted by the Sponsor 2026-10-30 |
+| R-08 | Malware running as the same user, root, physical access and browser zero-days are out of scope | n/a | Proposed: accept | Accepted by the Sponsor 2026-10-30 |
+| R-09 | Pattern-based AI-attribution hooks are incomplete by nature (homoglyphs, new tool names) | Medium / low | Proposed: accept with the server-side check and a human read of the squash message | Accepted by the Sponsor 2026-10-30 |
+| R-10 | Chromium runs without its sandbox in containers; the cloud environment's preinstalled Chromium has an unverified build | Low / low (local content only) | Proposed: accept | Accepted by the Sponsor 2026-10-30 |
+| R-11 | Maven advisories cannot be machine-checked from the review environment | Medium / medium | Proposed: accept as interim until Dependabot alerts or P-01 | Accepted as interim by the Sponsor 2026-10-30 |
+| R-12 | Playwright MCP runs through `npx` with an exact pin and an alpha Playwright build until installed from a lockfile | Low / medium | Proposed: accept as interim | Accepted as interim by the Sponsor 2026-10-30 |
 
-Only the Sponsor changes the "Sponsor approval" column.
+Only the Sponsor changes the "Sponsor approval" column. Entries dated 2026-10-30 record the Sponsor's approval of the Phase 1 recommendations, applied by the orchestrator on the Sponsor's instruction.
 
 ## 7. Open proposals (ASK FIRST)
 
 | ID | Proposal | Reason | Decision |
 |---|---|---|---|
-| P-01 | Enable Dependabot alerts and security updates for Maven and npm (repository setting); or add an automated Maven scanner such as the OWASP Dependency-Check plugin | The review environment cannot reach public advisory databases. Dependency-Check needs an NVD API key, which is a credential | Pending Sponsor; recommendation: Dependabot |
-| P-02 | Add a static security analyzer (SpotBugs with Find Security Bugs) and `maven-enforcer-plugin` (banned dependencies, convergence) | Automates SC-07, SC-08, SC-14, SC-27, SC-36 | Pending Sponsor; recommendation: approve at Task 1 with pins verified on Central |
-| P-03 | Secrets protection: GitHub secret scanning with push protection (plan-dependent) and the extended hook; no new tool in the repository | Automates SC-15 | Pending Sponsor |
-| P-04 | Add `@axe-core/playwright` for automated accessibility scans | Accessibility is part of quality and of safe UX | Pending Sponsor; no security objection if SC-21 passes |
-| P-05 | Replace `npx -y @playwright/mcp@0.0.83` by an install from a committed lockfile (dev dependency of `e2e/` or a separate `tools/mcp/` project) | Removes registry execution outside the lockfile (SEC-F-019) | Pending Sponsor |
-| P-06 | Committed `.claude/settings.json` (deny rules, `PreToolUse` guard), `.github/CODEOWNERS`, `.gitattributes`, and one read-only attribution/secret workflow | SC-34, SC-35, SEC-F-005, SEC-F-025 | Pending Sponsor |
-| P-07 | Trusted Types (`require-trusted-types-for 'script'`) in the CSP | Runtime guard behind the grep rule (SC-38) | Pending Sponsor |
+| P-01 | Enable Dependabot alerts and security updates for Maven and npm (repository setting); or add an automated Maven scanner such as the OWASP Dependency-Check plugin | The review environment cannot reach public advisory databases. Dependency-Check needs an NVD API key, which is a credential | Approved by the Sponsor 2026-10-30: Dependabot alerts and security updates (Sponsor setting, currently disabled); OWASP Dependency-Check not adopted |
+| P-02 | Add a static security analyzer (SpotBugs with Find Security Bugs) and `maven-enforcer-plugin` (banned dependencies, convergence) | Automates SC-07, SC-08, SC-14, SC-27, SC-36 | Approved by the Sponsor 2026-10-30: SpotBugs with Find Security Bugs at Task 1 with pins verified on Central; `maven-enforcer-plugin` stays ASK FIRST |
+| P-03 | Secrets protection: GitHub secret scanning with push protection (plan-dependent) and the extended hook; no new tool in the repository | Automates SC-15 | Approved by the Sponsor 2026-10-30: GitHub push protection (enabled) plus the extended hooks and the `hygiene` workflow |
+| P-04 | Add `@axe-core/playwright` for automated accessibility scans | Accessibility is part of quality and of safe UX | Approved by the Sponsor 2026-10-30, subject to SC-21 at installation |
+| P-05 | Replace `npx -y @playwright/mcp@0.0.83` by an install from a committed lockfile (dev dependency of `e2e/` or a separate `tools/mcp/` project) | Removes registry execution outside the lockfile (SEC-F-019) | Pending Sponsor (interim: exact pin, R-12 accepted) |
+| P-06 | Committed `.claude/settings.json` (deny rules, `PreToolUse` guard), `.github/CODEOWNERS`, `.gitattributes`, and one read-only attribution/secret workflow | SC-34, SC-35, SEC-F-005, SEC-F-025 | Approved by the Sponsor 2026-10-30 and applied in constitution v0.3 (settings, guard, CODEOWNERS, `.gitattributes`, `hygiene` workflow) |
+| P-07 | Trusted Types (`require-trusted-types-for 'script'`) in the CSP | Runtime guard behind the grep rule (SC-38) | Approved by the Sponsor 2026-10-30 and applied in constitution v0.3 (CSP) |
 
 ## 8. Findings log
 Security findings are written as handoffs in `docs/sdd/handoffs/` (Type `AUDIT_REPORT`, From `security`). IDs `SEC-F-NNN` are never reused. Severities: CRITICAL, HIGH, MEDIUM, LOW, INFO. CRITICAL and HIGH are vetoes. Details, evidence and remediation are in the handoff; this table is the index.
@@ -188,5 +188,17 @@ Security findings are written as handoffs in `docs/sdd/handoffs/` (Type `AUDIT_R
 | SEC-F-030 | INFO | Response-size bound for the unbounded list | OPEN | 003 |
 
 ## 9. Changelog
+- 0.3 (2026-10-30): Sponsor decisions recorded in the risk register and proposals (section 6 and 7); platform evidence added (section 10); constitution v0.3 applied the Security round 1 amendments.
 - 0.2 (2026-10-29): First Security review applied. Controls SC-01 to SC-27 sharpened (SC-03, 05, 06, 09, 10, 13, 16, 18, 22, 23, 25, 27); statuses and evidence recorded; SC-28 to SC-41 added; threat model extended (agent, developer environment, guards); risks R-07 to R-12 and proposals P-05 to P-07 added; test catalog (5.1) and hook test procedure (5.2) added; findings index SEC-F-001 to SEC-F-030. The Sponsor-approval column was not touched.
 - 0.1 (2026-10-29): Draft by the orchestrator.
+
+## 10. Repository and platform evidence (2026-10-30, read-only API check by the orchestrator)
+
+| Item | Evidence | Status |
+|---|---|---|
+| Repository visibility | public; default branch `main` | Recorded |
+| `main` branch protection | API answered "Branch not protected" (404) | **Open: the Sponsor enables pull request required, no force pushes, required `hygiene` check, CODEOWNERS review** |
+| Secret scanning and push protection | both `enabled` | Verified |
+| Dependabot security updates | `disabled` | Open: Sponsor setting (R-05, P-01) |
+| `hygiene` workflow | file committed; first run pending | Not yet verified |
+| Hooks | tested in a throwaway repository on 2026-10-30 (blocking and clean cases, force push over an unknown remote commit, tag message, ref name, identity) | Verified locally; hook mode `100755` to be confirmed with `git ls-files -s .githooks` |

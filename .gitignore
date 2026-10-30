@@ -10,7 +10,8 @@ build/
 *.db-wal
 *.db-shm
 *.db-journal
-data/
+/data/
+/backend/data/
 .env
 .env.*
 application-local.*
@@ -35,3 +36,24 @@ e2e/.auth/
 *.log
 logs/
 hs_err_pid*
+
+# Secrets, keys and local configuration (never committed)
+.mcp.json
+.claude/settings.local.json
+application-*.yml
+application-*.properties
+!application.yml
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+*.hprof
+*.pem
+*.key
+*.p12
+*.jks
+id_rsa*
+.mvn/settings*.xml
+playwright/.auth/
+*.har
+!.env.example

@@ -1,26 +1,28 @@
 #!/usr/bin/env bash
-# Rejects pushes whose commits, branch or tag names reveal the use of an AI tool,
-# or when no human identity is configured.
+# Rejects pushes whose new commits, branch/tag names or tag objects reveal the use of an AI tool,
+# and refuses to push without a configured human identity. Fails closed.
 # Activate once per clone: git config core.hooksPath .githooks
 remote="$1"
-pattern='\bclaude\b|anthropic|openai|chatgpt|\bgpt-?[0-9]|copilot|\bcoda\b|noreply@anthropic|co-authored-by|claude\.ai'
-zero='0000000000000000000000000000000000000000'
+hook_dir=$(cd "$(dirname "$0")" && pwd)
+pattern=$(cat "$hook_dir/attribution-pattern")
+zero=0000000000000000000000000000000000000000
 fail=0
 if [ -z "$(git config user.name)" ] || [ -z "$(git config user.email)" ]; then
-  echo "pre-push: git user.name and user.email must be configured with the human identity." >&2
-  fail=1
+  echo "pre-push: identity not configured (git config user.name / user.email)" >&2; fail=1
 fi
-while read -r local_ref local_sha remote_ref remote_sha; do
-  [ "$local_sha" = "$zero" ] && continue
-  if echo "$remote_ref" | grep -qiE "$pattern"; then
-    echo "pre-push: ref name '$remote_ref' reveals an AI tool." >&2; fail=1
-  fi
-  if [ "$remote_sha" = "$zero" ]; then range="$local_sha"; else range="$remote_sha..$local_sha"; fi
-  if git log "$range" --format='%an <%ae>%n%cn <%ce>' 2>/dev/null | grep -qiE "$pattern"; then
-    echo "pre-push: a commit in '$local_ref' has an author or committer identity that reveals an AI tool." >&2; fail=1
-  fi
-  if git log "$range" --format='%B' 2>/dev/null | grep -v '^#' | grep -qiE "$pattern|generated (with|by)|session_[0-9a-z]{8,}"; then
-    echo "pre-push: a commit message in '$local_ref' reveals an AI tool." >&2; fail=1
+# Non-ASCII bytes are dropped; the repository's own paths are not attribution.
+scan() { LC_ALL=C tr -d '\200-\377' | sed -E 's#\.claude/##g; s#CLAUDE\.md##g' | grep -qiE "$pattern"; }
+while read -r lref lsha rref rsha; do
+  [ "$lsha" = "$zero" ] && continue
+  if printf '%s\n' "$rref" | scan; then echo "pre-push: ref name '$rref' reveals an AI tool" >&2; fail=1; fi
+  commits=$(git rev-list "$lsha" --not --remotes="$remote" 2>/dev/null) || { echo "pre-push: cannot enumerate commits" >&2; fail=1; continue; }
+  for commit in $commits; do
+    if git show -s --format='%an <%ae>%n%cn <%ce>%n%B' "$commit" | scan; then
+      echo "pre-push: commit $commit reveals an AI tool (author, committer or message)" >&2; fail=1
+    fi
+  done
+  if [ "$(git cat-file -t "$lsha" 2>/dev/null)" = tag ]; then
+    if git cat-file -p "$lsha" | scan; then echo "pre-push: tag object reveals an AI tool" >&2; fail=1; fi
   fi
 done
 exit $fail

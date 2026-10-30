@@ -1,0 +1,18 @@
+# Protected paths: changes need the owner's review (docs/sdd/security.md, SC-25).
+/docs/sdd/constitution.md   @krlosferra
+/docs/sdd/security.md       @krlosferra
+/docs/sdd/git-workflow.md   @krlosferra
+/docs/sdd/agent-protocol.md @krlosferra
+/.githooks/                 @krlosferra
+/.claude/                   @krlosferra
+/.github/                   @krlosferra
+/CLAUDE.md                  @krlosferra
+/.gitignore                 @krlosferra
+/.gitattributes             @krlosferra
+/.nvmrc                     @krlosferra
+/backend/pom.xml            @krlosferra
+/backend/.mvn/              @krlosferra
+/backend/config/            @krlosferra
+/e2e/package.json           @krlosferra
+/e2e/package-lock.json      @krlosferra
+/e2e/.npmrc                 @krlosferra

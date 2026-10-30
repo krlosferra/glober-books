@@ -82,6 +82,6 @@ Rules:
 | 6. Contrast | Sponsor / any | n/a | Written comparison |
 
 ## 6. Escalation to the Sponsor
-Escalate (do not decide) when: a business rule, scope or priority is unknown; a compliance, security or privacy trade-off appears; an ASK FIRST item is needed (new dependency, schema change, new entity, architectural change); two review rounds fail to converge; the brief and the Constitution conflict.
+Escalate (do not decide) when: a business rule, scope or priority is unknown; a compliance, security or privacy trade-off appears; an ASK FIRST item is needed (new dependency, schema change, new entity, architectural change); disagreement persists after two review rounds (three rounds is the hard limit); the brief and the Constitution conflict.
 
 Every escalation must be decision-ready: context, options, consequences, recommendation.

@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 # Rejects commit messages that reveal the use of an AI tool.
 # Activate once per clone: git config core.hooksPath .githooks
+# The pattern is shared with pre-push and CI: .githooks/attribution-pattern
 msg_file="$1"
-pattern='co-authored-by|generated (with|by)|\bclaude\b|anthropic|openai|chatgpt|\bgpt-?[0-9]|copilot|\bcoda\b|ai[- ](generated|assisted|agent)|claude\.ai|session_[0-9a-z]{8,}'
-if grep -v '^#' "$msg_file" | grep -qiE "$pattern"; then
-  echo "commit-msg: rejected. The message mentions an AI tool, agent or co-author." >&2
-  echo "See docs/sdd/git-workflow.md (section 'No AI attribution')." >&2
-  grep -v '^#' "$msg_file" | grep -niE "$pattern" >&2
+hook_dir=$(cd "$(dirname "$0")" && pwd)
+pattern=$(cat "$hook_dir/attribution-pattern")
+# Only Git's own editor template is skipped; '#' lines typed by the author are scanned.
+# Non-ASCII bytes are dropped so look-alike or zero-width characters cannot split a name.
+# The repository's own paths ('.claude/' and 'CLAUDE.md') are not attribution.
+body=$(sed '/^# Please enter the commit message/,$d' "$msg_file" | LC_ALL=C tr -d '\200-\377' | sed -E 's#\.claude/##g; s#CLAUDE\.md##g')
+if printf '%s\n' "$body" | grep -qiE "$pattern"; then
+  echo "commit-msg: rejected (AI attribution pattern). See docs/sdd/git-workflow.md section 1." >&2
   exit 1
 fi

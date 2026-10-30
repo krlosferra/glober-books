@@ -1,0 +1,6 @@
+* text=auto
+.githooks/* text eol=lf
+.claude/hooks/* text eol=lf
+*.sh text eol=lf
+mvnw text eol=lf
+*.cmd text eol=crlf

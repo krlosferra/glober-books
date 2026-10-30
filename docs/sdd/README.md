@@ -51,5 +51,5 @@ An agent that finds an error in a document it does not own **does not fix it**: 
   - `IN_PROGRESS` / `IN_REVIEW`: another agent or branch owns it. Do not start.
   - `BLOCKED`: read the reason; do not work around it.
   - Only `READY` can be taken, and only by the orchestrator dispatching it.
-- The orchestrator additionally lists remote branches (`git ls-remote --heads origin 'feature/*' 'fix/*' 'test/*'`) before dispatch: a branch named after the task is a visible claim.
+- The orchestrator additionally lists remote branches (`git ls-remote --heads origin '*/task-*'`) before dispatch: a branch named after the task is a visible claim.
 - Behavior that already exists on `main` and is covered by a `DONE` row must not be re-implemented, "improved" or duplicated. If an agent believes it is wrong, it raises a finding; it does not rewrite it.

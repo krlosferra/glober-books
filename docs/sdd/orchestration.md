@@ -16,7 +16,7 @@ The main Claude Code session is the **orchestrator** of the whole analysis, deve
 ## 2. Orchestrator responsibilities
 1. Invoke the right agent for the current phase and pass it **only** the validated context (paths to the documents, the handoff to answer).
 2. Create the next handoff file when an agent's output has to be relayed (keep numbering sequential).
-3. Enforce gates: no phase advances without Liaison `APPROVED` and Sponsor approval.
+3. Enforce gates: no phase advances without Liaison `APPROVED`, Security `PASS` and Sponsor approval.
 4. Route feedback (section 5), count review rounds (max 3, then escalate to the Sponsor), keep `progress.md` current.
 5. Own repository hygiene: correct branch, no AI attribution (git-workflow section 1), no forbidden operations.
 6. Run builds and tests independently to verify evidence; never accept claims without output.
@@ -27,7 +27,7 @@ The orchestrator does not decide business questions, does not override a Liaison
 ## 3. End-to-end flow
 
 ```
-Phase 1  Constitution   Sponsor + Liaison (review)
+Phase 1  Constitution   Sponsor + Liaison and Security (review)
 Phase 2  Specify        PM ⇄ Liaison  → Sponsor gate
 Phase 3  Plan + Tasks   Java Architect drafts plan (backend) + Frontend Developer drafts frontend plan section
                         PM organizes tasks.md ⇄ Liaison review → Sponsor gate
@@ -43,7 +43,7 @@ Phase 6  Contrast       Sponsor
 3. Liaison reviews the backlog; Sponsor approves.
 
 ### Phase 4 detail (per task)
-1. **Select:** orchestrator reads `docs/sdd/status.md` and picks tasks that are `READY` (Definition of Ready met, dependencies `DONE`). It also lists remote branches (`git ls-remote --heads origin 'feature/*' 'fix/*' 'test/*'`) to make sure no one already holds the item. `DONE`, `IN_PROGRESS`, `IN_REVIEW` and `BLOCKED` items are never dispatched. On dispatch it sets the row to `IN_PROGRESS` with agent and branch.
+1. **Select:** orchestrator reads `docs/sdd/status.md` and picks tasks that are `READY` (Definition of Ready met, dependencies `DONE`). It also lists remote branches (`git ls-remote --heads origin '*/task-*'`) to make sure no one already holds the item. `DONE`, `IN_PROGRESS`, `IN_REVIEW` and `BLOCKED` items are never dispatched. On dispatch it sets the row to `IN_PROGRESS` with agent and branch.
 2. **Brief:** Liaison writes a TASK_BRIEF per task (Mode E).
 3. **Implement:** Java Architect and/or Frontend Developer work **in parallel** when the tasks are independent (see section 4). Each works on its own branch and delivers a TASK_DELIVERY.
 4. **Verify independently:** orchestrator checks out the branch and runs the build and tests (`./mvnw verify` for backend; `npx playwright test` from `e2e/` for frontend, per `docs/sdd/frontend-testing.md`) and compares real output with the report.
@@ -75,7 +75,7 @@ Phase 6  Contrast       Sponsor
 | Coverage below gate or weak oracle found | Test defect | Back to implementer; Liaison Test Gate review |
 | Security finding CRITICAL or HIGH | Security veto | Back to the implementer with the finding and remediation; Security re-verifies; the Sponsor alone may accept the residual risk in `security.md` |
 | Security finding that needs a spec or constitution change | Security design gap | CHANGE_REQUEST to the PM (spec) or proposal to the Sponsor (constitution) with the Security report attached |
-| Two review rounds without convergence | Escalation | Sponsor decides |
+| Disagreement after two rounds (three is the hard limit) | Escalation | Sponsor decides |
 
 The default response to any spec/code disagreement is to **fix the spec first**, then regenerate or correct the code. Never patch code to hide a spec problem.
 
@@ -83,7 +83,7 @@ The default response to any spec/code disagreement is to **fix the spec first**,
 
 **Before invoking an implementer**
 - [ ] Task ready; brief written by the Liaison; branch name per git-workflow
-- [ ] `git config user.name` / `user.email` are the human's identity; `core.hooksPath` is `.githooks`
+- [ ] `git config user.name` / `user.email` are the human's identity; `core.hooksPath` is `.githooks`; the hooks are executable (`git ls-files -s .githooks` shows `100755`); `.claude/settings.json` is present
 - [ ] Context limited to constitution, spec, plan, the task and relevant code
 
 **Before accepting a delivery**

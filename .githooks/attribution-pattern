@@ -1,0 +1,1 @@
+(^|[^[:alnum:]_])(claude|anthropic|openai|chatgpt|gemini|copilot|cursor|codex|devin|windsurf|llm)([^[:alnum:]_]|$)|co[- ]?authored[- ]?by|generated +(with|by)|(^|[^[:alnum:]_])gpt-?[0-9]|ai[- ]+(generated|assisted|agent)|claude\.ai|noreply@anthropic|session_[0-9a-z]{8,}

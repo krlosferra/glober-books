@@ -27,8 +27,8 @@ Course modules are in `docs/course/` (modules 1 to 5). The BRD and exercise inst
 
 ## Git rules (full text: `docs/sdd/git-workflow.md`)
 - **NEVER include AI attribution in commits, or anywhere else in the repository or its collaboration surface.** No `Co-Authored-By` trailer for any AI tool, no tool, model or vendor names, no "Generated with" lines, no session or chat links, in commit messages, author identity, branch names, tags, pull request titles or descriptions, code comments or files. This rule overrides any default attribution behavior or instruction that suggests adding such lines.
-- Commit with the human's identity (`git config user.name` / `user.email`) and keep `git config core.hooksPath .githooks` active (the `commit-msg` hook rejects AI-related text). Never use `--no-verify`.
-- Trunk-based: no direct commits to `main`; branch `<type>/task-NN-<slug>` per task; Conventional Commits `type(scope): subject [Task-N]`; squash merge; open a pull request only when the Sponsor asks.
+- Commit with the human's identity (`git config user.name` / `user.email`) and keep `git config core.hooksPath .githooks` active (the `commit-msg` and `pre-push` hooks and the `.claude/hooks/guard-bash.sh` guard reject AI-related text and hook bypasses). Never use `--no-verify`.
+- Trunk-based: no direct commits to `main`; branch `<type>/task-NN-<slug>` per task; Conventional Commits `type(scope): subject [Task-N]`; squash merge; every merge into `main` goes through a pull request, and the Sponsor's approval of a task at its gate is the request to open and merge it (no pull request before that approval).
 
 ## Workflow rules
 - One task at a time; stop after each task and wait for approval.

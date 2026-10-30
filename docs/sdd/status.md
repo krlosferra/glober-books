@@ -1,8 +1,8 @@
 # Project Status Board
 
 - Owner: Orchestrator (see `README.md` for edit rights per column)
-- Last updated: 2026-10-29
-- Phase: 1 (Constitution v0.2 applied; Liaison round 2 and first Security review pending). No spec, plan or tasks exist yet.
+- Last updated: 2026-10-30
+- Phase: 1 (Constitution v0.3 applied; Liaison round 3 and Security round 2 pending). Open Sponsor settings: enable `main` protection and Dependabot alerts (evidence in `security.md` section 10). No spec, plan or tasks exist yet.
 
 **Check this file before taking any work.** Definitions of stories, rules and tasks live in `spec.md` and `tasks.md`; this file only tracks state.
 
@@ -33,7 +33,7 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 
 | Phase | State | Liaison verdict | Security verdict | Sponsor approval | Date |
 |---|---|---|---|---|---|
-| 1 Constitution | v0.2 applied; fixes pending | round 2: APPROVED WITH CHANGES (handoff 002) | round 1: FAIL, 3 HIGH (handoff 003) | not yet | |
+| 1 Constitution | v0.3 applied; round 3 re-review pending | round 2: APPROVED WITH CHANGES (handoff 002); round 3 pending | round 1: FAIL, 3 HIGH (handoff 003); round 2 pending | not yet | |
 | 2 Specify | not started | | | | |
 | 3 Plan and tasks | not started | | | | |
 | 4 Implement | not started | | | | |
