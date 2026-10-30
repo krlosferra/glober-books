@@ -1,3 +1,5 @@
+> **Historical document (2026-10-30).** This is the initial delivery approach. The binding decisions are in `constitution.md` (Spring Boot 4.1.2, `./mvnw verify`, JUnit Jupiter 6, package layout and pins) and `agent-protocol.md`. Where this file disagrees with them, they win.
+
 # GloberBooks: Delivery Approach (Senior Java Developer / AI Architect view)
 
 > Companion to the SDD workflow document. It describes how the project is organized and run. It contains no implementation code.

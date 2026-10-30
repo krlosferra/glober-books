@@ -7,6 +7,13 @@ build/
 *.db
 *.sqlite
 *.sqlite3
+*.db-wal
+*.db-shm
+*.db-journal
+/data/
+/backend/data/
+.env
+.env.*
 application-local.*
 
 # Node tooling (E2E tests only)
@@ -24,3 +31,29 @@ e2e/.auth/
 
 # Scratch and agent output
 .playwright-mcp/
+
+# Logs
+*.log
+logs/
+hs_err_pid*
+
+# Secrets, keys and local configuration (never committed)
+.mcp.json
+.claude/settings.local.json
+application-*.yml
+application-*.properties
+!application.yml
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+*.hprof
+*.pem
+*.key
+*.p12
+*.jks
+id_rsa*
+**/.mvn/settings*.xml
+**/playwright/.auth/
+*.har
+!.env.example

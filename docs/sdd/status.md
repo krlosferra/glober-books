@@ -1,8 +1,8 @@
 # Project Status Board
 
 - Owner: Orchestrator (see `README.md` for edit rights per column)
-- Last updated: 2026-10-29
-- Phase: 1 (Constitution under review). No spec, plan or tasks exist yet.
+- Last updated: 2026-10-30
+- Phase: 1 approved (constitution 1.0). Next: Phase 2 (Specify) with the PM agent. Open items carried forward: set the required check source to GitHub Actions and squash-only merges in the ruleset, R-15 signature, `ask` rule check, attribution setting re-test in a new session (security.md section 10). No spec, plan or tasks exist yet.
 
 **Check this file before taking any work.** Definitions of stories, rules and tasks live in `spec.md` and `tasks.md`; this file only tracks state.
 
@@ -23,7 +23,7 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 | READY | Definition of Ready met (spec approved, criteria testable, dependencies DONE) | PM, confirmed by Liaison |
 | IN_PROGRESS | Dispatched to an agent; branch exists | Orchestrator (at dispatch) |
 | IN_REVIEW | Delivery handed off; audit and acceptance pending | Implementer (own row) or Orchestrator |
-| REJECTED | Audit failed; back to the same implementer; attempt count increases | Liaison / Orchestrator |
+| REJECTED | Audit failed; back to the same implementer; attempt count increases | Liaison / Security / Orchestrator |
 | DONE | Merged to `main`; Liaison ACCEPT; PM accepted; Sponsor approved. **Do not redo.** | Orchestrator, at merge |
 | BLOCKED | Waiting on a decision or dependency (reason required) | Anyone, with reason |
 | REOPENED | Approved change request invalidates a DONE item | PM |
@@ -31,20 +31,20 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 
 ## Phase gates
 
-| Phase | State | Liaison verdict | Sponsor approval | Date |
-|---|---|---|---|---|
-| 1 Constitution | Draft v0.1, amendment 1 pending review | not yet | not yet | |
-| 2 Specify | not started | | | |
-| 3 Plan and tasks | not started | | | |
-| 4 Implement | not started | | | |
-| 5 Drift / change | not started | | | |
-| 6 Contrast | not started | | | |
+| Phase | State | Liaison verdict | Security verdict | Sponsor approval | Date |
+|---|---|---|---|---|---|
+| 1 Constitution | APPROVED: constitution 1.0 | round 3: APPROVED WITH CHANGES (handoff 004), MAJORs applied | round 3: PASS WITH CONDITIONS (handoff 006); guard fixes applied; platform steps verified (security.md section 10) | approved 2026-10-30 | 2026-10-30 |
+| 2 Specify | not started | | | | |
+| 3 Plan and tasks | not started | | | | |
+| 4 Implement | not started | | | | |
+| 5 Drift / change | not started | | | | |
+| 6 Contrast | not started | | | | |
 
 ## Backlog board
 
-| Task | Title | Layer | State | Owner agent | Branch | Attempts | Merge commit | Audit | Acceptance | Notes |
-|---|---|---|---|---|---|---|---|---|---|---|
-| (none yet) | | | | | | | | | | |
+| Task | Title | Layer | State | Owner agent | Branch | Attempts | Merge commit | Audit | Security | Acceptance | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| (none yet) | | | | | | | | | | | |
 
 ## Spec coverage
 

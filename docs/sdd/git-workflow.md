@@ -13,7 +13,7 @@ Nothing in the repository's history or collaboration surface may reveal that an 
 
 Forbidden examples (non-exhaustive): `Co-Authored-By:` naming any AI tool; `Generated with ...`; names of AI products, models or vendors; session or chat URLs; `noreply@` addresses of AI vendors; phrases such as "AI-generated" or "AI-assisted".
 
-Commits are authored by the human contributor's own configured identity. Configure it locally and verify before committing:
+Commits are authored by the human contributor's own configured identity (an employer email or the platform's noreply address; do not mix them within one repository). Configure it locally and verify before committing:
 
 ```bash
 git config user.name  "<your name>"
@@ -21,7 +21,12 @@ git config user.email "<your email>"
 git config core.hooksPath .githooks     # enables the commit-msg guard (once per clone)
 ```
 
-The guard `.githooks/commit-msg` rejects messages that match known AI-related patterns. It is a safety net, not a substitute for the rule. Do not bypass it (`--no-verify` is forbidden).
+Two guards live in `.githooks/` and are enabled by `core.hooksPath`:
+- `commit-msg` rejects messages that match the AI-attribution patterns (trailers, tool, model and vendor names, session links, spacing variants). Only Git's own editor template is skipped; non-ASCII bytes are dropped before matching so look-alike or zero-width characters cannot split a name. The repository's own paths `.claude/` and `CLAUDE.md` are not attribution.
+- `pre-push` fails closed: it rejects a push when any new commit (author, committer or message), annotated tag message, branch or tag name matches the patterns, when it cannot enumerate the commits, or when the configured identity is empty. It enumerates commits with `git rev-list <sha> --not --remotes=<remote>`, so a force push over an unknown remote commit is still checked.
+- Both hooks read one shared pattern file, `.githooks/attribution-pattern`, which the CI `hygiene` workflow and the `.claude/hooks/guard-bash.sh` guard also use.
+
+They are a safety net, not a substitute for the rule. Do not bypass them (`--no-verify` is forbidden). The orchestrator checks `git config core.hooksPath`, the executable bit of the hooks and the identity before dispatching any work.
 
 If a violating commit is found in history, report it to the Sponsor; rewriting shared history requires the Sponsor's explicit approval.
 
@@ -29,7 +34,7 @@ If a violating commit is found in history, report it to the Sponsor; rewriting s
 
 - `main` is always releasable: builds, all tests green, coverage gate met, docs in sync.
 - No direct commits to `main`, with one exception: the initial bootstrap of the repository.
-- All work happens on a short-lived branch created from the latest `main`, merged back through a pull request, then deleted.
+- All work happens on a short-lived branch created from the latest `main`. The branch is pushed and integrated into `main` only through a pull request and a squash merge (section 4). `main` is protected on the server: pull request required, no force pushes or deletion, required `hygiene` check. While the Sponsor is the only maintainer, code-owner review is not a required rule: the orchestrator lists protected-path changes at the top of every pull request description and the Sponsor reads them before merging. Branches are deleted after merging.
 - One branch per task (or per tightly related set of spec changes). Target lifetime: under one day.
 
 ### Branch names
@@ -96,8 +101,8 @@ Note on the original exercise: the exercise suggests `[Task-N] [Description] - A
 ## 4. Pull requests and merging
 
 1. Push the branch: `git push -u origin <branch>`.
-2. A pull request is opened only when the Sponsor asks for it (or approves the orchestrator proposing it). Title follows the commit convention. The description lists: task, spec references, acceptance criteria status, test evidence (command and result), deviations. No AI attribution lines.
-3. Merge requirements: build and tests green, coverage ≥ 80%, Liaison `ACCEPT`, PM business acceptance (feature work), Sponsor approval.
+2. Every merge into `main` goes through a pull request. The Sponsor's approval of a task at its gate is the request to open and merge it; no pull request is opened before that approval. Title follows the commit convention. The description lists: task, spec references, acceptance criteria status, test evidence (command and result), deviations. No AI attribution lines.
+3. Merge requirements: required `hygiene` check green, build and tests green, coverage ≥ 80%, Liaison `ACCEPT`, Security verdict `PASS` (or `PASS WITH CONDITIONS` with every condition closed), PM business acceptance (feature work), Sponsor approval.
 4. **Squash merge** into `main`, so history shows one commit per accepted task. The squashed message follows section 3.
 5. Delete the branch after merging.
 
@@ -108,4 +113,4 @@ Note on the original exercise: the exercise suggests `[Task-N] [Description] - A
 Tag messages follow the same no-attribution rule.
 
 ## 6. Forbidden operations (without explicit Sponsor approval)
-`git push --force` (and `--force-with-lease`) on `main`; history rewriting on shared branches; `git reset --hard` outside a `drift/` branch; `--no-verify`; deleting tags or branches that are not yours.
+`git push --force` (and `--force-with-lease`) on any shared branch, and always on `main`; history rewriting on shared branches; `git reset --hard` outside a `drift/` branch; `--no-verify` and any `core.hooksPath` override; deleting tags or branches that are not yours. `.claude/settings.json` asks before the destructive commands and the guard blocks the hook bypasses.
