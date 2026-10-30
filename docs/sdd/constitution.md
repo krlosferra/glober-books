@@ -1,7 +1,7 @@
 # Project Constitution: GloberBooks
 
 - Owner: Sponsor
-- Version: 1.0
+- Version: 1.1
 - Last updated: 2026-10-30
 - Status: Approved by the Sponsor on 2026-10-30 (Phase 1 gate: Liaison round 3 APPROVED WITH CHANGES, Security round 3 PASS WITH CONDITIONS)
 
@@ -69,7 +69,7 @@ glober-books/
 ├── .githooks/                 # commit-msg and pre-push guards, attribution-pattern
 ├── CLAUDE.md  README.md  .gitignore  .gitattributes  .nvmrc
 ```
-- Files go where this map says. A new top-level directory or package is an architectural change (ASK FIRST).
+- Files go where this map says. A new top-level directory or package is an architectural change (ASK FIRST). Exception approved by the Sponsor on 2026-10-30: the `config` package may contain sub-packages (for example for the transport filter, the error factory and the database settings), named in `plan.md`.
 - Frontend unit tests are named `*.test.js` and live next to their module. The Maven `<resources>` entry for `frontend/` excludes `**/*.test.js`, `**/*.map` and dotfiles, and resource filtering is off, so test files are never served.
 - Maven coordinates: `com.globant.globerbooks:globerbooks-backend`; package root `com.globant.globerbooks`.
 
@@ -289,6 +289,7 @@ Status codes: 200 success with data; 201 created; 400 validation, malformed requ
 | Commit `[Task-N] ... - ACCEPTED` | Conventional Commits with `[Task-N]` | Standard history; ACCEPTED is tracked in `progress.md` and `status.md` |
 
 ## Changelog
+- 1.1 (2026-10-30): Sponsor approved sub-packages inside the `config` package (Phase 3 plan decision 6). No other change.
 - 1.0 (2026-10-30): Approved by the Sponsor at the Phase 1 gate; content of 0.4 unchanged. Conditions carried forward: Task 1 proofs and the unverified pins, the Security conditions C-1 to C-5 of handoff 005 and the open items of `security.md` section 10.
 - 0.4 (2026-10-30): Applied Security round 3 (guard case-insensitivity and read-only queries, ask rule for a trailing push flag, `log4j-core` banned, wording of the dependency-tree rule); Applied Liaison round 3 and Security round 2: pull request for every merge (orchestration aligned), agent definitions aligned, residual risk R-13 signed, enumerated banned dependencies with the transitive exceptions of the real tree, Task 1 proofs, fail-closed hardening of the guard and the CI script, ask rules for protected paths, solo-maintainer review model (D2), written acceptance (D6): Maven 3.9.16 and wrapper 3.3.4, Checkstyle 14.3.0 with plugin 3.6.0, `@playwright/test` 1.64.1 and `@playwright/mcp` 0.0.83 are approved unverified; Task 1 or the first frontend task verifies them or the Sponsor re-approves other pins. The Phase 1 package was prepared on a `docs/` branch instead of `spec/`: accepted once by the Sponsor.
 - 0.3 (2026-10-30): Applied Liaison round 2 (error-body factory and codes, referenced-document governance, `node --test` glob, verification column, Failsafe split, wording fixes) and Security round 1 (CSRF layers, exact Host rule, request limits, explicit CSP and headers, Jackson strictness, SQLite hardening, mandatory properties, real-port security tests, E2E isolation, MCP allowlist and agent settings, supply-chain controls, logging, hooks, protected paths, pull request for every merge).
