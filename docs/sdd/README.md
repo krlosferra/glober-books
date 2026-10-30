@@ -16,6 +16,7 @@ Single entry point to the project's living documents. **Read this first, then `s
 | `security.md` | Threat model, security controls (`SC-NN`), standard checks, risk register, open proposals | Security Reviewer (the Sponsor alone changes the risk-acceptance column) | Read; propose through handoffs |
 | `frontend-testing.md` | Process for UI end-to-end testing with Playwright | Frontend Developer (after Liaison review) | Read |
 | `git-workflow.md` | Branches, commits, PRs, no AI attribution | Sponsor | Read |
+| `delivery-strategy.md` | Order of work and iteration: walking skeleton, increments, test tiers, "good enough" release definition | Orchestrator (binding changes go through the Sponsor and the Amendment Procedure) | Read |
 | `orchestration.md`, `agent-protocol.md` | How the team works together | Sponsor / orchestrator | Read |
 | `exercise-brief.md` | The BRD and the exercise instructions (scope source) | Nobody (frozen reference) | Read |
 | `approach.md` | Initial delivery approach and rationale | Sponsor | Read |
