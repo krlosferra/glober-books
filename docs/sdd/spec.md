@@ -1,38 +1,40 @@
 # GloberBooks Product Specification
 
 - Owner: PM (`sdd-product-manager`)
-- Version: 0.2
+- Version: 0.3
 - Last updated: 2026-10-30
-- Status: Draft (Phase 2, round 1 continued, after the Sponsor's decisions of 2026-10-30). Not yet approved: it awaits the Liaison verdict, the Security verdict and Sponsor approval at the Phase 2 gate. Decisions DEC-001 to DEC-024 are CONFIRMED by the Sponsor (2026-10-30); DEC-025 to DEC-028 are new PM proposals added in v0.2 and are PROPOSED. No decision is pending.
-- Authority: below `constitution.md` v1.0, above `plan.md`. Companion: `requirements.md` (register), `handoffs/007` (discovery and decisions), `handoffs/009` (current review request).
-- Conventions: "must" is binding. Messages quoted in this document are the informative English texts; tests assert `code`, HTTP status, `details[].field` and structure, never the text of `error` or `message`. "Code point" means a Unicode code point. "Rejected" means: the stated status and code are returned and no data changed.
+- Status: Draft (Phase 2, round 2 of 3). Not yet approved: it awaits the Liaison verdict, the Security verdict and Sponsor approval at the Phase 2 gate. Decisions DEC-001 to DEC-028 and DEC-029, DEC-031, DEC-032 are CONFIRMED by the Sponsor (2026-10-30); DEC-030 is CONFIRMED for the cut order and PROPOSED for the two priority promotions (confirmation at the gate). No other decision is pending.
+- Authority: below `constitution.md` v1.0, above `plan.md`. Companion: `requirements.md` (register), `handoffs/007` (discovery and decisions), `handoffs/012` (current review request, with the resolution of handoffs 010 and 011).
+- Conventions: "must" is binding. API texts (`error`, `message`) are informative and tests never assert their wording; every text in quotation marks in the UI stories (US-010 to US-014) and in Section 5.9 is exact and is asserted by tests. "Code point" means a Unicode code point. "Rejected" means: the stated status and code are returned and no data changed. "Pre-application answer" means an answer the server gives while it is still parsing the request line or the headers, before the application sees the request (Appendix D, D.3 header).
 
 ## 1. Overview
 
 **Problem Statement:** Readers need a simple way to track books they want to read, are reading, and have completed, and to remember how much they liked the ones they finished.
 
-**Target Users:** Individual readers managing a personal reading list on their own machine. One user, one library, no accounts.
+**Target Users:** Individual readers managing a personal reading list on their own machine. One user, one library, no accounts. GloberBooks protects against other web pages, not against other users logged in to the same machine: any local user can reach the open API (risk R-16, accepted by the Sponsor, DEC-031).
 
 **Product:** a small REST API and a web page served by the same application. The web page is the user interface; the API is its only data channel.
 
 **Success Metrics** (measurable; verification in Phase 4):
-- M-1 A user adds a book in under 10 seconds: with the keyboard, three actions (type title, type author, press Enter) from page load (US-011).
-- M-2 The library is visible instantly: with 1,000 books the list is on screen within 1 second of page load; the list API with 5,000 books of typical size (titles and authors of about 40 characters) answers within 1 second; any single-book operation answers within 300 ms. Reference environment: the project's development machine, application and browser on the same host; measured once and the figures recorded (DEC-020).
+- M-1 A user adds a book in under 10 seconds: using the keyboard only, type the title, Tab, type the author, Enter, from page load, with no pointer input and no other control (US-011).
+- M-2 The library is visible instantly: with 1,000 books the list is on screen within 1 second of page load; the list API with 5,000 books of typical size (titles and authors of about 40 characters) answers within 1 second; any single-book operation answers within 300 ms on typical data; with 5,000 books of maximum size (title 500 and author 200 code points) an add completes within 2 seconds and never returns `500`. Reference environment: the project's development machine, application and browser on the same host; measured once and the figures recorded (DEC-020).
 - M-3 Zero data loss on restart: every write acknowledged with a 2xx response is present after the application process is killed and restarted (US-009).
 - M-4 100% of attempts to rate a book that is not completed are rejected (BR-007).
 - M-5 Every acceptance criterion in this document maps to at least one automated test (constitution, Testing Requirements).
 
-**Functional requirements covered:** FR1 Add Book, FR2 Track Status, FR3 Rate Books. FR4 Author Bio is RESERVED and not specified in v1 (DEC-003): the Sponsor holds it for the Phase 5 drift exercise. Its identifiers US-005 and BR-005 stay reserved and nothing in this document, the API or the page implements or anticipates it.
+**Functional requirements covered:** FR1 Add Book, FR2 Track Status, FR3 Rate Books. FR4 Author Biography is reserved and is not specified in this version. Its identifiers US-005 and BR-005 are reserved.
 
 **Invariants** (must be true at all times, after every request, including failed ones):
 - INV-1 A book's `rating` is non-null only if its `status` is `completed`.
 - INV-2 A non-null `rating` is an integer from 1 to 5.
 - INV-3 `status` is always exactly one of `unread`, `reading`, `completed`.
 - INV-4 `date_completed` is non-null if and only if `status` is `completed`.
-- INV-5 Two books with the same duplicate key (BR-003) exist only when the user explicitly confirmed adding the second one (`allow_duplicate: true`).
-- INV-6 Every error response uses the envelope and codes of Appendix A.
+- INV-5 A request without `allow_duplicate: true` never results in two books with the same duplicate key (BR-003).
+- INV-6 Every error response uses the envelope and codes of Appendix A (except pre-application answers, Appendix A note).
 - INV-7 The library never holds more than 5,000 books (DEC-013), also under concurrent requests.
 - INV-8 A failed request changes nothing (BR-013).
+
+**Delivery priorities (DEC-030).** Every requirement is Must except REQ-047 (Should), REQ-014 (Won't) and REQ-004 (reserved). If time runs out, work is cut in this order and in no other: (1) the timing measurements (M-2, US-010.9), E-22, and the visual layout checks (the 320-pixel clause of US-014.4 and the containment clause of US-014.6); (2) US-014.3 and US-014.5. Invariants, business rules, the security criteria and every other Appendix D case are never cut. A cut item is reported as open in the delivery report, never dropped silently.
 
 ## 2. User Stories
 
@@ -47,7 +49,7 @@ Acceptance Criteria:
 - US-001.3 `status` is optional; when given it must be one of `unread`, `reading`, `completed` (BR-001). A book created as `completed` has `date_completed` equal to `date_added` and `rating` null (BR-008).
 - US-001.4 `title` is required, 1 to 500 code points and `author` is required, 1 to 200 code points, counted per BR-006. Boundary cases: 500 accepted, 501 rejected; 200 accepted, 201 rejected; empty or whitespace-only rejected; `null` or missing rejected; each with `400 VALIDATION_ERROR` and the field name in `details`.
 - US-001.5 Leading and trailing white space is removed from `title` and `author` before storage and before measuring; the response shows the stored (trimmed, NFC) values. Letter case and internal spacing are preserved.
-- US-001.6 Characters forbidden by BR-006 (for example NUL, a tab or line feed inside the text, a zero-width space, bidirectional overrides, private-use and unassigned code points) are rejected with `400 VALIDATION_ERROR`; an unpaired surrogate escape or invalid UTF-8 anywhere in the body is rejected with `400 MALFORMED_REQUEST` (BR-006, DEC-027).
+- US-001.6 Text forbidden by BR-006 (for example NUL, a tab or line feed inside the text, a zero-width space, bidirectional overrides, private-use, unassigned and tag code points, text that renders blank, too many combining marks, a misplaced joiner) is rejected with `400 VALIDATION_ERROR`; an unpaired surrogate escape or invalid UTF-8 anywhere in the body is rejected with `400 MALFORMED_REQUEST` (BR-006, DEC-027).
 - US-001.7 When the library already holds 5,000 books the request is rejected with `409 LIBRARY_FULL`, whether or not `allow_duplicate` is true (DEC-013, BR-009).
 - US-001.8 A matching existing book triggers the duplicate flow of US-004, not an error of this story.
 - US-001.9 After a 201 response, `GET /api/v1/books/{id}` returns the same book (read-your-writes).
@@ -62,7 +64,7 @@ Acceptance Criteria:
 - US-002.3 Each entry contains exactly `id`, `title`, `author`, `status`, `rating`, `date_added`, `date_completed`; `rating` and `date_completed` are null (not omitted) when absent.
 - US-002.4 `GET /api/v1/books?status=reading` returns only books with that status, same order; the same for `unread` and `completed`. `total` counts the filtered result.
 - US-002.5 An empty library, or a filter that matches nothing, returns 200 with `"books": []` and `"total": 0` (not 404).
-- US-002.6 A `status` value other than the three exact lower-case values (including `READING`, ` reading`, an empty value, `?status` without a value) is rejected with `400 INVALID_STATUS`. The value is judged after standard URL decoding.
+- US-002.6 A `status` value other than the three exact lower-case values (including `READING`, ` reading`, an empty value, `?status` without a value) is rejected with `400 INVALID_STATUS`. The value is judged after standard query decoding (Section 5.0): `+` is a space, so `?status=%72eading` is accepted and `?status=reading+` is `INVALID_STATUS`.
 - US-002.7 A repeated `status` parameter, or any query parameter other than `status` (parameter names are case-sensitive: `Status` is unknown), is rejected with `400 MALFORMED_REQUEST`; this check precedes the value check (BR-012).
 - US-002.8 The response never contains more than 5,000 entries and no pagination members exist (Appendix B).
 
@@ -71,11 +73,11 @@ Acceptance Criteria:
 
 Acceptance Criteria:
 - US-003.1 `PUT /api/v1/books/{id}/rating` with `{"rating": 4}` on a completed book returns 200 and the updated book with `rating` 4.
-- US-003.2 Each integer 1, 2, 3, 4, 5 is accepted; 0, 6, -1, -0, 4.9, 5.0, 1e0, a number larger than any 64-bit integer (up to 100 characters long), `null` and a missing `rating` member are rejected with `400 INVALID_RATING` (BR-002).
-- US-003.3 A valid rating sent for a book whose status is `unread` or `reading` is rejected with `400 RATING_NOT_ALLOWED` (BR-007) and the book is unchanged.
+- US-003.2 Each integer 1, 2, 3, 4, 5 is accepted; 0, 6, -1, -0, 4.9, 5.0, 1e0, 1E1, a number larger than any 64-bit integer (up to 100 characters long as written), `null` and a missing `rating` member are rejected with `400 INVALID_RATING` (BR-002).
+- US-003.3 A valid rating sent for a book whose status is `unread` or `reading` is rejected with `400 RATING_NOT_ALLOWED` (BR-007) and the book is unchanged. An invalid rating value sent for such a book is `INVALID_RATING` (BR-012: field values before state rules).
 - US-003.4 An existing rating can be replaced by another valid value (DEC-002); sending the current value returns 200 and changes nothing.
 - US-003.5 An empty object is rejected with `400 INVALID_RATING`.
-- US-003.6 A value of the wrong JSON type (for example the string `"5"`, `true`, an array, an object) is rejected with `400 MALFORMED_REQUEST`; so is a number that is not valid JSON (`01`, `+5`, `NaN`) or longer than 100 characters.
+- US-003.6 A value of the wrong JSON type (for example the string `"5"`, `true`, an array, an object) is rejected with `400 MALFORMED_REQUEST`; so is a number that is not valid JSON (`01`, `+5`, `NaN`) or whose literal, as written, is longer than 100 characters.
 - US-003.7 `DELETE /api/v1/books/{id}/rating` returns 200 and the book with `rating` null; it is idempotent (a book without a rating, completed or not, also returns 200) (DEC-009).
 - US-003.8 With a valid body, a well-formed unknown id returns `404 BOOK_NOT_FOUND`; a malformed id returns `400 MALFORMED_REQUEST` (BR-011). An invalid body for an unknown id reports the body error (BR-012 order: field values before existence).
 - US-003.9 A rating is never changed by any operation other than the two above, except by the clearing of BR-004.
@@ -88,14 +90,14 @@ Acceptance Criteria:
 - US-004.2 The 409 body carries `details.existing_book`, the full book representation of the matching book; if several match, the one with the earliest `date_added` (ties: lowest `id`) (DEC-005).
 - US-004.3 The same request with `"allow_duplicate": true` returns 201 and stores a new, separate book with its own `id`; the existing book is untouched.
 - US-004.4 `allow_duplicate` is optional, boolean, default false; `"allow_duplicate": false` behaves as absent; any other type (including `null`) is rejected with `400 MALFORMED_REQUEST`. `allow_duplicate` is not part of the stored or returned book.
-- US-004.5 Matching ignores letter case, leading and trailing white space, Unicode compatibility forms and repeated internal white space (BR-003): "Clean Code" by "Robert Martin" matches " clean   code " by "ROBERT MARTIN" and the full-width form "Ｃlean Code".
+- US-004.5 Matching ignores letter case, leading and trailing white space, Unicode compatibility forms and repeated internal white space (BR-003): "Clean Code" by "Robert Martin" matches " clean   code " by "ROBERT MARTIN" and the full-width form "Ｃlean Code". Matching uses lower-casing, not case folding: "Straße" and "STRASSE" do not match.
 - US-004.6 The same title with a different author, or the same author with a different title, is not a duplicate. Status, rating and dates do not take part in matching.
 - US-004.7 `allow_duplicate: true` on a request with no matching book simply creates the book.
 - US-004.8 Two simultaneous identical requests without `allow_duplicate` result in exactly one 201 and one 409 (BR-013).
 - US-004.9 At capacity `LIBRARY_FULL` is reported before `DUPLICATE_BOOK`, with or without `allow_duplicate` (BR-012).
 
-### US-005: Author Biography (FR4) — RESERVED, NOT SPECIFIED IN V1 (DEC-003)
-The identifier is reserved. The Sponsor decided on 2026-10-30 to keep FR4 for the Phase 5 drift exercise (Scenario B: the spec changes before the code). No behavior, field, entity, error code, endpoint or page element of this story exists in v0.2, and no implementation may anticipate it. When the Phase 5 change request is approved, the PM adds the story, BR-005, the data model change (ASK FIRST for the new entity) and the contract in that order.
+### US-005: reserved
+The identifier is reserved. This version has no behavior for it.
 
 ### US-006: Track status (FR2)
 **As a** reader **I want** to change a book's status **so that** my list reflects my progress.
@@ -105,7 +107,7 @@ Acceptance Criteria:
 - US-006.2 Every transition between the three statuses is allowed (nine combinations including the same-state ones) (DEC-006).
 - US-006.3 A change to `completed` from another status sets `date_completed` to the time of the change and leaves `rating` null (BR-008).
 - US-006.4 A change from `completed` to `unread` or `reading` sets `rating` to null and `date_completed` to null in the same operation (BR-004, DEC-007). After a later change back to `completed`, `date_completed` is the new time and `rating` is null.
-- US-006.5 A change to the status the book already has returns 200 and changes nothing, in particular not `date_completed` and not `rating` (idempotent).
+- US-006.5 A change to the status the book already has (`unread` to `unread`, `reading` to `reading`, `completed` to `completed`) returns 200 and changes nothing, in particular not `date_completed` and not `rating` (idempotent).
 - US-006.6 A status that is not exactly `unread`, `reading` or `completed` (including `Completed`, `"reading "`, the empty string, `null`, a missing member, an empty object) is rejected with `400 INVALID_STATUS` (BR-001).
 - US-006.7 A non-string status (number, boolean, array, object) is rejected with `400 MALFORMED_REQUEST`.
 - US-006.8 With a valid body, unknown id: `404 BOOK_NOT_FOUND`; malformed id: `400 MALFORMED_REQUEST`.
@@ -116,9 +118,9 @@ Acceptance Criteria:
 
 Acceptance Criteria:
 - US-007.1 `GET /api/v1/books/{id}` returns 200 and the book (same members as US-002.3).
-- US-007.2 Unknown well-formed id: `404 BOOK_NOT_FOUND`. Malformed id (uppercase letters, wrong length, any non-UUID text): `400 MALFORMED_REQUEST`. A trailing slash or a `;` suffix after the id is a route that does not exist: `404 NOT_FOUND` (constitution API Standards).
+- US-007.2 Unknown well-formed id: `404 BOOK_NOT_FOUND`. Malformed id (uppercase letters, wrong length, any non-UUID text, any text containing `%`): `400 MALFORMED_REQUEST`. A trailing slash, a `;` suffix or an encoded variant of a fixed path segment is a route that does not exist: `404 NOT_FOUND` (constitution API Standards, Section 5.0).
 
-Priority Should (DEC-009).
+Priority Must (DEC-030; the page and US-001.9, US-008.1 depend on it).
 
 ### US-008: Delete a book
 **As a** reader **I want** to remove a book **so that** my list stays correct (a mistaken entry, a book I no longer care about). Title and author cannot be edited in v1 (DEC-010), so deleting and re-adding is the way to correct them.
@@ -136,36 +138,39 @@ Acceptance Criteria:
 Acceptance Criteria:
 - US-009.1 After an acknowledged add, status change, rating change or delete (2xx), stopping the application normally and starting it again shows the same data.
 - US-009.2 The same holds when the application process is terminated forcibly right after the response (DEC-019).
-- US-009.3 Starting the application on an empty or missing database creates it; starting it on an existing database never removes or alters books.
+- US-009.3 If the database file is absent or has zero length, the application creates it. If it is a valid GloberBooks database (US-009.5), the application opens it and never removes or alters books.
 - US-009.4 Loss of data on power failure or operating system crash is not guaranteed by this specification (stated limit).
-- US-009.5 If the database cannot be opened or is not a valid GloberBooks database, the application refuses to start, reports the reason on the console without echoing book data, and leaves the file unmodified (DEC-028).
+- US-009.5 A file is a valid GloberBooks database when it is a database of the kind used by the application, contains the Book structure of Section 4 (and may contain no other tables), and its rows satisfy INV-1 to INV-4 and the 5,000 limit. In every other case (not a database, damaged, other structure, no tables, rows violating an invariant, not readable or writable) the application exits with a non-zero status without serving any request, reports a reason on the console that does not contain book data, and leaves the bytes of the database file unchanged (files the storage creates next to it are not part of this criterion) (DEC-028).
+- US-009.6 On a POSIX system the application refuses to start (same reporting as US-009.5, database file untouched) when the data directory or the database file is a symbolic link, is owned by another user, or is accessible by group or others. It creates a missing directory with mode 0700 and a missing file with mode 0600 before the first connection. On Windows this check is not made (stated platform limit).
+- US-009.7 If another running instance of the application already uses the same database file, the second start fails with a non-zero exit status and the same reporting as US-009.5, and the first instance keeps serving. A second instance on the same database is not supported (DEC-032).
 
 ### US-010: Library view (UI)
 **As a** reader **I want** a page that shows my library **so that** I see everything at a glance.
 
 Acceptance Criteria:
-- US-010.1 Opening the application root (`/`) shows a page with the title "GloberBooks", the add form (US-011), the status filter and the list; no other page exists, and no author biography element exists (DEC-003).
-- US-010.2 While the list loads, a visible "Loading your books…" status is shown and announced politely to assistive technology.
-- US-010.3 On success each entry shows title, author, status, `date_added` as a calendar date in the browser's local time zone (`YYYY-MM-DD`), and the rating as "Rating: n of 5" when present, "Not rated" for a completed book without rating, nothing for other statuses. A completed book also shows its completion date in the same format.
-- US-010.4 The order is the API order (newest first). A count "n books" (singular "1 book", "0 books" for none) shows `total` of the current result.
-- US-010.5 The filter offers All, Unread, Reading, Completed; the current choice is indicated by text and not by color alone; choosing one reloads the list with the matching `status` parameter (All sends none).
-- US-010.6 Empty library (All selected, `total` 0): message "Your reading list is empty. Add your first book above." Empty filter result: message "No books with this status." plus a way back to All.
-- US-010.7 If loading fails, the message of Section 5.9 for that failure and a "Try again" button are shown; the button repeats the request; the previous list is not shown as if it were current.
-- US-010.8 Title, author and all other strings are displayed exactly as stored, as text; markup in a title is shown literally (US-014).
-- US-010.9 With 1,000 books the list is visible within 1 second of load (M-2, DEC-020).
+- US-010.1 Opening the application root (`/`) shows a page whose document title and single level-1 heading read "GloberBooks", with the add form (US-011), the status filter and the list; no other page exists. The list is a list named "Books" whose items are the entries; the heading above it reads "Your books" (level 2).
+- US-010.2 While the list loads, a visible "Loading your books…" text is shown inside an element with `role="status"` or `aria-live="polite"`.
+- US-010.3 On success each entry (one list item) shows the title, the author, the status as the label "Unread", "Reading" or "Completed", "Added: YYYY-MM-DD" (the `date_added` calendar date in the browser's local time zone) and, for a completed book, "Completed: YYYY-MM-DD" (same rule). The rating is shown as "Rating: n of 5" when present, "Not rated" for a completed book without rating, and nothing for other statuses.
+- US-010.4 The order is the API order (newest first). A count "n books" (singular "1 book", "0 books" for none; digits without thousands separator, for example "1000 books") is shown. The count is the `total` of the last successful load plus the books added since then that match the active filter minus the books deleted since then; it is therefore unchanged by an add that does not match the filter, and an entry marked by US-012.8 still counts until the next load.
+- US-010.5 The filter is a radio group named "Filter by status" with the options "All", "Unread", "Reading", "Completed" (the checked option is the current choice; "All" is checked at page load). Choosing an option loads the list with the matching `status` parameter ("All" sends none).
+- US-010.6 Empty library (All checked, `total` 0): message "Your reading list is empty. Add your first book above." Empty filter result: message "No books with this status." plus a button "Show all books" that checks "All" and loads the list.
+- US-010.7 If loading fails, the message of Section 5.9 for that failure and a "Try again" button are shown; the button repeats the request with the active filter; no book entry (zero list items) is present in the page until a load succeeds.
+- US-010.8 Title, author and all other strings are displayed as text; the text content of the element equals the stored value; markup in a title is shown literally (US-014).
+- US-010.9 With 1,000 books, all 1,000 entries are present in the page 1,000 ms after the `load` event (measured once on the reference environment, DEC-020). With 5,000 books of typical size the time until all entries are present is measured once and recorded; it has no pass threshold (SEC-F-054, DEC-020).
+- US-010.10 The list is requested only when the page loads, when the filter changes, when "Try again" is pressed, and after a `404 BOOK_NOT_FOUND` (US-012.7); no other action reloads it. An add inserts the returned book at the top of the list only when it matches the active filter (US-011.5); a successful delete removes the entry; neither requests the list.
 
 ### US-011: Add a book and resolve duplicates (UI)
 **As a** reader **I want** a quick form with a clear duplicate warning **so that** adding is fast and safe.
 
 Acceptance Criteria:
-- US-011.1 The form has labelled fields "Title" and "Author" and a "Status" choice defaulting to "Unread", and an "Add book" button. Keyboard focus is on Title at page load.
-- US-011.2 Typing a title and an author and pressing Enter submits the form (three actions, M-1).
+- US-011.1 The form has labelled fields "Title" and "Author", a "Status" single-choice control with the options "Unread", "Reading", "Completed" defaulting to "Unread", and an "Add book" button. Keyboard focus is on Title at page load.
+- US-011.2 Using the keyboard only (type the title, Tab, type the author, Enter) submits the form (M-1).
 - US-011.3 Client-side checks (UX only) cover: empty or whitespace-only, and over the length limit counted in code points. Forbidden characters are left to the server (US-011.6). A failed check shows an inline message linked to the field and no request is sent.
-- US-011.4 While a request is in progress the button is disabled, so a double click sends one request.
-- US-011.5 On 201 the book appears at the top of the list when it matches the current filter, the count updates, the form is cleared and Status resets to Unread, a polite confirmation "Added: <title>" is announced (also when the book does not match the filter), and focus returns to Title.
-- US-011.6 On `400` with `details`, each message is shown next to the field named in `field`; focus moves to the first field in error. `details` entries for unknown fields are shown in a general message area.
-- US-011.7 On `409 DUPLICATE_BOOK` a modal dialog opens showing the existing book's title, author, status and added date from `details.existing_book`, with buttons "Add anyway" and "Cancel". Initial focus is on "Cancel"; Escape cancels.
-- US-011.8 "Cancel" closes the dialog, keeps the typed values and returns focus to the form. "Add anyway" resends the same values with `"allow_duplicate": true`, then follows US-011.5.
+- US-011.4 While a request from the form is in progress the button is disabled and any further submission by any means (button, Enter) sends no request, so a double click or a repeated Enter sends one request.
+- US-011.5 On 201 the book appears at the top of the list when it matches the active filter and the count follows US-010.4, the form is cleared and Status resets to "Unread", a polite confirmation "Book added: <title>" is announced (also when the book does not match the filter), and focus returns to Title.
+- US-011.6 On `400 VALIDATION_ERROR` with `details`, the message of each entry for `title` or `author` is shown next to that field (the text shown equals the `message` of the response) and for an entry with `field` `status` the text "Choose Unread, Reading or Completed." is shown beside the Status control; focus moves to the first field in error. On `400 INVALID_STATUS` the same Status text is shown. (These two paths cannot be reached through the page's own controls, so a page test with a stubbed response covers them.)
+- US-011.7 On `409 DUPLICATE_BOOK` a modal dialog named "Possible duplicate" opens. Its text is "This book may already exist. Add anyway?" followed by the existing book's title, author, status label and "Added: YYYY-MM-DD" from `details.existing_book`, with buttons "Add anyway" and "Cancel". Initial focus is on "Cancel"; Escape cancels.
+- US-011.8 "Cancel" closes the dialog, keeps the typed values and returns focus to the form. "Add anyway" closes the dialog, then resends the same values with `"allow_duplicate": true`, then follows US-011.5.
 - US-011.9 On `409 LIBRARY_FULL` a message "Your library is full (5,000 books). Delete a book to add another." is shown and the typed values are kept (DEC-013). This also applies after "Add anyway".
 - US-011.10 Any other failure is shown per Section 5.9 and the typed values are kept.
 
@@ -173,13 +178,13 @@ Acceptance Criteria:
 **As a** reader **I want** controls on each book **so that** I can maintain my list without leaving the page.
 
 Acceptance Criteria:
-- US-012.1 Each entry has a single-choice status control whose accessible name is "Status of <title>" with the three values; choosing a different value sends `PUT .../status`.
+- US-012.1 Each entry has a single-choice status control whose accessible name is "Status of <title>" with the three values "Unread", "Reading", "Completed"; choosing a different value sends `PUT .../status`. Titles are not unique (US-004.3), so accessible names may repeat; tests scope by the list item.
 - US-012.2 The rating control exists on every completed entry and on no other entry (so it appears after a successful change to `completed` and disappears after a successful change away from it).
-- US-012.3 If the entry shows a rating and the user chooses `unread` or `reading`, a confirmation dialog first says "Moving <title> back to <Unread|Reading> removes its rating and completion date." with "Continue" and "Cancel"; initial focus on "Cancel"; "Continue" sends the request, "Cancel" restores the previous choice without a request (DEC-007). A completed entry without a rating changes without a dialog. The confirmation is client-side only: the API clears the data on its own (BR-004), also when called without any confirmation.
-- US-012.4 The rating control is a labelled group named "Rating of <title>" offering 1 to 5, operable by keyboard, showing the current value as text, and a "Clear rating" button when a rating exists. Selecting a value sends `PUT .../rating`; "Clear rating" sends `DELETE .../rating`.
-- US-012.5 Each entry has a "Delete" button; it opens a confirmation dialog "Delete <title>? This cannot be undone." with "Delete" and "Cancel"; initial focus on "Cancel". "Delete" sends `DELETE`; on success the entry disappears, the count updates, "Deleted: <title>" is announced and focus moves to the list heading.
+- US-012.3 If the entry shows a rating and the user chooses `unread` or `reading`, a confirmation dialog named "Confirm status change" first says "Moving <title> back to <Unread|Reading> removes its rating and completion date." with "Continue" and "Cancel"; initial focus on "Cancel"; "Continue" sends the request, "Cancel" restores the previous choice without a request (DEC-007). A completed entry without a rating changes without a dialog. The confirmation is client-side only: the API clears the data on its own (BR-004), also when called without any confirmation.
+- US-012.4 The rating control is a labelled group named "Rating of <title>" offering the options "1" to "5", operable by keyboard, showing the current value as text, and a button "Clear rating of <title>" when a rating exists. Selecting a value sends `PUT .../rating`; "Clear rating of <title>" sends `DELETE .../rating`.
+- US-012.5 Each entry has a button named "Delete <title>"; it opens a confirmation dialog named "Delete book" with the text "Delete <title>? This cannot be undone." and buttons "Delete" and "Cancel"; initial focus on "Cancel". "Delete" sends `DELETE`; on success the entry disappears, the count follows US-010.4, "Book deleted: <title>" is announced and focus moves to the "Your books" heading (programmatically focusable).
 - US-012.6 After any successful change the entry shows the server's returned values (not optimistic ones); while a request for an entry is in progress its controls are disabled.
-- US-012.7 If a request fails, the control returns to the server's last known value and the message of Section 5.9 is shown next to the entry; on `404 BOOK_NOT_FOUND` the entry is removed and the list is reloaded.
+- US-012.7 If a request fails, the control returns to the server's last known value and the message of Section 5.9 is shown next to the entry; on `404 BOOK_NOT_FOUND` the entry is removed, the list is reloaded (US-010.10) and "This book no longer exists." is announced in the page-level polite message area.
 - US-012.8 Changing status while a filter is active: an entry that no longer matches the filter stays visible until the next list load and shows the text "No longer matches this filter".
 - US-012.9 No control edits an existing book's title or author (DEC-010).
 
@@ -190,7 +195,7 @@ Acceptance Criteria:
 - US-013.1 The page maps every `code` of Appendix A to the behavior of Section 5.9; the page chooses its text by `code`, never by the server's `error` text.
 - US-013.2 A failure to reach the server (no response) shows "Cannot reach the server. Check that GloberBooks is running, then try again." and keeps the user's input.
 - US-013.3 A response that is not a valid error envelope (not JSON, missing `code`, unknown `code`) is treated as `INTERNAL_ERROR`.
-- US-013.4 Errors and results are announced in a polite live region; field errors are tied to their fields; the same message is not announced twice for one failure.
+- US-013.4 Errors and results are announced by placing their text in an element with `role="status"` or `aria-live="polite"`; field errors are tied to their fields; one failure causes one update of the live region.
 - US-013.5 No raw `error` text, status code, stack, URL or id is displayed to the user except the book's own data.
 - US-013.6 No error leaves the page in a state where controls stay disabled permanently.
 
@@ -198,13 +203,14 @@ Acceptance Criteria:
 **As a** reader (including with assistive technology) **I want** an accessible page **so that** I can use it however I work.
 
 Acceptance Criteria:
-- US-014.1 An automated accessibility check against the WCAG 2.1 A and AA rules reports zero violations of impact "serious" or "critical" on: the list, the add form with errors showing, and each dialog (DEC-026: the tool is chosen by the testing documents, not by this spec).
-- US-014.2 Every control has a programmatic label; all operations work with the keyboard alone; focus is always visible; dialogs trap focus and return it to the control that opened them when closed.
+- US-014.1 An automated accessibility check against the WCAG 2.1 A and AA rules reports zero violations of impact "serious" or "critical" on the page with at least three books on the list (one completed and rated), the add form showing two field errors, and each dialog open (DEC-026: the tool is chosen by the testing documents, not by this spec).
+- US-014.2 Every control has a programmatic label; all operations work with the keyboard alone; focus is always visible (the focused control has an indicator with at least 3:1 contrast against its surroundings); dialogs trap focus and return it to the control that opened them when closed.
 - US-014.3 Text contrast is at least 4.5:1 (3:1 for large text and control boundaries); status and errors are never conveyed by color alone.
-- US-014.4 The page has a document language, a page title, one `h1`, a main landmark; at a viewport 320 CSS pixels wide there is no horizontal scrolling of the page.
+- US-014.4 The page has the document language `en`, a page title, one `h1`, a main landmark; at a viewport 320 CSS pixels wide there is no horizontal scrolling of the page.
 - US-014.5 Animations are absent or disabled when the user prefers reduced motion.
-- US-014.6 Titles and authors containing `<script>alert(1)</script>`, `<img src=x onerror=alert(1)>`, quotes, ampersands and an extremely long unbroken word are displayed as inert text and do not break the layout; no content-security violation is reported in the browser console during any flow.
+- US-014.6 Titles and authors containing `<script>alert(1)</script>`, `<img src=x onerror=alert(1)>`, quotes, ampersands, an unbroken word of 500 code points, and a title of 500 code points made of base characters each followed by 8 combining marks (the worst case BR-006 allows) are displayed as inert text; no content-security violation is reported in the browser console during any flow (a failed request for `/favicon.ico` is not a page failure and is excluded). Containment: shown in the list and in each dialog, the text lies inside the bounding box of its list item or dialog, and the buttons of the dialog and of the list item remain visible and operable (asserted by a bounding-box check).
 - US-014.7 The page makes no request to any origin other than its own.
+- US-014.8 The page takes no data from the address (`location.search`, `location.hash`), `window.name`, `document.referrer` or `postMessage`, and stores nothing in `localStorage`, `sessionStorage`, cookies or IndexedDB.
 
 ## 3. Business Rules
 
@@ -216,7 +222,7 @@ Every rule has at least one passing scenario and one failing scenario (constitut
 **Then** it is accepted.
 **Given** a value of the right JSON type (a string, or `null`, or missing where required) that is anything else, including `Completed`, `UNREAD`, `"unread "`, the empty string
 **When** the request is evaluated
-**Then** it is rejected with `400 INVALID_STATUS` and a `details` entry with `field` `status` (unless BR-012 step 6 turns it into `VALIDATION_ERROR`).
+**Then** it is rejected with `400 INVALID_STATUS` and a `details` entry with `field` `status`. On a request where only `status` fails, the code is `INVALID_STATUS`; where `status` and another field fail, the code is `VALIDATION_ERROR` (BR-012 step 6).
 **Given** a status value of another JSON type (number, boolean, array, object)
 **Then** the request is rejected with `400 MALFORMED_REQUEST`.
 Exception: on `POST /api/v1/books` an absent `status` member means `unread`; an explicit `null` is `INVALID_STATUS`.
@@ -225,10 +231,10 @@ Exception: on `POST /api/v1/books` an absent `status` member means `unread`; an 
 **Given** a request assigns a rating
 **When** the value is a JSON integer literal from 1 to 5
 **Then** the value is valid.
-**Given** a JSON number outside that range or not written as an integer literal (0, 6, -3, -0, 4.9, 5.0, 1e0, a number beyond the 64-bit range of at most 100 characters), `null`, or a missing `rating` member
+**Given** a JSON number outside that range or not written as an integer literal (0, 6, -3, -0, 4.9, 5.0, 1e0, 1E1, a number beyond the 64-bit range of at most 100 characters as written), `null`, or a missing `rating` member
 **When** the request is evaluated
-**Then** it is rejected with `400 INVALID_RATING` and a `details` entry with `field` `rating`.
-**Given** a `rating` of another JSON type (string, boolean, array, object), or a number that is not valid JSON or longer than 100 characters
+**Then** it is rejected with `400 INVALID_RATING` and a `details` entry with `field` `rating`. Because a rating request has one field, an invalid rating is always `INVALID_RATING`, also for a book that is not completed (BR-012 step 6 precedes step 8).
+**Given** a `rating` of another JSON type (string, boolean, array, object), or a number that is not valid JSON or whose literal as written is longer than 100 characters
 **Then** it is rejected with `400 MALFORMED_REQUEST`.
 
 ### BR-003: Duplicate detection and override
@@ -238,7 +244,7 @@ Exception: on `POST /api/v1/books` an absent `status` member means `unread`; an 
 **Given** the same situation
 **When** the request carries `allow_duplicate: true`
 **Then** the book is added (201) as a separate book.
-**Definition:** the duplicate key of a (title, author) pair is the pair of the title key and the author key; a text key is obtained from the already trimmed and NFC-normalized text (BR-006) by normalizing to NFKC, converting to lower case without regard to locale, and collapsing every run of white space inside to a single space (DEC-001). Keys are computed in application logic and are not part of the API.
+**Definition:** the duplicate key of a (title, author) pair is the pair of the title key and the author key; a text key is obtained from the already trimmed and NFC-normalized text (BR-006) by normalizing to NFKC, converting to lower case with the Unicode default lower-case mapping (not case folding, and without regard to locale), collapsing every run of white space inside to a single space, and trimming the result (DEC-001). So "Clean Code" and "CLEAN CODE" are duplicates and "Straße" and "STRASSE" are not. Keys are computed in application logic and are not part of the API.
 **Scope:** only creation is checked. Status, rating and dates are ignored. All books count, whatever their status. Because title and author cannot change after creation (DEC-010), no other operation can create a duplicate.
 **Given** no matching book **When** a book is added **Then** it is added (201).
 
@@ -251,8 +257,8 @@ Exception: on `POST /api/v1/books` an absent `status` member means `unread`; an 
 **Then** `rating` and `date_completed` stay null and nothing else changes.
 The API needs no confirmation parameter; the page's confirmation (US-012.3) is a client-side protection only.
 
-### BR-005: Bio validation — RESERVED (DEC-003)
-Reserved for FR4. No behavior in v1.
+### BR-005: reserved
+Reserved. No behavior in this version.
 
 ### BR-006: Title and author text
 **Given** a title or an author in a request
@@ -263,11 +269,16 @@ Reserved for FR4. No behavior in v1.
 3. the text is converted to Unicode normalization form NFC;
 4. the result is measured in Unicode code points (an emoji or a character outside the basic plane counts 1);
 5. a title must be 1 to 500 and an author 1 to 200 code points;
-6. it must not contain: control characters (category Cc, which includes tab, line feed and NUL), format characters (Cf) other than U+200D (zero-width joiner), line and paragraph separators (Zl, Zp), private-use code points, or code points unassigned in Unicode 15.0. The variation selector U+FE0F (category Mn) is allowed as a combining mark. White space of category Zs inside the text is allowed. Combining marks (Mn, Mc, Me) are allowed, within the length limit.
-**And** a violation of items 5 or 6 (including an empty result) is rejected with `400 VALIDATION_ERROR` and one `details` entry per failing field (`field` `title` or `author`), whose message is the first failing check in this order: required (null or missing), empty, length, characters.
-**And** an unpaired surrogate (for example the JSON escape `\uD800`) or invalid UTF-8 anywhere in the body is not text: the whole request is rejected with `400 MALFORMED_REQUEST` (BR-012 step 5, DEC-027).
+6. it must not contain: control characters (category Cc, which includes tab, line feed and NUL); format characters (Cf) other than U+200C and U+200D; tag characters (U+E0000 to U+E007F); line and paragraph separators (Zl, Zp); private-use code points; noncharacters; or code points unassigned in Unicode 15.0. U+FE0F is category Mn and is allowed. White space of category Zs is allowed inside the text;
+6b. visible content: the text must contain at least one code point of category L, N, P or S other than U+115F, U+1160, U+3164, U+FFA0 and U+2800, and must not begin with a code point of category Mn, Mc or Me;
+6c. marks: at most 8 consecutive code points of category Mn, Mc or Me, and at most one variation selector (U+FE00 to U+FE0F, U+E0100 to U+E01EF) in a row;
+6d. joiners: U+200C and U+200D must not be the first or last code point of the text, must not be adjacent to each other, and must not be adjacent to a code point of category Zs.
+
+Items 6 to 6d are judged on the text after items 2 and 3 (trimmed, NFC). The Unicode version is 15.0; changing it is a spec change.
+**And** a violation of items 5 to 6d (including an empty result) is rejected with `400 VALIDATION_ERROR` and one `details` entry per failing field (`field` `title` or `author`), whose message is the first failing check in this order: required (null or missing), empty, length, characters (the message "contains characters that are not allowed" covers items 6 to 6d).
+**And** an unpaired surrogate (for example the JSON escape `\uD800`, or a pair in the wrong order) or invalid UTF-8 anywhere in the body is not text: the whole request is rejected with `400 MALFORMED_REQUEST` (BR-012 step 5, DEC-027).
 **And** the stored and returned text is the trimmed NFC form; letter case and internal spacing are preserved.
-Passing examples: "Les Misérables" / "Victor Hugo"; a title of 500 emoji (U+1F600); a title written with decomposed "é" (e plus U+0301) 500 times (counts 500 after NFC); a family emoji joined with U+200D. Failing examples (`VALIDATION_ERROR`): "", "   ", a single U+00A0, 501 characters, `a\u0000b`, `a\nb`, `a\tb`, `a​b` (zero-width space), `a‮b` (bidirectional override), `a‌b` (zero-width non-joiner), `ab` (private use), `a͸b` (unassigned), a tag character U+E0041. Failing example (`MALFORMED_REQUEST`): `"\uD800"`.
+Passing examples: "Les Misérables" / "Victor Hugo"; a title of 500 emoji (U+1F600); a title written with decomposed "é" (e plus U+0301) 500 times (counts 500 after NFC); a family emoji joined with U+200D; the Persian word "می‌خواهم" (U+200C between two letters); "ab", U+3164, "cd"; "x" followed by 8 times U+0301; the literal character U+FFFD between letters. Failing examples (`VALIDATION_ERROR`): "", "   ", a single U+00A0, 501 characters, U+0000 inside, a line feed inside, a tab inside, U+200B, U+202E, U+E000, U+0378 (unassigned), U+E0041 (tag), U+FFFE, U+FDD0, a title that is only U+3164 or only U+2800 or only U+0301, a title that begins with U+0301, "x" followed by 9 times U+0301, "a" followed by U+E0100 and U+E0101, U+200C or U+200D as first or last character, U+200C next to U+200D, a joiner next to a space. Failing example (`MALFORMED_REQUEST`): `"\uD800"`.
 
 ### BR-007: Rating only for completed books
 **Given** a book with status `completed`
@@ -308,22 +319,22 @@ Time values come from the application's clock and use the fixed format of Sectio
 
 ### BR-011: Identifiers
 **Given** a request path containing a book id
-**When** the id (after URL decoding) is not a lowercase, hyphenated, 36-character UUID (pattern 8-4-4-4-12 of lowercase hexadecimal digits; the version digit is not checked)
+**When** the id segment, judged exactly as received and never decoded, is not a lowercase, hyphenated, 36-character UUID (pattern 8-4-4-4-12 of lowercase hexadecimal digits; the version digit is not checked), so that an id containing `%` is malformed
 **Then** it is rejected with `400 MALFORMED_REQUEST` before any lookup.
 **Given** a well-formed id
 **When** no book has it
 **Then** the response is `404 BOOK_NOT_FOUND`.
-Ids are generated by the system; clients cannot choose them.
+Ids are generated by the system; clients cannot choose them. The route and the method are decided before the id is judged (BR-012 steps 2 and 3).
 
 ### BR-012: Order of evaluation
 **Given** a request violates several rules
 **When** it is evaluated
 **Then** the response reports the first violation in this order, and nothing later is evaluated:
-1. Transport and security checks of the constitution, applied to every path (API, page, unknown), in this sub-order: (a) Host: `INVALID_HOST`; (b) `Origin`, then `Sec-Fetch-Site`: `FORBIDDEN`; (c) for every method other than GET and HEAD, content type absent or not `application/json` (a `charset` parameter other than UTF-8 counts as wrong): `UNSUPPORTED_MEDIA_TYPE`; (d) body over 16 KiB (16,384 bytes), also while streaming: `PAYLOAD_TOO_LARGE`.
-2. Route and method, in this sub-order: unknown path `NOT_FOUND`; path known, method not defined for it (HEAD and OPTIONS included) `METHOD_NOT_ALLOWED`; on `/api/v1/` paths, an `Accept` header that excludes `application/json` `NOT_ACCEPTABLE`.
+1. Transport and security checks of the constitution, applied to every path (API, page, unknown) and every method, in this sub-order: (a) Host: `INVALID_HOST`; (b) `Origin`, then `Sec-Fetch-Site`: `FORBIDDEN`; (c) for every method other than GET and HEAD, `Content-Type` absent or not matching the grammar of Section 5.0 (media type `application/json`; only the parameter `charset=utf-8`; a single header): `UNSUPPORTED_MEDIA_TYPE`; (d) body over 16 KiB (16,384 bytes), also while streaming: `PAYLOAD_TOO_LARGE`. The cap of (d) applies to every request that carries a body, whatever the method and route, including a chunked body that no handler would read. A request rejected by an earlier check is not read further; the server may close the connection after the response.
+2. Route and method, in this sub-order: path not routable or unknown `NOT_FOUND`; path known, method not defined for it (HEAD, OPTIONS, TRACE and unknown method names included) `METHOD_NOT_ALLOWED` with an `Allow` header; on `/api/v1/` paths, an `Accept` header that does not accept `application/json` (Section 5.0) `NOT_ACCEPTABLE`. In route matching, `{id}` matches any single non-empty path segment; the id is judged in step 3, after the route and method are known. Example: `GET /api/v1/books/NOT-A-UUID/status` is `405`, `PUT /api/v1/books/NOT-A-UUID/status` is `400 MALFORMED_REQUEST`, `GET /api/v1/books/not-a-uuid/other` is `404`.
 3. Path id format (BR-011): `MALFORMED_REQUEST`.
-4. Query string, in this sub-order: shape (any parameter on an endpoint other than the list; on the list, an unknown or repeated parameter) `MALFORMED_REQUEST`; then the `status` value `INVALID_STATUS`.
-5. Body, all `MALFORMED_REQUEST`: invalid UTF-8; unreadable JSON; a body that is not a JSON object; an unknown member (member names are case-sensitive); a duplicate member; content after the JSON value; an unpaired surrogate; a number literal longer than 100 characters; a wrong JSON type for a known member; a non-empty body on GET or DELETE.
+4. Query string (Section 5.0 grammar), in this sub-order: shape (any non-empty query on an endpoint other than the list, including the static paths; on the list, an unknown or repeated parameter, an empty pair, a malformed percent-encoding or a decoded invalid UTF-8 sequence) `MALFORMED_REQUEST`; then the `status` value `INVALID_STATUS`.
+5. Body, all `MALFORMED_REQUEST`: invalid UTF-8; unreadable JSON, including a zero-byte body, a byte order mark, comments, trailing commas and every failure of the JSON parser or its limits; a body that is not a JSON object (`null`, array, string, number); an unknown member (member names are case-sensitive and compared after unescaping); a duplicate member (also when written with escapes); content after the JSON value; an unpaired surrogate; a number literal longer than 100 characters; a wrong JSON type for a known member; any body byte (white space included) on GET or DELETE.
 6. Field values: if exactly one field fails and it is `status` or `rating`, the code of that rule (`INVALID_STATUS`, `INVALID_RATING`); in every other case, including two or more failing fields on one request, `VALIDATION_ERROR` with all failing fields in `details` (order of entries: `title`, `author`, `status`).
 7. Existence of the book: `BOOK_NOT_FOUND`.
 8. State rules, in this order: `RATING_NOT_ALLOWED`; `LIBRARY_FULL`; `DUPLICATE_BOOK`.
@@ -339,8 +350,10 @@ Unexpected failures are `INTERNAL_ERROR` (DEC-024).
 **Then** exactly one is stored and the other receives `409 DUPLICATE_BOOK` (the check and the insert are one indivisible step).
 **Given** two add requests arrive at the same time when 4,999 books exist
 **Then** exactly one is stored and the other receives `409 LIBRARY_FULL`.
-**Given** two concurrent updates of the same book
-**Then** both are applied one after the other and the later one wins; no mixed state is stored (DEC-018).
+**Given** two concurrent updates of the same book, including a status change racing a rating change
+**Then** both are applied one after the other and the later one wins; no mixed state is stored, and INV-1 and INV-4 hold in every final state (DEC-018).
+**Given** a second instance of the application is started on a database file that a running instance uses
+**Then** the second start fails (US-009.7). The guarantees of this rule are stated for the one running instance; any other writer of the database file is outside this specification (DEC-032).
 
 ## 4. Data Model (Conceptual)
 
@@ -356,7 +369,7 @@ Unexpected failures are `INTERNAL_ERROR` (DEC-024).
 | `date_completed` | same format or null | system | BR-008, INV-4 |
 
 - The duplicate key is derived data (BR-003); it is not a member of the Book and is not exposed.
-- There is exactly one entity in v1 (Book). No Author entity exists (DEC-003).
+- There is exactly one entity in v1 (Book).
 - State matrix (INV-1, INV-4):
 
 | status | rating | date_completed |
@@ -371,13 +384,16 @@ Unexpected failures are `INTERNAL_ERROR` (DEC-024).
 ## 5. API Contract
 
 ### 5.0 Conventions (all endpoints)
-- Base path `/api/v1`. JSON members are snake_case. API responses (success and error) are `application/json; charset=UTF-8`, with non-ASCII characters written as UTF-8 text (not as escape sequences).
-- Requests: every method other than GET and HEAD must send `Content-Type: application/json` (the only accepted parameter is `charset=UTF-8`, case-insensitive), also when it has no body (`DELETE` included), else `415 UNSUPPORTED_MEDIA_TYPE`. Request bodies are UTF-8 JSON objects of at most 16 KiB (16,384 bytes), else `413 PAYLOAD_TOO_LARGE`. GET and DELETE take no body. `Accept` on `/api/v1/` paths may be absent, `*/*`, `application/*` or include `application/json`; anything else is `406 NOT_ACCEPTABLE`. Whatever the `Accept` header, an error body is still JSON.
-- Strict parsing: unknown members, duplicate members, content after the JSON value, and wrong JSON types are `400 MALFORMED_REQUEST`. A request within 16 KiB must never turn into another code because of a parser limit (a long string yields `VALIDATION_ERROR` by length, not a parse failure); the one exception is a number literal longer than 100 characters, which is `MALFORMED_REQUEST`.
-- Query strings: only `GET /api/v1/books` accepts a query, and only `status` (once). A query on any other endpoint is `400 MALFORMED_REQUEST`.
-- Only the paths and methods below exist. Any other path (including the page's unknown paths) is `404 NOT_FOUND`; another method on a defined path is `405 METHOD_NOT_ALLOWED` (HEAD and OPTIONS are never defined). Trailing slashes, suffixes, `;` path parameters and encoded variants are not routed (`404 NOT_FOUND`). The server never redirects.
+- Base path `/api/v1`. JSON members are snake_case. API responses (success and error) are `application/json; charset=UTF-8`, with non-ASCII characters written as UTF-8 text (not as escape sequences). Every response the application produces carries the security headers of the constitution (Security Standards).
+- **Routing.** Only the paths and methods below exist. Paths are matched exactly as received. Not routable (`404 NOT_FOUND`): any other path; a trailing slash; a suffix; a `;` in the path; a percent-encoded variant of a fixed segment (for example `/api/v1/%62ooks`); an encoded `/`, `\` or `;`, a literal `\`, and a dot segment (literal or encoded) in any segment. The `{id}` segment matches any other single non-empty segment and is judged as received (BR-011): any `%` in it makes it malformed (`400 MALFORMED_REQUEST`). Percent-encoding validity in the path matters only through these two rules. The server never redirects.
+- **Methods.** Another method on a defined path, including HEAD, OPTIONS, TRACE, CONNECT, unknown and lower-case method names, ends as `405 METHOD_NOT_ALLOWED` (or as a pre-application answer, Appendix D); HEAD and OPTIONS are never defined. No response echoes the request. Every `405` carries an `Allow` header listing exactly the methods defined for that path and never HEAD or OPTIONS: `/api/v1/books`: `GET, POST`; `/api/v1/books/{id}`: `GET, DELETE`; `/api/v1/books/{id}/status`: `PUT`; `/api/v1/books/{id}/rating`: `PUT, DELETE`; the page and its asset paths: `GET`.
+- **Content type.** Every method other than GET and HEAD must send `Content-Type`, also when it has no body (`DELETE` included). The media type `application/json` is compared case-insensitively. The only allowed parameter is `charset` with the unquoted value `utf-8` (case-insensitive); optional white space around `;` is allowed. Any other parameter, a quoted `charset` value, a list, another type, or more than one `Content-Type` header is `415 UNSUPPORTED_MEDIA_TYPE`. (A request without `charset` is accepted; the constitution's `charset=UTF-8` form is accepted too.)
+- **Accept** (API paths only). The header may be absent or empty (all white space): accepted. Otherwise it is a comma-separated list of ranges `type/subtype` (`*` allowed) with optional `;name=value` parameters; a range whose `q` parameter is 0 (`0`, `0.0`, `0.00`, `0.000`) is ignored; the request is acceptable when a remaining range is `application/json`, `application/*` or `*/*` (case-insensitive). Otherwise, or when the header cannot be parsed, it is `406 NOT_ACCEPTABLE`. Whatever the `Accept` header, an error body is still JSON. The page ignores `Accept`.
+- **Request bodies** are UTF-8 JSON objects of at most 16 KiB (16,384 bytes), else `413 PAYLOAD_TOO_LARGE`. GET and DELETE take no body: any body byte, white space included, is `MALFORMED_REQUEST` (this holds for the page's `GET` too). A request with `Expect: 100-continue` and an oversized `Content-Length` is answered `413` and the server does not send `100 Continue`. `Upgrade` headers are ignored.
+- **Strict parsing.** Unknown members, duplicate members (compared after unescaping), content after the JSON value, and wrong JSON types are `400 MALFORMED_REQUEST`. A zero-byte body, a byte order mark, comments, trailing commas, single-quoted strings, unquoted names, a raw control character inside a string, `NaN`, `Infinity`, and a top-level value that is not an object are invalid. Every failure of the JSON parser, of its limits (nesting depth, string, name or number length) or of the UTF-8 decoder is `400 MALFORMED_REQUEST`; none is `INTERNAL_ERROR`; none takes longer than 300 ms. The decoder reports malformed input and never replaces it (a literal U+FFFD in valid UTF-8 is an ordinary character). A string up to the 16 KiB cap must not trip a parser limit (a long string yields `VALIDATION_ERROR` by length, not a parse failure). A number literal is measured in characters as written (sign, digits, fraction, exponent): up to 100 characters it is judged by its value (a 100-character integer literal is `INVALID_RATING` in the rating position), above 100 it is `MALFORMED_REQUEST`.
+- **Query strings.** Only `GET /api/v1/books` accepts a query, and only `status` (once). A query is a list of `&`-separated `name=value` pairs; the empty query (a `?` with nothing after it) means no query on every path. Names and values are decoded once (`%XX`; `+` is a space) before comparison; `;` is an ordinary character. A non-empty query on any other endpoint, including `/` and the page's asset paths, is `400 MALFORMED_REQUEST`; so is, on the list, an empty pair (`?&`, `?status=reading&`), an unknown or repeated name, a malformed percent-encoding (`%zz`, `%4`) and a decoded invalid UTF-8 sequence. A `status` pair without `=` has an empty value (`INVALID_STATUS`).
 - No CORS: no response carries an `Access-Control-*` header; a preflight request is answered like any other request by BR-012 (a cross-origin preflight is `403 FORBIDDEN`).
-- No cookies or sessions: no response carries `Set-Cookie`. The server is reachable on `127.0.0.1` only; no authentication.
+- No cookies or sessions: no response carries `Set-Cookie`. The server is reachable on `127.0.0.1` only; no authentication. The server never sends `101`, `206`, `304`, `416`, `204` or `422`.
 - Successful responses carry no `message` member; the data is the response.
 - Error envelope (all errors): `{ "error": string, "code": string, "timestamp": string, "details"?: ... }`. `details` exists only for the codes in the table of Appendix A and has the shape stated there. Messages never echo input.
 - **Book representation** (used by every success response and inside `details.existing_book`), exactly these seven members:
@@ -404,7 +420,7 @@ Success 200:
 }
 ```
 Empty: `{ "books": [], "total": 0 }`.
-Errors: 400 `MALFORMED_REQUEST` (repeated or unknown parameter, body present), 400 `INVALID_STATUS` (bad `status` value; `details` `[{ "field": "status", "message": "must be one of: unread, reading, completed" }]`).
+Errors: 400 `MALFORMED_REQUEST` (query shape, body present), 400 `INVALID_STATUS` (bad `status` value; `details` `[{ "field": "status", "message": "must be one of: unread, reading, completed" }]`).
 
 ### 5.2 `POST /api/v1/books` — add (US-001, US-004)
 Request:
@@ -420,7 +436,7 @@ Errors:
   "details": [ { "field": "title", "message": "must be between 1 and 500 characters" } ] }
 ```
 - 400 `INVALID_STATUS`: only `status` is invalid. `details`: `[{ "field": "status", "message": "must be one of: unread, reading, completed" }]`.
-- 400 `MALFORMED_REQUEST`: unreadable JSON, unknown member, wrong JSON type (including `allow_duplicate` that is not a boolean), unpaired surrogate, invalid UTF-8.
+- 400 `MALFORMED_REQUEST`: unreadable JSON, non-object body, unknown member, wrong JSON type (including `allow_duplicate` that is not a boolean), unpaired surrogate, invalid UTF-8.
 - 409 `DUPLICATE_BOOK`:
 ```json
 { "error": "A book with the same title and author already exists.", "code": "DUPLICATE_BOOK", "timestamp": "2026-02-19T10:00:00.000Z",
@@ -448,18 +464,18 @@ No body (the `Content-Type` header is still required). Success 200: the Book rep
 No body. Success 200: the Book representation of the deleted book (status 204 is not in the constitution's list). Errors: 400 `MALFORMED_REQUEST`, 404 `BOOK_NOT_FOUND`.
 
 ### 5.8 Static content
-`GET /` (and `GET /index.html`, the same page) serves the web page; the page's own scripts and stylesheets are served from fixed paths under the application root. It is not part of the versioned API and is governed by the constitution (Static resources, headers). Everything else, including directory paths, files of the build, test files, the database, `/error` and framework paths, is `404 NOT_FOUND` in the standard envelope. Methods other than GET are `405 METHOD_NOT_ALLOWED`.
+`GET /` and `GET /index.html` (the same page) serve the web page. Exactly one stylesheet path and one script path under the application root serve the page's own assets (their names are left to the plan). It is not part of the versioned API and is governed by the constitution (Static resources, headers). Everything else, including directory paths, `/index.html/`, `/favicon.ico`, files of the build, test files, the database, `/error` and framework paths, is `404 NOT_FOUND` in the standard envelope. Methods other than GET are `405 METHOD_NOT_ALLOWED` with `Allow: GET`. Static responses carry no `ETag`, `Last-Modified` or `Accept-Ranges`; `Range`, `If-None-Match` and `If-Modified-Since` are ignored and the full body is returned with `200`. A non-empty query or any body byte on a static `GET` is `400 MALFORMED_REQUEST` (Section 5.0).
 
 ### 5.9 Behavior of the web page for every error code (US-013)
 | Code | HTTP | What the page does |
 |---|---|---|
-| `VALIDATION_ERROR` | 400 | Show each `details[].message` beside the field named in `field`; keep input; focus the first field in error |
-| `INVALID_STATUS` | 400 | Show "Choose Unread, Reading or Completed." beside the status control; restore the control's last known value |
+| `VALIDATION_ERROR` | 400 | US-011.6: the `details[].message` beside the field named in `field` (`title`, `author`); for `status` the text "Choose Unread, Reading or Completed."; keep input; focus the first field in error |
+| `INVALID_STATUS` | 400 | Show "Choose Unread, Reading or Completed." beside the Status control of the entry or of the add form; for an entry restore the control's last known value |
 | `INVALID_RATING` | 400 | Show "Choose a rating from 1 to 5." beside the rating control |
-| `RATING_NOT_ALLOWED` | 400 | Show "Only completed books can be rated." and reload the entry (the book is not completed anymore) |
+| `RATING_NOT_ALLOWED` | 400 | Show "Only completed books can be rated." and reload the entry with `GET /api/v1/books/{id}` (the book is not completed anymore) |
 | `DUPLICATE_BOOK` | 409 | Open the duplicate dialog (US-011.7) |
 | `LIBRARY_FULL` | 409 | Message of US-011.9 |
-| `BOOK_NOT_FOUND` | 404 | "This book no longer exists." remove the entry and reload the list |
+| `BOOK_NOT_FOUND` | 404 | US-012.7: remove the entry, reload the list, announce "This book no longer exists." in the page-level polite message area |
 | `MALFORMED_REQUEST`, `UNSUPPORTED_MEDIA_TYPE`, `NOT_ACCEPTABLE`, `METHOD_NOT_ALLOWED`, `NOT_FOUND`, `PAYLOAD_TOO_LARGE` | 400, 415, 406, 405, 404, 413 | "The request could not be processed. Reload the page and try again." (these indicate a defect or a tampered page, not a user error) |
 | `INVALID_HOST`, `FORBIDDEN` | 400, 403 | "This page cannot talk to the server from this address. Open GloberBooks from http://localhost or http://127.0.0.1." |
 | `INTERNAL_ERROR` or unreadable response | 500, other | "Something went wrong on our side. Try again." |
@@ -467,7 +483,7 @@ No body. Success 200: the Book representation of the deleted book (status 204 is
 
 ## 6. Out of Scope
 - Authentication, accounts, multi-user support, sharing (BRD).
-- Author biography (FR4) and any author concept, field, entity, endpoint, error code or page element: reserved for the Phase 5 drift exercise by Sponsor decision (DEC-003). Out of scope for now, not out of scope forever.
+- Author biography (FR4): not specified in this version.
 - Editing title or author of an existing book (DEC-010): a mistaken entry is deleted and re-added.
 - Cloud or remote databases; in-memory-only storage; import and export.
 - Integration with Goodreads, Amazon or any book metadata service; automatic lookup of covers or authors.
@@ -481,25 +497,36 @@ No body. Success 200: the Book representation of the deleted book (status 204 is
 - Real-time sync between several browser tabs (last write wins; a reload shows the current state).
 - Languages other than English; user-selectable themes.
 - Books above 5,000 in one library (DEC-013).
+- A second application instance on the same database file (DEC-032).
+
+**Accepted limitations** (Sponsor, 2026-10-30; DEC-029, DEC-031):
+- Protection of the list against other users of the same machine (R-16): the API is open to every local user.
+- Visible natural-language instructions inside a title or author remain possible and may be read by tools that read the page (R-17); hidden channels are cut by BR-006.
+- Subdivision flag emoji (England, Scotland, Wales) cannot be stored because tag characters are rejected (BR-006).
+- Confusable and mixed-script look-alike text is allowed; the duplicate key uses lower-casing, not case folding, so "Straße" and "STRASSE" are not duplicates and final-sigma forms can differ; both only affect an advisory warning.
+- "Unassigned" means unassigned in Unicode 15.0; moving to another Unicode version is a spec change.
+- HEAD and OPTIONS answer `405` although general-purpose HTTP servers are expected to support HEAD (DEC-027).
+- A cross-site top-level navigation to `/` (a link on another site) carries `Sec-Fetch-Site: cross-site` and gets `403`; typing the address or using a bookmark works.
+- Text escape-encoded in a more expanded form than the typical one can exceed 16,384 bytes and is then `413` (Appendix B).
 
 ## 7. Decision Log
 
-Status values: CONFIRMED (Sponsor, with the date shown; items traceable to the brief, the constitution or `security.md` were already approved and are also confirmed), RESERVED (confirmed by the Sponsor as not specified now), PROPOSED (added by the PM in v0.2, awaiting Sponsor confirmation at the Phase 2 gate). Original drafting date of DEC-001 to DEC-024: 2026-10-30; the Sponsor answered handoff 007 on 2026-10-30 with "accept all recommendations".
+Status values: CONFIRMED (Sponsor, with the date shown; items traceable to the brief, the constitution or `security.md` were already approved and are also confirmed), RESERVED (confirmed by the Sponsor as not specified now), PROPOSED (awaiting Sponsor confirmation at the Phase 2 gate). Original drafting date of DEC-001 to DEC-024: 2026-10-30; the Sponsor answered handoff 007 on 2026-10-30 with "accept all recommendations" and decided the open points of reviews 010 and 011 on 2026-10-30 (DEC-025 to DEC-032 in v0.3). "Amended v0.3" marks entries changed by the round 2 resolution.
 
 | ID | Date | Status | Decision | Rationale |
 |---|---|---|---|---|
-| DEC-001 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Duplicates are detected on title + author compared case-insensitively after trimming (brief), using the constitution's key (NFKC, locale-independent lower case) plus collapsing of internal white space runs | Users capitalize and space differently; a missed warning is harmless but a spurious one is noise; the refinement is cheap and testable |
+| DEC-001 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30); amended v0.3 | Duplicates are detected on title + author compared case-insensitively after trimming (brief), using the constitution's key (NFKC, locale-independent lower case) plus collapsing of internal white space runs, then trimming again; lower case means the Unicode default lower-case mapping, not case folding | Users capitalize and space differently; a missed warning is harmless but a spurious one is noise; the refinement is cheap and testable; the key must be deterministic (NFKC can add a leading space; case folding is out of reach of the stated key) |
 | DEC-002 | 2026-10-30 | CONFIRMED (brief DEC-002; Sponsor 2026-10-30) | A rating can be changed after it was assigned | Opinions change |
-| DEC-003 | 2026-10-30 | RESERVED (Sponsor 2026-10-30, Q1) | FR4 Author Bio is not specified in v1; US-005 and BR-005 stay reserved; no Author entity, field, endpoint, code or page element now; the Phase 5 change request introduces it | BRD says FR4 arrives through Drift Management; keeps the drift exercise meaningful; a new entity is ASK FIRST; the constitution forbids features not in the spec |
-| DEC-004 | 2026-10-30 | CONFIRMED (constitution; Sponsor 2026-10-30) | Data is stored in a durable local file database; the BRD "local/in-memory" wording yields to the constitution | The success metric "zero data loss on restart" cannot be met by memory alone |
+| DEC-003 | 2026-10-30 | RESERVED (Sponsor 2026-10-30) | FR4 is not specified in this version; US-005 and BR-005 are reserved identifiers | Sponsor decision of 2026-10-30 (scope) |
+| DEC-004 | 2026-10-30 | CONFIRMED (constitution; Sponsor 2026-10-30); amended v0.3 | Data is stored in a durable local file database | The BRD allows local storage and the constitution chooses a local file; the success metric "zero data loss on restart" excludes memory-only storage |
 | DEC-005 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Duplicate override: the add request carries optional boolean `allow_duplicate`; the 409 carries the existing book in `details.existing_book` | Gives the UI dialog a mechanism, stays on one endpoint, keeps the first call free of side effects |
 | DEC-006 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Status changes through `PUT /books/{id}/status`; any status may follow any status; same-status update is a successful no-op | FR2 needs an update path; restricting transitions has no business basis in the brief |
 | DEC-007 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30, Q4) | Leaving `completed` clears rating and completion date in the same operation; the page asks for confirmation first when a rating is shown; the API needs no confirmation parameter | Invariants 1 and 4 force the clearing; a client-side dialog protects against accidental loss without a second API call |
 | DEC-008 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30); refined by DEC-025 | Codes: `INVALID_STATUS`, `INVALID_RATING`, `RATING_NOT_ALLOWED` are HTTP 400 (BRD: 400 for bad ratings); `VALIDATION_ERROR` for title/author or several failing fields; wrong JSON types are `MALFORMED_REQUEST` | Keeps brief codes, uses the constitution's reserved codes, avoids a status code (422) outside the constitution list |
-| DEC-009 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Operations added to complete "CRUD": `GET /books/{id}` (Should), `DELETE /books/{id}` (Must), `DELETE /books/{id}/rating` (Should); DELETE returns 200 with the removed representation | BRD scope says CRUD; the brief template has no delete or get; 204 is not in the constitution's status list; clearing a rating needs an explicit mechanism |
+| DEC-009 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30); priority amended by DEC-030 | Operations added to complete "CRUD": `GET /books/{id}`, `DELETE /books/{id}`, `DELETE /books/{id}/rating`; DELETE returns 200 with the removed representation | BRD scope says CRUD; the brief template has no delete or get; 204 is not in the constitution's status list; clearing a rating needs an explicit mechanism |
 | DEC-010 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30, Q2) | Title and author are not editable in v1 | Not in FR1 to FR4; editing re-triggers duplicate checks and expands the surface; delete and re-add covers the need |
-| DEC-011 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | `POST` returns the full book (201), no `message` member; rating cannot be given while adding | The page needs the new book at once; FR1 lists title, author, status only |
-| DEC-012 | 2026-10-30 | CONFIRMED (brief lengths 1-500 and 1-200; constitution; SC-16; Sponsor 2026-10-30) | Text policy of BR-006 | Limits in code points after trimming; characters rejected per security control SC-16 |
+| DEC-011 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30); amended v0.3 | No success response has a `message` member; `POST` returns the full book (201); `PUT` status and `PUT` rating return the book (the BRD example returns a `message`); rating cannot be given while adding | The page needs the changed book at once; FR1 lists title, author, status only; recorded deviation from the BRD example contract |
+| DEC-012 | 2026-10-30 | CONFIRMED (brief lengths 1-500 and 1-200; constitution; SC-16; Sponsor 2026-10-30); amended by DEC-029 | Text policy of BR-006 | Limits in code points after trimming; characters rejected per security control SC-16 |
 | DEC-013 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30, Q3) | Maximum 5,000 books; `409 LIBRARY_FULL`; list response bounded by the same number (worst case below 16,000,000 bytes, typical under 2 MB, Appendix B) | Constitution requires a maximum and a response bound (SC-17, R-02 not accepted); "thousands of books" capacity assumption |
 | DEC-014 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Order: `date_added` descending, ties by `id` ascending | Timestamps have millisecond resolution and can collide; a total order makes tests deterministic |
 | DEC-015 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Non-UUID id: `400 MALFORMED_REQUEST`; unknown id: `404 BOOK_NOT_FOUND` | Constitution reserves `MALFORMED_REQUEST` for invalid path values; security wants a clean envelope, never 500 |
@@ -507,18 +534,22 @@ Status values: CONFIRMED (Sponsor, with the date shown; items traceable to the b
 | DEC-017 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | `details`: array of `{field, message}` for `VALIDATION_ERROR`, `INVALID_STATUS`, `INVALID_RATING`; object `{existing_book}` for `DUPLICATE_BOOK`; absent elsewhere; messages never echo input | Constitution leaves the shape to the spec; one shape per code lets clients branch |
 | DEC-018 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Duplicate check and insert are one atomic step; capacity check and insert likewise; concurrent updates are last-write-wins; no optimistic locking | Risk R-06 accepted by the Sponsor with a concurrent-request test; single user |
 | DEC-019 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Durability: acknowledged writes survive process termination; no promise for power loss | Meets "zero data loss on restart"; stronger guarantees cost performance and are not needed for a personal list |
-| DEC-020 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Timing targets: single-book operation 300 ms, list API 1 s at 5,000 typical books, page list visible in 1 s at 1,000 books, measured once on the reference environment and recorded; add by keyboard in three actions | BRD metrics "instantly" and "under 10 seconds" need numbers; measured once to avoid flaky tests |
-| DEC-021 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Frontend scope: a single page with US-010 to US-014 behavior and the error table of 5.9 | BRD puts the frontend in scope without criteria |
-| DEC-022 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30, Q5) | The exercise time budget (6 to 8 hours) is indicative; the cut line is MoSCoW | The exercise phases add up to 9.5 hours; the security and test requirements add work |
+| DEC-020 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Timing targets: single-book operation 300 ms, list API 1 s at 5,000 typical books, page list visible in 1 s at 1,000 books, measured once on the reference environment and recorded; add by keyboard with the actions of M-1 | BRD metrics "instantly" and "under 10 seconds" need numbers; measured once to avoid flaky tests |
+| DEC-021 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30); amended v0.3 | Frontend scope: a single page with US-010 to US-014 behavior and the error table of 5.9; v0.3 adds the page state model (US-010.4, US-010.10) and the exact UI wording that tests rely on | BRD puts the frontend in scope without criteria; two implementations of an undefined state model would pass different tests |
+| DEC-022 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30, Q5); refined by DEC-030 | The exercise time budget (6 to 8 hours) is indicative; the cut line is MoSCoW | The exercise phases add up to 9.5 hours; the security and test requirements add work |
 | DEC-023 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | `date_completed`: equals `date_added` on creation as completed, new time on each entry into completed, cleared on leaving | Keeps INV-4 true after any history |
-| DEC-024 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Fixed order of evaluation of checks (BR-012; sub-orders added in v0.2) | Without it, tests with several faults are ambiguous |
-| DEC-025 | 2026-10-30 | PROPOSED (PM, v0.2) | Refinement of DEC-008: the spec's own value-domain codes `INVALID_STATUS` and `INVALID_RATING` (the latter named by the BRD) are used when a single status or rating value is of the right JSON type but not allowed; the reserved `VALIDATION_ERROR` is used for title and author and whenever two or more fields fail; the reserved `MALFORMED_REQUEST` is used for structure and JSON types; `RATING_NOT_ALLOWED` stays 400 | The constitution says a spec code with the same meaning takes precedence over the reserved code, and the BRD names the rating codes; a client can branch on one code per rule; one status class (400) is kept; Liaison ruling requested |
-| DEC-026 | 2026-10-30 | PROPOSED (PM, v0.2) | US-014.1 names the standard (WCAG 2.1 A and AA rules, impact serious or critical) and not the checking tool | A tool name is a HOW detail owned by the constitution and `frontend-testing.md`; the criterion stays valid if the tool changes |
-| DEC-027 | 2026-10-30 | PROPOSED (PM, v0.2) | Wire-level rules settled for testability: unpaired surrogate and invalid UTF-8 are `MALFORMED_REQUEST`; a `charset` other than UTF-8 is `UNSUPPORTED_MEDIA_TYPE`; a body on GET or DELETE, or a query on an endpoint that takes none, is `MALFORMED_REQUEST`; a number literal longer than 100 characters is `MALFORMED_REQUEST`; `Accept` rules; HEAD and OPTIONS are `METHOD_NOT_ALLOWED` (or the transport codes first); sub-order of the transport checks | Without exact answers an implementer must guess and the security tests (SC-16, SC-29, SC-30) have no expected value |
-| DEC-028 | 2026-10-30 | PROPOSED (PM, v0.2) | An unopenable or invalid database makes the application refuse to start and leaves the file untouched (US-009.5) | A silent re-creation would destroy a reader's data; fail-closed matches the constitution's startup posture |
+| DEC-024 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Fixed order of evaluation of checks (BR-012; sub-orders) | Without it, tests with several faults are ambiguous |
+| DEC-025 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30, as amended by the reviewers); amended v0.3 | Refinement of DEC-008: the spec's own value-domain codes `INVALID_STATUS` and `INVALID_RATING` (the latter named by the BRD) are used when a single status or rating value is of the right JSON type but not allowed; the reserved `VALIDATION_ERROR` is used for title and author and whenever two or more fields fail; the reserved `MALFORMED_REQUEST` is used for structure and JSON types; `RATING_NOT_ALLOWED` stays 400. Conditions met: tests T-34 to T-38, one sentence in BR-001 and BR-002, page mapping in US-011.6 and 5.9 | The constitution says a spec code with the same meaning takes precedence over the reserved code, and the BRD names the rating codes; one status class (400) is kept; the price is two possible codes for the `status` field, accepted because tested |
+| DEC-026 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30, as amended) | US-014.1 names the standard (WCAG 2.1 A and AA rules, impact serious or critical) and the data state, not the checking tool | A tool name is a HOW detail owned by the constitution and `frontend-testing.md`; the criterion stays valid if the tool changes |
+| DEC-027 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30, as amended); amended v0.3 | Wire-level rules settled for testability, now exact: path matching as received and id judged as received (BR-011, Section 5.0); `Content-Type` and `Accept` grammar; query grammar (also on the static paths); body faults; parser failures are `MALFORMED_REQUEST` and never `INTERNAL_ERROR`; `Allow` on every 405; no `Range`, conditional or upgrade handling; HEAD and OPTIONS are `METHOD_NOT_ALLOWED` (or the transport codes first); `charset` is optional on requests (the constitution writes `charset=UTF-8`) and the request grammar is stricter than HTTP in places (quoted `charset`, repeated header); HEAD is not supported although RFC 9110 expects it of general-purpose servers; sub-order of the transport checks | Without exact answers an implementer must guess and the security tests (SC-16, SC-29, SC-30, SC-31, SC-40) have no expected value; a smaller surface is chosen wherever HTTP leaves a choice |
+| DEC-028 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30, as amended); amended v0.3 | An unopenable or invalid database makes the application refuse to start and leaves the file untouched; "valid" is defined by observable facts (US-009.5); an untrustworthy data location also stops the start on POSIX (US-009.6) | A silent re-creation would destroy a reader's data; fail-closed matches the constitution's startup posture |
+| DEC-029 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Text policy (BR-006 items 6 to 6d): U+200C and U+200D are allowed under a positional rule (not first, not last, not adjacent to another joiner or to a Zs character); tag characters stay rejected and the loss of subdivision flag emoji is an accepted limitation; combining marks are capped (at most 8 in a row, at most one variation selector in a row, no leading mark); text that renders blank is rejected | Correct spelling of Persian, Urdu, Kurdish and several Indic scripts needs U+200C; invisible first or last characters, hidden-payload channels and layout overflow are cut (SC-16, R-17) |
+| DEC-030 | 2026-10-30 | Cut order CONFIRMED (Sponsor 2026-10-30); promotion of REQ-009 and REQ-012 to Must PROPOSED (Liaison F-10), to be confirmed at the gate | Makes DEC-022 executable: `DELETE .../rating` and `GET /books/{id}` become Must because Must stories depend on them (US-001.9, US-008.1, US-012.4, 5.9); the cut order is the one stated in Section 1 (Delivery priorities) | A cut line with Must items depending on Should items cannot be executed; the Sponsor chose what drops first |
+| DEC-031 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | Residual risks accepted and stated: R-16 (other local OS users can use the open API), R-17 (visible instructions inside titles), and the limits of Section 6 (confusables, lower-case instead of case folding, Unicode 15.0 fixed, cross-site navigation to `/`, expanded escape forms over 16 KiB) | Single-user local tool; the controls that are cheap were applied, the rest is stated |
+| DEC-032 | 2026-10-30 | CONFIRMED (Sponsor 2026-10-30) | A second instance on the same database file is not supported; the second start fails (US-009.7) | The concurrency guarantees (BR-009, BR-013, INV-5, INV-7) hold for one running instance; refusing the second is simple and testable |
 
 ## Appendix A: Error catalog
-Envelope: `error` (informative text), `code`, `timestamp` (fixed format), optional `details`. Text below is informative. There are no other codes; `BIO_TOO_LONG` of the brief is reserved with FR4 and does not exist in v1.
+Envelope: `error` (informative text), `code`, `timestamp` (fixed format), optional `details`. Text below is informative. There are no other codes. Statuses outside this table (400, 414, 431, 501, 505) occur only for pre-application answers (Appendix D, D.3 header).
 
 | Code | HTTP | Used when | `details` | Source |
 |---|---|---|---|---|
@@ -529,67 +560,75 @@ Envelope: `error` (informative text), `code`, `timestamp` (fixed format), option
 | `BOOK_NOT_FOUND` | 404 | Well-formed id with no book | none | BR-011 |
 | `DUPLICATE_BOOK` | 409 | Add matches an existing book and no override | object `{existing_book}` | BR-003 |
 | `LIBRARY_FULL` | 409 | Add when 5,000 books exist | none | BR-009 |
-| `MALFORMED_REQUEST` | 400 | Bad JSON, non-object body, unknown or duplicate member, wrong type, malformed id, bad query shape, body on GET or DELETE, unpaired surrogate, invalid UTF-8 | none | constitution (reserved), BR-012 |
+| `MALFORMED_REQUEST` | 400 | Bad JSON or any parser or decoder failure, empty or non-object body, unknown or duplicate member, wrong type, malformed id, bad query shape (including a query on the static paths and malformed percent-encoding in the query), body on GET or DELETE, unpaired surrogate, invalid UTF-8 | none | constitution (reserved), BR-012 |
 | `INVALID_HOST` | 400 | Host not allowed | none | constitution |
 | `FORBIDDEN` | 403 | Origin or Fetch-Metadata not allowed | none | constitution |
-| `NOT_FOUND` | 404 | Unknown route or static path | none | constitution |
-| `METHOD_NOT_ALLOWED` | 405 | Method not defined for the path | none | constitution |
-| `NOT_ACCEPTABLE` | 406 | `Accept` excludes `application/json` on an API path | none | constitution |
+| `NOT_FOUND` | 404 | Unknown or not routable path, static path not served | none | constitution |
+| `METHOD_NOT_ALLOWED` | 405 | Method not defined for the path (with `Allow`) | none | constitution |
+| `NOT_ACCEPTABLE` | 406 | `Accept` does not accept `application/json` on an API path | none | constitution |
 | `PAYLOAD_TOO_LARGE` | 413 | Body over 16 KiB | none | constitution |
-| `UNSUPPORTED_MEDIA_TYPE` | 415 | Content type missing, not `application/json`, or charset not UTF-8 (methods other than GET and HEAD) | none | constitution |
+| `UNSUPPORTED_MEDIA_TYPE` | 415 | `Content-Type` missing or outside the grammar of Section 5.0 (methods other than GET and HEAD) | none | constitution |
 | `INTERNAL_ERROR` | 500 | Unexpected failure; generic text | none | constitution |
 
-Informative texts: `VALIDATION_ERROR` "The request contains invalid values."; `INVALID_STATUS` "Status must be unread, reading or completed."; `INVALID_RATING` "Rating must be an integer from 1 to 5."; `RATING_NOT_ALLOWED` "Only completed books can be rated."; `BOOK_NOT_FOUND` "Book not found."; `DUPLICATE_BOOK` "A book with the same title and author already exists."; `LIBRARY_FULL` "The library is full."; `INTERNAL_ERROR` "Unexpected error." Detail messages (the only ones that exist): "is required", "must not be empty", "must be between 1 and 500 characters" (author: 200), "contains characters that are not allowed", "must be one of: unread, reading, completed", "must be an integer from 1 to 5". No message includes user input, member names other than the API `field`, class names or paths.
+Informative texts: `VALIDATION_ERROR` "The request contains invalid values."; `INVALID_STATUS` "Status must be unread, reading or completed."; `INVALID_RATING` "Rating must be an integer from 1 to 5."; `RATING_NOT_ALLOWED` "Only completed books can be rated."; `BOOK_NOT_FOUND` "Book not found."; `DUPLICATE_BOOK` "A book with the same title and author already exists."; `LIBRARY_FULL` "The library is full."; `INTERNAL_ERROR` "Unexpected error." Detail messages (the fixed list from which the API chooses; informative like the other texts): "is required", "must not be empty", "must be between 1 and 500 characters" (author: 200), "contains characters that are not allowed", "must be one of: unread, reading, completed", "must be an integer from 1 to 5". No message includes user input, member names other than the API `field`, class names or paths.
 
 ## Appendix B: Limits
 | Item | Limit | Derivation / behavior |
 |---|---|---|
 | Title | 1 to 500 code points | BR-006 |
 | Author | 1 to 200 code points | BR-006 |
-| Request body | 16 KiB (16,384 bytes) | constitution; the largest valid body (title of 500 and author of 200 characters outside the basic plane written as escape pairs: 700 x 12 bytes = 8,400 bytes plus structure, under 9 KiB) fits; a valid body padded with white space to exactly 16,384 bytes is accepted |
-| Number literal in a request | at most 100 characters | DEC-027 |
+| Request body | 16 KiB (16,384 bytes), counted on the bytes as sent | constitution. A typical valid body is under 9 KiB (title of 500 and author of 200 characters outside the basic plane written as escape pairs: 700 x 12 bytes = 8,400 bytes plus structure). Valid text written in a more expanded form can be larger: 500 Hangul syllables written as three escaped decomposed letters each take 9,000 bytes for the title alone and about 12.7 KB with a full author, and one counted code point such as U+1F82 written as four escaped code points takes 24 bytes, so 700 of them (16,800 bytes) are answered `413` although the counted length is valid; this is a stated limit. Any valid body padded with white space to exactly 16,384 bytes is accepted |
+| Number literal in a request | at most 100 characters as written | DEC-027 |
+| Combining marks | at most 8 in a row; one variation selector in a row | BR-006 item 6c |
 | Books in the library | 5,000 | BR-009 (DEC-013) |
 | Entries in a list response | 5,000 | same as the library |
 | One book in a response | at most about 3,100 bytes (2,800 bytes of text at 4 bytes per code point, about 300 of structure) | derived |
-| Largest list response | below 16,000,000 bytes (5,000 x 3,100 = 15.5 MB, text written as UTF-8 and not as escape sequences); typical under 2 MB (about 400 bytes per book) | derived for the Security review (SC-17); the test asserts the limit |
+| Largest list response | below 16,000,000 bytes (5,000 x 3,100 = 15.5 MB, text written as UTF-8 and not as escape sequences; control characters are banned so no 6-byte escapes occur) ; typical under 2 MB (about 400 bytes per book) | derived for the Security review (SC-17); the test asserts the limit |
 | Query parameters | only `status`, once, on the list endpoint | US-002.7 |
 | Ids | 36-character lowercase UUID | BR-011 |
 | Error details | at most 3 entries; `existing_book` is one book | Appendix A |
+| Add at 5,000 books of maximum size | completes within 2 seconds, never `500` | M-2, C-11 |
 
 ## Appendix C: Traceability matrix
 
-| FR / BRD rule | Requirements | User stories | Business rules | Endpoints | UI stories |
-|---|---|---|---|---|---|
-| FR1 Add Book | REQ-001, 010, 011, 025, 026, 027, 051 | US-001, US-004 | BR-001, BR-003, BR-006, BR-008, BR-009 | `POST /api/v1/books` | US-011 |
-| FR1 / scope: view library | REQ-005, 006, 007, 012, 028 | US-002, US-007 | BR-010, BR-011 | `GET /api/v1/books`, `GET /api/v1/books/{id}` | US-010 |
-| FR2 Track Status | REQ-002, 022, 023, 024, 048 | US-006 | BR-001, BR-004, BR-008 | `PUT /api/v1/books/{id}/status` | US-012 |
-| FR3 Rate Books | REQ-003, 008, 009, 020, 021 | US-003 | BR-002, BR-007, BR-004 | `PUT`, `DELETE /api/v1/books/{id}/rating` | US-012 |
-| FR4 Author Bio | REQ-004 | US-005 (reserved) | BR-005 (reserved) | none (reserved, DEC-003) | none (reserved) |
-| CRUD: delete | REQ-013 | US-008 | BR-011 | `DELETE /api/v1/books/{id}` | US-012 |
-| CRUD: edit (decided out) | REQ-014 | none (Won't, DEC-010) | none | none | US-012.9 |
-| BRD Rating Integrity | REQ-020, 023 | US-003, US-006 | BR-007, BR-004 | PUT rating, PUT status | US-012 |
-| BRD Validation Range | REQ-021 | US-003 | BR-002 | PUT rating | US-012 |
-| BRD Data Integrity (duplicates) | REQ-010, 011, 031 | US-004 | BR-003, BR-013 | POST | US-011 |
-| BRD Explicit error handling | REQ-032, 040, 049, 051, 053 | all | BR-012, Appendix A, Appendix D | all | US-013 |
-| Success metric: zero data loss | REQ-033, 052 | US-009 | BR-013 | all writes | n/a |
-| Success metric: add in under 10 s | REQ-034 | US-011 | n/a | POST | US-011 |
-| Success metric: instant library | REQ-035 | US-002 | BR-009 | GET list | US-010 |
-| Constitution: frontend standards | REQ-018, 019, 039 | US-013, US-014 | n/a | n/a | US-013, US-014 |
-| Boundaries: capacity / response bound | REQ-027, 036, 050 | US-001, US-002 | BR-009 | POST, GET list | US-011 |
-| Security controls SC-16, SC-17, SC-29, SC-30 | REQ-026, 036, 040, 051, 053 | US-001, US-002, US-013 | BR-006, BR-009, BR-012 | all | US-014 |
+Functional tests for acceptance criteria that Appendix D does not list (for example the normalization examples of US-004.5, the same-state updates of US-006.5, the ties of US-002.2, US-008.3) are specified in Phase 3 from the acceptance criteria (M-5); UI stories are verified by page and E2E tests specified in Phase 3.
 
-Gaps: the plan section and task columns are filled in Phase 3. Every endpoint has a story; every story is reachable from an FR, a BRD rule or a logged decision; FR4 has no downstream items by design (DEC-003, reserved for Phase 5).
+| FR / BRD rule | Requirements | User stories | Business rules | Endpoints | UI stories | Appendix D cases |
+|---|---|---|---|---|---|---|
+| FR1 Add Book | REQ-001, 010, 011, 025, 026, 027, 051 | US-001, US-004 | BR-001, BR-003, BR-006, BR-008, BR-009 | `POST /api/v1/books` | US-011 | T-01 to T-13, T-16, T-21 to T-30, T-34, T-35, T-39, T-40, C-01 to C-04, C-06 to C-11, S-01 |
+| FR1 / scope: view library | REQ-005, 006, 007, 012, 028 | US-002, US-007 | BR-010, BR-011 | `GET /api/v1/books`, `GET /api/v1/books/{id}` | US-010 | T-14, T-15, T-20, C-03, C-05, E-06, E-24 to E-27, S-06 |
+| FR2 Track Status | REQ-002, 022, 023, 024, 048 | US-006 | BR-001, BR-004, BR-008 | `PUT /api/v1/books/{id}/status` | US-012 | T-19, T-38, S-02 to S-04, S-08, S-09, S-11 |
+| FR3 Rate Books | REQ-003, 008, 009, 020, 021 | US-003 | BR-002, BR-007, BR-004 | `PUT`, `DELETE /api/v1/books/{id}/rating` | US-012 | T-17, T-18, T-31, T-32, T-36, T-37, S-01, S-02, S-05, S-08, S-09 |
+| FR4 Author Biography | REQ-004 | US-005 (reserved) | BR-005 (reserved) | none (reserved, DEC-003) | none (reserved) | none |
+| CRUD: delete | REQ-013 | US-008 | BR-011 | `DELETE /api/v1/books/{id}` | US-012 | S-06, S-09, C-03, C-08 |
+| CRUD: edit (decided out) | REQ-014 | none (Won't, DEC-010) | none | none | US-012.9 | T-16 (unknown members) |
+| BRD Rating Integrity | REQ-020, 023 | US-003, US-006 | BR-007, BR-004 | PUT rating, PUT status | US-012 | S-01, S-02, S-08, S-09, T-36 |
+| BRD Validation Range | REQ-021 | US-003 | BR-002 | PUT rating | US-012 | T-17, T-18, T-31, T-32, T-37 |
+| BRD Data Integrity (duplicates) | REQ-010, 011, 031 | US-004 | BR-003, BR-013 | POST | US-011 | C-07, C-10, T-40 |
+| BRD Explicit error handling | REQ-032, 040, 049, 051, 053 | all | BR-012, Appendix A, Appendix D | all | US-013 | E-01 to E-39, T-34 to T-39, S-07 |
+| Success metric: zero data loss | REQ-033, 052, 054, 055 | US-009 | BR-013 | all writes | n/a | C-12, C-13, S-10 |
+| Success metric: add in under 10 s | REQ-034 | US-011 | n/a | POST | US-011 | Phase 3 (E2E) |
+| Success metric: instant library | REQ-035 | US-002 | BR-009 | GET list | US-010 | C-05, C-11 |
+| Constitution: frontend standards | REQ-018, 019, 039, 056, 057 | US-013, US-014 | n/a | n/a | US-013, US-014 | Phase 3 (page and E2E tests) |
+| Boundaries: capacity / response bound | REQ-027, 036, 050 | US-001, US-002 | BR-009 | POST, GET list | US-011 | C-01 to C-11 |
+| Security controls SC-16, SC-17, SC-29, SC-30 | REQ-026, 036, 040, 051, 053 | US-001, US-002, US-013 | BR-006, BR-009, BR-012 | all | US-014 | T-01 to T-40, C-01 to C-13, E-01 to E-39 |
+
+Gaps: the plan section and task columns are filled in Phase 3. Every endpoint has a story; every story is reachable from an FR, a BRD rule or a logged decision; FR4 has no downstream items by design (DEC-003).
 
 ## Appendix D: Security test cases with expected results
 
-Expected values for the security tests (`security.md` SC-16, SC-17, SC-29, SC-30). "Body" cases use `Content-Type: application/json`, the allowed `Host` and no `Origin` unless stated. A check on the error envelope means: members exactly `error`, `code`, `timestamp` (plus `details` only where Appendix A allows), `Content-Type` JSON with UTF-8, no `Server` product or version, no `Access-Control-*`, no `Set-Cookie`, no `Location`, and no stack trace, SQL, class name, path or echo of the input in any text.
+Expected values for the security tests (`security.md` SC-16, SC-17, SC-29, SC-30, SC-31, SC-40). Requests use `Content-Type: application/json`, the allowed `Host` and no `Origin` unless stated. "Real port" means the case is also run against the application on its real port (SC-30). **Raw-socket cases** (a normal HTTP client cannot produce them): T-05, T-28, T-29 (bytes), T-31 (bodies), E-09 (chunked), E-10 (HTTP/1.0, duplicate Host), E-20, E-22, E-28, E-31 to E-33, E-36, E-37; every other row may use a normal HTTP client.
 
-### D.1 Text and identifiers (SC-16)
+**Envelope check:** every response of D.1 to D.4 that the application produces has the members exactly `error`, `code`, `timestamp` (plus `details` only where Appendix A allows), `Content-Type` JSON with UTF-8, the security headers of the constitution (`Content-Security-Policy` as specified there, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Cross-Origin-Opener-Policy`, `Cross-Origin-Resource-Policy`, `Permissions-Policy`, `Cache-Control: no-store`), no `Server` product or version, no `Access-Control-*`, no `Set-Cookie`, no `Location`, and no stack trace, SQL, class name, path or echo of the input in any text.
+
+**Pre-application answers** are the cases the server rejects while parsing the request line or headers, before the application sees the request (footnote: `security.md` R-13). For them the status is 400, 414, 431, 501 or 505 (the only statuses outside Appendix A), the body need not be an envelope or carry the security headers, but it contains no product, no version and no echo of the request, and the application keeps serving. They are limited to: HTTP/1.0 or 1.1 without `Host`, duplicate `Host` headers, an invalid request line, an over-long line or header, both `Content-Length` and `Transfer-Encoding`, a bad `Content-Length`, an invalid method token and a malformed percent-encoding in the path or query where the server rejects it first.
+
+### D.1 Text, identifiers and values (SC-16, SC-31)
 | # | Request | Expected |
 |---|---|---|
 | T-01 | POST title `a\u0000b`, valid author | 400 `VALIDATION_ERROR`, `details[0].field` `title` |
 | T-02 | POST title containing a line feed, then one containing a tab, in the middle | 400 `VALIDATION_ERROR`, field `title` (each) |
-| T-03 | POST title `a​b`; `a‮b`; `a‌b`; `ab`; `a͸b`; U+E0041 | 400 `VALIDATION_ERROR`, field `title` (each) |
+| T-03 | POST title with U+200B inside; with U+202E; with U+E000; with U+0378; with U+E0041 | 400 `VALIDATION_ERROR`, field `title` (each) |
 | T-04 | POST title `"\uD800"` (unpaired surrogate) | 400 `MALFORMED_REQUEST`, no `details` |
 | T-05 | POST body with the byte 0xFF inside a string | 400 `MALFORMED_REQUEST` |
 | T-06 | POST title of 500 code points U+1F600; then 501 | 201; then 400 `VALIDATION_ERROR` field `title` |
@@ -600,7 +639,8 @@ Expected values for the security tests (`security.md` SC-16, SC-17, SC-29, SC-30
 | T-11 | POST with a title of 16,000 characters (within 16 KiB) | 400 `VALIDATION_ERROR` (not a parse error) |
 | T-12 | POST title `'; DROP TABLE books;--`, then `<script>alert(1)</script>`, then `${7*7}`, then `#{7*7}`, `%s%n` | 201 each; later GET returns each text unchanged; the number of books grows by exactly one each time |
 | T-13 | POST title 501 characters containing `${7*7}` | 400 `VALIDATION_ERROR`; no message contains `${7*7}` or `49` |
-| T-14 | GET, PUT, DELETE on `/api/v1/books/3F2B8C1E-5A4D-4E6F-9B7A-1C2D3E4F5A6B` (upper case); `/api/v1/books/not-a-uuid`; `/api/v1/books/1%27%20OR%20%271%27%3D%271` | 400 `MALFORMED_REQUEST` (each, with a valid JSON body where required) |
+| T-14 | Where `{bad}` is each of: the id in upper case, `not-a-uuid`, `1%27%20OR%20%271%27%3D%271`: GET and DELETE on `/api/v1/books/{bad}`; PUT on `/api/v1/books/{bad}/status` and on `/api/v1/books/{bad}/rating`; DELETE on `/api/v1/books/{bad}/rating` (valid JSON body where required) | 400 `MALFORMED_REQUEST` (each) |
+| T-14b | GET `/api/v1/books/not-a-uuid/status` | 405 `METHOD_NOT_ALLOWED` (route and method before the id) |
 | T-15 | GET `/api/v1/books/00000000-0000-4000-8000-000000000000` | 404 `BOOK_NOT_FOUND` |
 | T-16 | POST with `id`, `date_added`, `date_completed` or `rating` member; with `Title`; with duplicate `title` member; with `{"title":"a","author":"b"}x` | 400 `MALFORMED_REQUEST` (each) |
 | T-17 | PUT rating with `4.9`, `5.0`, `1e0`, `0`, `6`, `-0`, `null`, `{}`, `99999999999999999999999` | 400 `INVALID_RATING`, field `rating` (each) |
@@ -608,20 +648,44 @@ Expected values for the security tests (`security.md` SC-16, SC-17, SC-29, SC-30
 | T-19 | PUT status with `"Completed"`, `""`, `null`, `{}`; with `5` or `true` | 400 `INVALID_STATUS` (the first four); 400 `MALFORMED_REQUEST` (the last two) |
 | T-20 | GET list with `?status=READING`, `?status=`, `?status`; with `?status=a&status=b`, `?foo=1`, `?Status=reading` | 400 `INVALID_STATUS` (first three); 400 `MALFORMED_REQUEST` (last three) |
 | T-21 | POST allow_duplicate `"true"`, `1`, `null` | 400 `MALFORMED_REQUEST` (each) |
+| T-22 | POST title of 300 times U+1D15E (NFC gives 600 code points) | 400 `VALIDATION_ERROR`, field `title` (count after NFC) |
+| T-23 | POST title U+3164 only; U+2800 only; U+0301 only; U+0301 followed by "abc"; U+FE0F only; and, as the accepted row, "ab", U+3164, "cd" | 400 `VALIDATION_ERROR` field `title` (the first five); 201 (the last: a blank filler between visible characters is allowed) |
+| T-24 | POST title "x" + 9 times U+0301; "x" + 8 times U+0301; "a" + U+E0100 + U+E0101; "a" + U+E0100 (the base is "x" because NFC composes "e" with the first U+0301, which would leave 8 marks) | 400 field `title`; 201; 400 field `title`; 201 |
+| T-25 | POST title with U+200C between two Persian letters ("می‌خواهم"); U+200C first; U+200C last; U+200C followed by U+200D; a joiner next to a space | 201 (first); 400 `VALIDATION_ERROR` field `title` (the other four) |
+| T-26 | POST title with U+FFFD between letters; title U+FFFE; U+FDD0; U+0378 | 201; 400 field `title` (each of the other three) |
+| T-27 | POST with an escaped valid pair `😀` 500 times as the title; the reversed pair `\uDE00\uD83D`; `\uD83D` followed by a letter | 201 (title of 500 code points); 400 `MALFORMED_REQUEST` (each of the others) |
+| T-28 | POST body bytes `C0 80`, `ED A0 80`, `F4 90 80 80`, `E2 82` (truncated) inside a string | 400 `MALFORMED_REQUEST` (each); the stored library unchanged |
+| T-29 | POST body starting with the byte order mark `EF BB BF`; with `/*x*/`; with a trailing comma; with single-quoted strings; with unquoted member names; with a raw line feed (0x0A) inside a string | 400 `MALFORMED_REQUEST` (each) |
+| T-30 | `{"title":"a","title":"b","author":"c"}`; `{"title":"a","title":"b","author":"c"}`; `{"title":"a","author":"b","allow_duplicate":true,"allow_duplicate":false}` | 400 `MALFORMED_REQUEST` (each; duplicates are detected after unescaping) |
+| T-31 | PUT rating body `{"rating":` followed by 8,000 nested `[` and the matching `]` (inside 16 KiB); a body of 2,000 nested `{"x":` objects as an unknown member value (inside 16 KiB); `{"rating":1e999999999}`; `{"rating":1e-999999999}`; `{"rating":0.0000000000000000000000000000000000000001}` | 400 `MALFORMED_REQUEST` (the two nested bodies); 400 `INVALID_RATING` (the three numbers); each answered within 300 ms, never 500 |
+| T-32 | PUT rating `NaN`, `Infinity`, `5.`, `.5`, `0x5`, `5e`; `1E1`; PUT rating `{"status":"completed","rating":5}`; `{"rating":5,"status":"completed"}`; `{"rating":4,"rating":5}` | 400 `MALFORMED_REQUEST` (the six invalid numbers and the three bodies); 400 `INVALID_RATING` (`1E1`: a valid JSON number that is not an integer literal) |
+| T-33 | Hostile text for the log: a path id with `%0d%0a`, `%e2%80%a8`, `%1b[2J`; `?status=` with the same; a title with the same characters; each in a failing and in a succeeding request | the response is as in T-14, T-20, T-12; the captured log has one line per event, no raw CR, LF, U+2028, U+2029, U+0085 or ESC, and no title text |
+| T-34 | POST `{"title":"","author":"a","status":"Done"}` | 400 `VALIDATION_ERROR` with `details` entries `title` then `status` |
+| T-35 | POST `{"title":"a","author":"b","status":"Done"}` | 400 `INVALID_STATUS`, one `details` entry `status` |
+| T-36 | PUT rating `7` on an unread book; then PUT rating `4` on the same book | 400 `INVALID_RATING` (not `RATING_NOT_ALLOWED`); then 400 `RATING_NOT_ALLOWED` |
+| T-37 | PUT rating with an integer literal of exactly 100 digits; with 101 digits | 400 `INVALID_RATING`; 400 `MALFORMED_REQUEST` |
+| T-38 | PUT status on an unknown well-formed id with body `{"status":"Done"}` | 400 `INVALID_STATUS` (field values before existence) |
+| T-39 | POST with a zero-byte body; PUT status with a zero-byte body; POST bodies `null`, `[]`, `"x"`, `5`; GET `/api/v1/books` with a body of one space; DELETE `/api/v1/books/{id}` with a body of one space | 400 `MALFORMED_REQUEST` (each) |
+| T-40 | POST "Straße" by "a", then "STRASSE" by "a"; POST "Clean Code" by "b", then "CLEAN CODE" by "b" | 201, 201; 201, then 409 `DUPLICATE_BOOK` |
 
-### D.2 Capacity and response size (SC-17)
+### D.2 Capacity, response size and concurrency (SC-17)
 | # | Scenario | Expected |
 |---|---|---|
 | C-01 | 5,000 books exist; POST a valid new book | 409 `LIBRARY_FULL`, no `details`, count stays 5,000 |
 | C-02 | 5,000 books exist; POST a duplicate with `allow_duplicate: true`; POST a duplicate without it | 409 `LIBRARY_FULL` (both) |
 | C-03 | 5,000 books exist; GET list; PUT status to `completed` on an unread book; PUT rating 4 on that book; DELETE one book | 200 with `total` 5000; 200; 200; 200 |
-| C-04 | after C-03 delete, POST a valid book | 201 |
-| C-05 | 5,000 books with title 500 and author 200 code points outside the basic plane; GET list | 200, `total` 5000, body below 16,000,000 bytes |
+| C-04 | after the delete of C-03, POST a valid book; then POST another | 201; then 409 `LIBRARY_FULL` |
+| C-05 | 5,000 books with title 500 and author 200 code points outside the basic plane; GET list (on the real port; the time is recorded, no gate) | 200, `total` 5000, body below 16,000,000 bytes |
 | C-06 | two simultaneous POSTs of different valid books with 4,999 books | one 201, one 409 `LIBRARY_FULL`; 5,000 books after |
 | C-07 | two simultaneous identical POSTs without `allow_duplicate` | one 201, one 409 `DUPLICATE_BOOK`; one book stored |
 | C-08 | a loop of 20 add and delete pairs at 4,999 books | every response 201 or 200; the count never exceeds 5,000 |
+| C-09 | 4,990 books; 20 concurrent POSTs of different valid books | exactly 10 times 201 and 10 times 409 `LIBRARY_FULL`; 5,000 books after |
+| C-10 | 20 concurrent identical POSTs without `allow_duplicate` (empty library); then 20 concurrent identical POSTs with `allow_duplicate: true` | 1 time 201 and 19 times 409 `DUPLICATE_BOOK`; then 20 times 201 (21 books) |
+| C-11 | At 5,000 books of maximum size: one POST (duplicate check); then 50 concurrent POSTs and 50 concurrent list requests | the single POST answers within 2 s; in the flood every response has a documented status, none is a 500 caused by a timeout; a failed request changed nothing; the application serves normally afterwards |
+| C-12 | A second instance started on the database file of a running instance | the second start fails with a non-zero exit status (US-009.7); the first keeps serving and its data are unchanged |
+| C-13 | Terminate the process forcibly right after each of POST, PUT status, PUT rating, DELETE returns 2xx (50 iterations of a loop with a restart) | after restart the acknowledged change is present (US-009.2, M-3) |
 
-### D.3 Error paths, routing and headers (SC-29, also run on a real port for SC-30)
+### D.3 Error paths, routing and headers (SC-29, SC-40, also run on a real port for SC-30)
 | # | Request | Expected |
 |---|---|---|
 | E-01 | GET `/api/v1/unknown`; GET `/api/v1/books/`; GET `/api/v1/books/{id}/`; GET `/api/v1/books/{id};x=1` | 404 `NOT_FOUND` (each) |
@@ -633,20 +697,36 @@ Expected values for the security tests (`security.md` SC-16, SC-17, SC-29, SC-30
 | E-07 | POST with `Content-Type: text/plain`; none; `application/jsonx`; `application/json; charset=ISO-8859-1`; DELETE `/api/v1/books/{id}` with no content type | 415 `UNSUPPORTED_MEDIA_TYPE` (each) |
 | E-08 | POST with `Content-Type: application/json;charset=utf-8` and a valid body | 201 |
 | E-09 | POST with a body of 16,384 bytes (valid JSON padded with spaces); with 16,385 bytes; a chunked body crossing 16,384 bytes; a 16,385-byte body to an unknown path | 201; 413 `PAYLOAD_TOO_LARGE`; 413; 413 |
-| E-10 | Host `evil.example`; no Host (HTTP/1.0); `localhost` without port; `localhost:<other port>`; `[::1]:<port>`; `127.0.0.1:<port>, evil.example`; two Host headers | 400 `INVALID_HOST` (each; the container may answer the last two with its own 400 under R-13: status 400 and no disclosure) |
+| E-10 | Host `evil.example`; `localhost` without port; `localhost:<other port>`; `[::1]:<port>`; one header `127.0.0.1:<port>, evil.example`. Then, as pre-application answers: no Host (HTTP/1.0); two Host headers | 400 `INVALID_HOST` (exactly, from the application, for the first five); status 400 or 505, no disclosure, application keeps serving (the last two) |
 | E-11 | Host `LOCALHOST:<port>`; `127.0.0.1:<port>`; `localhost:<port>` | 200 on GET `/api/v1/books` |
 | E-12 | `Origin: http://evil.example`; `Origin: null`; `Origin: http://localhost:<other port>` on POST and on GET | 403 `FORBIDDEN` (each) |
 | E-13 | `Origin: http://localhost:<port>` or `http://127.0.0.1:<port>` or none; `Sec-Fetch-Site: same-origin` or `none` | accepted (normal result) |
 | E-14 | `Sec-Fetch-Site: cross-site`; `same-site` | 403 `FORBIDDEN` |
-| E-15 | GET `/data/globerbooks.db`; `/js/`; `/css/`; `/error`; `/actuator/health`; `/h2-console`; `/WEB-INF/web.xml`; `/.git/config`; `/.env`; a path to a `*.test.js` file; `/%2e%2e/%2e%2e/etc/passwd`; `/..%2f..%2fetc/passwd`; `/index.html;jsessionid=1` | 404 `NOT_FOUND` (each) with the standard envelope |
+| E-15 | GET `/data/globerbooks.db`; `/js/`; `/css/`; `/error`; `/actuator/health`; `/h2-console`; `/WEB-INF/web.xml`; `/.git/config`; `/.env`; a path to a `*.test.js` file; `/%2e%2e/%2e%2e/etc/passwd`; `/..%2f..%2fetc/passwd`; `/index.html;jsessionid=1`; `/index.html/` | 404 `NOT_FOUND` (each) with the standard envelope |
 | E-16 | GET `/` and GET `/index.html` | 200, HTML page; the headers of the constitution are present |
-| E-17 | POST `/` | 405 `METHOD_NOT_ALLOWED` |
+| E-17 | POST `/` with `Content-Type: application/json` | 405 `METHOD_NOT_ALLOWED` |
 | E-18 | GET `/api/v1/books` with a body; DELETE `/api/v1/books/{id}` with the body `{}` | 400 `MALFORMED_REQUEST` (each) |
 | E-19 | GET `/api/v1/books/{id}?x=1` | 400 `MALFORMED_REQUEST` |
-| E-20 | A request line or header block above 8 KiB; both `Content-Length` and `Transfer-Encoding` | status 400 or 431 (container level, R-13), no server product or version in the response; the application keeps serving |
-| E-21 | A forced unexpected failure (the plan names the test hook) | 500 `INTERNAL_ERROR`, text "Unexpected error.", no detail; the application keeps serving |
+| E-20 | A request line above 8 KiB; one header above 8 KiB; both `Content-Length` and `Transfer-Encoding` | pre-application answer: status 400, 414 or 431; no server product or version in the response; the application keeps serving |
+| E-21 | A request that makes the application fail unexpectedly (how it is provoked is defined in the plan; the way of provoking it does not exist in the shipped application, and a request to it there gets 404 `NOT_FOUND`) | 500 `INTERNAL_ERROR`, text "Unexpected error.", no detail; the application keeps serving |
 | E-22 | A connection that sends no complete request within 5 seconds | the server closes it (constitution connection timeout); other requests are served meanwhile |
-| E-23 | Every response above | passes the envelope check stated at the top of this appendix |
+| E-23 | Every response above that the application produces | passes the envelope check stated at the top of this appendix, including the security headers |
+| E-24 | GET `/api/v1/books/%33f2b8c1e-5a4d-4e6f-9b7a-1c2d3e4f5a6b` (any `%` in the id segment); GET `/api/v1/%62ooks`; GET `/api/v1/books/%2e%2e` | 400 `MALFORMED_REQUEST`; 404 `NOT_FOUND`; 404 `NOT_FOUND` (an encoded dot segment is not routable) |
+| E-25 | GET `/api/v1/books?status=%zz`; GET `/api/v1/books?status=%FF`; GET `/api/v1/books/%zz`; GET `/api/v1/books/%`; GET `/%00` | 400 `MALFORMED_REQUEST` (the first four); 404 `NOT_FOUND` (the last). A pre-application answer (status 400, no product, no version, no echo) is accepted for any of these rows |
+| E-26 | GET `/api/v1/books?`; `?&`; `?status=reading&`; `?status=reading;x=1`; `?status[]=reading`; `?%73tatus=reading`; `?status=%72eading`; `?status=reading+` | 200 all books (empty query); 400 `MALFORMED_REQUEST`; 400 `MALFORMED_REQUEST`; 400 `INVALID_STATUS` (the value is `reading;x=1`); 400 `MALFORMED_REQUEST`; 200 filtered; 200 filtered; 400 `INVALID_STATUS` |
+| E-27 | POST `/api/v1/books/not-a-uuid`; GET `/api/v1/books/not-a-uuid/status`; GET `/api/v1/books/not-a-uuid/other` | 405; 405; 404 `NOT_FOUND` (route and method first, id format second) |
+| E-28 | TRACE `/api/v1/books` with the allowed Host and JSON content type; TRACE without content type; a request with method `FOO`; method `get` (lower case) | 405 `METHOD_NOT_ALLOWED` (or a pre-application answer with status 400, 405 or 501), never a body that echoes the request, never a product or version; 415 `UNSUPPORTED_MEDIA_TYPE` for the second (content type first) |
+| E-29 | The 405 responses of E-02, E-03, E-05, E-17 | carry `Allow` listing exactly the methods defined for that path (for `/api/v1/books`: `GET, POST`; for `/`: `GET`) and never HEAD or OPTIONS |
+| E-30 | GET `/` with `Range: bytes=0-5`; with `Range: bytes=99999999-`; with `If-None-Match: *`; with `If-Modified-Since: <a future date>`; the response headers of GET `/` | 200 with the full body each time (no 206, 304 or 416); no `ETag`, `Last-Modified` or `Accept-Ranges` header |
+| E-31 | GET `/` with `Upgrade: websocket` and `Connection: Upgrade`; with `Upgrade: h2c`; POST with a 16,385-byte `Content-Length` and `Expect: 100-continue` | 200 page (no 101); 200; 413 `PAYLOAD_TOO_LARGE` and no `100 Continue` was sent |
+| E-32 | A chunked body of 16,385 bytes to an unknown path; to `GET /api/v1/books`; to `DELETE /api/v1/books/{id}` | 413 `PAYLOAD_TOO_LARGE` (each) |
+| E-33 | A request rejected early (415) that declares `Content-Length: 10485760` of which 1 MiB is sent | the response arrives within 2 seconds; the server may close the connection; other requests are served meanwhile |
+| E-34 | `Content-Type`: `Application/JSON`; `application/json ; charset=utf-8`; `application/json; charset="utf-8"`; `application/json; charset=utf-8; foo=bar`; `application/json; boundary=x`; `application/json, text/plain`; two `Content-Type` headers (on a POST with a valid body) | 201; 201; 415; 415; 415; 415; 415 |
+| E-35 | `Accept` on `GET /api/v1/books`: `application/json;q=0`; `text/html,application/json;q=0.5`; `text/xml, */*;q=0.1`; `*/*;q=0`; `;;;`; `text/html, application/json;q=0`; empty value | 406; 200; 200; 406; 406; 406; 200 |
+| E-36 | Request line above 8 KiB; one header above 8 KiB; 2,000 query pairs `a=b&` (inside 8 KiB) on the list | pre-application answer (status 400, 414 or 431) for the first two; 400 `MALFORMED_REQUEST` for the third |
+| E-37 | Invalid request line (`GET  /  HTTP/1.1` with two spaces, `GET / HTTP/9.9`, a target containing a space); HTTP/1.1 without `Host`; two `Content-Length` headers; `Content-Length: -1`; `Content-Length` plus `Transfer-Encoding` | pre-application answer: status 400 (505 for the version), no product, no version; the application keeps serving |
+| E-38 | GET `/?x=1`; GET `/index.html?`; GET `/` with a body of one space; GET the page's stylesheet path with `?x=1` | 400 `MALFORMED_REQUEST`; 200; 400 `MALFORMED_REQUEST`; 400 `MALFORMED_REQUEST` |
+| E-39 | GET `/favicon.ico` | 404 `NOT_FOUND` in the envelope |
 
 ### D.4 Sequences (invariants)
 | # | Sequence | Expected |
@@ -658,7 +738,12 @@ Expected values for the security tests (`security.md` SC-16, SC-17, SC-29, SC-30
 | S-05 | Add completed; PUT rating 5; DELETE rating; DELETE rating | 200, rating null; 200, rating null |
 | S-06 | Add; DELETE; DELETE again | 200 with the book; 404 `BOOK_NOT_FOUND` |
 | S-07 | Any failed request in D.1 to D.3 | the library content is identical before and after |
+| S-08 | A completed book with rating 3; run PUT status `reading` and PUT rating 4 concurrently, 200 times (a fresh book each time) | the final state is always status `reading`, rating null, date_completed null; the status call is 200; the rating call is 200 or 400 `RATING_NOT_ALLOWED`; never a non-null rating with status `reading` (INV-1) |
+| S-09 | PUT status `completed`, DELETE rating and DELETE of the book concurrently on one book | every response is 200 or 404 `BOOK_NOT_FOUND`; INV-1 and INV-4 hold in every final state |
+| S-10 | A failure is forced after the first of the two changes of BR-004 (how is defined in the plan) | 500 `INTERNAL_ERROR`; the book is exactly as before (status, rating, date_completed) |
+| S-11 | PUT status `unread` on an unread book; PUT status `reading` on a reading book | 200 each; no field changed |
 
 ## Changelog
-- v0.2 (2026-10-30): Applied the Sponsor's decisions of 2026-10-30 ("accept all recommendations"): DEC-001 to DEC-024 CONFIRMED; Q1 FR4 reserved (DEC-003; US-005 and BR-005 stay reserved, no Phase 5 behavior in the spec); Q2 no edit of title or author (DEC-010, US-012.9); Q3 5,000 books and `LIBRARY_FULL` (DEC-013); Q4 page confirmation when a rating would be lost (DEC-007, US-012.3); Q5 MoSCoW is the cut line (DEC-022). All PENDING and PROPOSED markers removed. Hostile review fixes: exact rules for text edge cases (unpaired surrogate and invalid UTF-8 are `MALFORMED_REQUEST`, trimming of Unicode white space, variation selectors, unassigned code points tied to Unicode 15.0), BR-012 sub-orders (transport, route, query), Content-Type, charset and Accept rules, HEAD and OPTIONS, body on GET and DELETE, query on other endpoints, number literal length, no CORS, no cookies, no redirects, static path handling (5.8), capacity under concurrency, database failure at start (US-009.5), response-size derivation, exact `details` shape per code (Appendix A), UI wording (US-011, US-012, US-010.4), US-014.1 without a tool name. New: Appendix D (security test cases), DEC-025 to DEC-028 (PROPOSED), US-001.10, US-004.9 rewritten, US-009.5, US-012.9.
+- v0.3 (2026-10-30): Round 2 of Phase 2. Resolved the Liaison review (handoff 010: F-01 to F-21) and the Security review (handoff 011: SEC-F-043 to SEC-F-056); the finding-by-finding table is in handoff 012. Applied the Sponsor decisions of 2026-10-30: text policy (DEC-029: joiners allowed under a positional rule, tag characters rejected, marks capped), R-16 and R-17 accepted (DEC-031), single instance (DEC-032), cut order (DEC-030), DEC-025 to DEC-028 confirmed as amended. Encoded-path rule and id judged as received (BR-011, 5.0); wire grammar for content type, accept, query, bodies, methods, `Allow`, static headers (5.0); BR-012 steps clarified; UI state model and exact UI wording (US-010 to US-014); US-009.3 and US-009.5 rewritten, US-009.6 and US-009.7 added; US-014.8 added; INV-5 reworded; BR-003 key definition completed; BR-006 items 6b to 6d; Appendix B body row corrected; Appendix C gains a test column; Appendix D gains T-14b, T-22 to T-40, C-09 to C-13, E-24 to E-39, S-08 to S-11 and tightened E-10, E-20, E-21, E-23; reserved identifiers reduced to the word reserved; REQ-009 and REQ-012 promoted (DEC-030); decisions DEC-029 to DEC-032 added.
+- v0.2 (2026-10-30): Applied the Sponsor's decisions of 2026-10-30 ("accept all recommendations"): DEC-001 to DEC-024 CONFIRMED; Q1 FR4 reserved (DEC-003); Q2 no edit of title or author (DEC-010, US-012.9); Q3 5,000 books and `LIBRARY_FULL` (DEC-013); Q4 page confirmation when a rating would be lost (DEC-007, US-012.3); Q5 MoSCoW is the cut line (DEC-022). Hostile review fixes: exact rules for text edge cases, BR-012 sub-orders, Content-Type, charset and Accept rules, HEAD and OPTIONS, body on GET and DELETE, query on other endpoints, number literal length, no CORS, no cookies, no redirects, static path handling (5.8), capacity under concurrency, database failure at start (US-009.5), response-size derivation, exact `details` shape per code (Appendix A), UI wording, US-014.1 without a tool name. New: Appendix D, DEC-025 to DEC-028 (PROPOSED), US-001.10, US-004.9 rewritten, US-009.5, US-012.9.
 - v0.1 (2026-10-30): First draft, Phase 2 round 1. Created from the brief, the constitution v1.0 and `security.md`. Decisions DEC-001 to DEC-024 logged (3 confirmed, 16 proposed, 5 pending).
