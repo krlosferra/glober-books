@@ -1,9 +1,9 @@
 # Delivery Strategy: working software first, then iterate
 
 - Owner: Orchestrator (proposals that change a binding rule go through the constitution's Amendment Procedure)
-- Version: 0.1 (proposal for the Sponsor)
+- Version: 1.0
 - Last updated: 2026-10-30
-- Status: Draft, pending Sponsor decisions (section 8)
+- Status: Approved by the Sponsor on 2026-10-30 ("accept all recommendations"). S-1 to S-5 adopted; S-6 adopted in principle and needs a constitution amendment proposal after Phase 2 closes.
 
 ## 1. Why this document exists
 GloberBooks is a course exercise: a personal reading list that runs **locally**, as one process with an **embedded SQLite file**, for one user on one machine. The governance built so far (constitution, security controls, a 57-requirement spec with a 104-row test appendix) is more rigorous than the product strictly needs. That rigor is useful for the exercise, but only if it ends in **running software we can iterate on**. A perfect specification of software that does not exist yet has no value. This strategy fixes the order of work and the definition of "good enough" so that development starts soon and improves in short loops.
@@ -65,7 +65,7 @@ For each increment:
 
 Spec defects found while building are cheap to fix when found; that is the reason to start building before the spec is perfect.
 
-## 8. Decisions requested from the Sponsor
+## 8. Sponsor decisions (all recommendations accepted on 2026-10-30)
 | # | Decision | Recommendation |
 |---|---|---|
 | S-1 | Close Phase 2 after review round 2 unless a BLOCKER remains (no round 3 for minor findings; they become change requests during the build) | Yes |
