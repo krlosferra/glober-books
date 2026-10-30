@@ -2,7 +2,7 @@
 
 - Owner: Orchestrator (see `README.md` for edit rights per column)
 - Last updated: 2026-10-30
-- Phase: 1 (Constitution v0.4 applied; Security round 3 re-check pending). `main` ruleset and Dependabot security updates verified (security.md section 10); open: first pull request and `hygiene` run, agent session credentials. No spec, plan or tasks exist yet.
+- Phase: 1 approved (constitution 1.0). Next: Phase 2 (Specify) with the PM agent. Open items carried forward: set the required check source to GitHub Actions and squash-only merges in the ruleset, R-15 signature, `ask` rule check, attribution setting re-test in a new session (security.md section 10). No spec, plan or tasks exist yet.
 
 **Check this file before taking any work.** Definitions of stories, rules and tasks live in `spec.md` and `tasks.md`; this file only tracks state.
 
@@ -33,7 +33,7 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 
 | Phase | State | Liaison verdict | Security verdict | Sponsor approval | Date |
 |---|---|---|---|---|---|
-| 1 Constitution | v0.4 applied; Security re-check and Sponsor platform steps pending | round 3: APPROVED WITH CHANGES (handoff 004), MAJORs applied | round 2: PASS WITH CONDITIONS (handoff 005): C-A to C-C applied, C-D (platform settings) open | not yet | |
+| 1 Constitution | APPROVED: constitution 1.0 | round 3: APPROVED WITH CHANGES (handoff 004), MAJORs applied | round 3: PASS WITH CONDITIONS (handoff 006); guard fixes applied; platform steps verified (security.md section 10) | approved 2026-10-30 | 2026-10-30 |
 | 2 Specify | not started | | | | |
 | 3 Plan and tasks | not started | | | | |
 | 4 Implement | not started | | | | |
