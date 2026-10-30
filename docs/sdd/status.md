@@ -2,7 +2,7 @@
 
 - Owner: Orchestrator (see `README.md` for edit rights per column)
 - Last updated: 2026-10-30
-- Phase: 1 approved (constitution 1.0). Phase 2 approved (spec 0.4.1), merge by pull request in progress. Next: Phase 3 (plan and tasks by increment, test tiers P0 P1 P2, see delivery-strategy.md). Open items carried forward: set the required check source to GitHub Actions and squash-only merges in the ruleset, R-15 signature, `ask` rule check, attribution setting re-test in a new session (security.md section 10). No spec, plan or tasks exist yet.
+- Phase: 1 approved (constitution 1.0). Phase 2 approved and merged (spec 0.4.1, pull request 3, merged by the Sponsor with a merge commit; the ruleset still allows merge and rebase). Phase 3 in progress (plan and tasks by increment, test tiers P0 P1 P2, see delivery-strategy.md). Open items carried forward: set the required check source to GitHub Actions and squash-only merges in the ruleset, R-15 signature, `ask` rule check, attribution setting re-test in a new session (security.md section 10). No spec, plan or tasks exist yet.
 
 **Check this file before taking any work.** Definitions of stories, rules and tasks live in `spec.md` and `tasks.md`; this file only tracks state.
 
@@ -35,7 +35,7 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 |---|---|---|---|---|---|
 | 1 Constitution | APPROVED: constitution 1.0 | round 3: APPROVED WITH CHANGES (handoff 004), MAJORs applied | round 3: PASS WITH CONDITIONS (handoff 006); guard fixes applied; platform steps verified (security.md section 10) | approved 2026-10-30 | 2026-10-30 |
 | 2 Specify | APPROVED: spec 0.4.1 | round 3: APPROVED (handoff 016) | round 3: PASS at spec level (handoff 019) | approved 2026-10-30 (confirmed: 2 s add bound is a security bound and is never cut; 409 for DUPLICATE_BOOK and LIBRARY_FULL; RATING_NOT_ALLOWED stays 400) | 2026-10-30 |
-| 3 Plan and tasks | not started | | | | |
+| 3 Plan and tasks | in progress: plan.md (Java architect, frontend developer), then tasks.md and tiers (PM, Security) | | | | |
 | 4 Implement | not started | | | | |
 | 5 Drift / change | not started | | | | |
 | 6 Contrast | not started | | | | |
