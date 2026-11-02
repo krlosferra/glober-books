@@ -12,7 +12,7 @@ Task 02 is implemented on `chore/task-02-quality-gates` (local commits only, not
 Created: `backend/config/checkstyle/checkstyle.xml`, `backend/config/checkstyle/suppressions.xml`, `backend/config/spotbugs/exclude.xml`.
 Modified: `backend/pom.xml` (4 version properties, 2 plugins), `docs/sdd/progress.md` (Task 02 entry), and one Task 01 file, see deviation D-1: `backend/src/test/java/com/globant/globerbooks/RuntimeClasspathBanTest.java` (3 lines wrapped).
 Nothing else changed. `status.md` untouched. Seed files never committed (`git status` after every seed shows only the files above).
-Commit note: the pom change for SpotBugs went into the Checkstyle commit because both plugins were developed in one `pom.xml` edit; commits are `build(quality): ... [Task-2]` and `docs(progress): ... [Task-2]` (see `git log`).
+Commit note: the pom change for SpotBugs went into the Checkstyle commit (one pom edit); `backend/config/spotbugs/exclude.xml` has its own commit. All subjects end with `[Task-2]`; see `git log`.
 
 ## 2. Evidence per row of section 5 of the brief
 
@@ -204,7 +204,7 @@ exit=1        (nothing found)
 - F-4: not implemented, noted in `progress.md` (a proposal without a new plugin, not built: a Surefire test that runs `dependency:tree` and compares it with `config/dependency-tree.txt`; it runs Maven inside a test, so slower and needs the wrapper available).
 - R-1: no written "FSB 1.14.0 requires SpotBugs x" statement was found in the artifacts; compatibility rests on the successful run. FSB 1.14.0 is from April 2025 while SpotBugs is 4.10.5 (October 2026): a future SpotBugs bump may need an FSB check.
 - R-2: Checkstyle and SpotBugs analyze 4 files and 1 class today; the seeded runs are the proof the gates fire. `ClockConfig` suppression covers all wall-clock forms in that one file (see row 1c).
-- Commit atomicity: the Checkstyle commit also contains the SpotBugs part of `pom.xml` (single file edit); config files for SpotBugs are in the same commit.
+- Commit atomicity: the Checkstyle commit also contains the SpotBugs part of `pom.xml` (single file edit).
 
 ## 6. Status
 IN_REVIEW is to be set by the orchestrator (status.md untouched). STOP: Task 03a not started. Waiting for the Liaison audit, Security verdict, PM acceptance and Sponsor approval.
