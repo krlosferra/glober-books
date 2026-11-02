@@ -1,7 +1,7 @@
 # GloberBooks Task Backlog
 
 - Owner: PM (`sdd-product-manager`)
-- Version: 0.5
+- Version: 0.5.1
 - Last updated: 2026-11-02
 - Status: Draft (Phase 3, round 3 of 3, final edits). Round 1 findings (handoffs 025, 026) were resolved in 0.4 and the round 2 findings (handoffs 031, 032) in 0.5; the answers by finding number are in handoff 027 (sections 2 and "Round 3"). Definitions only: task state lives in `status.md`.
 - Inputs: `delivery-strategy.md` v1.0, `spec.md` v0.4.3 (draft change requests CR-1 to CR-9 on top of the approved 0.4.1), `constitution.md` 1.1, `security.md`, `plan.md` and `plan-appendix.md` 0.2, handoff 022 (lean backend plan, tasks B01 to B27) and handoff 021 (frontend plan, candidates F0.1 to F4.3).
@@ -68,10 +68,11 @@ Gate rows (P0): E-04, E-07 to E-14, E-16 (0b), E-21, E-23, E-09 (declared and ch
 
 ### Task 02: Quality gates
 - Source: B02 | Layer: backend | Tier: P0 | Estimate: 45 | Depends on: 01 | Branch: `chore/task-02-quality-gates`
-- Description: Add Checkstyle 14.3.0 (plugin 3.6.0) with the constitution rules and regex bans, and SpotBugs with Find Security Bugs, verifying the unverified pins or requesting Sponsor re-approval, with a justified exclusion file.
+- Description: Add Checkstyle 14.3.0 (plugin 3.6.0) with the constitution rules and regex bans (including the SC-27 ban on outbound HTTP clients in main sources), and SpotBugs with Find Security Bugs, verifying the unverified pins or requesting Sponsor re-approval, with a justified exclusion file.
 - Production: (1) build files; (2) `config/checkstyle/checkstyle.xml` and `suppressions.xml`; (3) `config/spotbugs/exclude.xml`. Tests: none (seeded violations are recorded runs).
 - Acceptance criteria:
-  1. Checkstyle runs in `verify` with naming (3 characters, `id` exception), 300-line and 50-line limits, imports, Javadoc, line length and regex bans for wall-clock calls, `System.out`, `printStackTrace` and `select *`; one seeded violation of each ban fails the build (recorded).
+  1. Checkstyle runs in `verify` with naming (3 characters, `id` exception), 300-line and 50-line limits, imports, Javadoc, line length and regex bans for wall-clock calls, `System.out`, `printStackTrace` and `select *`; one seeded violation of each ban fails the build (recorded). The time rule also catches `new java.util.Date()` and the spaced form `.now (` (SEC-F-090).
+  1a. SC-27: a regex ban on outbound HTTP clients fails the build in `src/main` with a message naming SC-27 for `RestTemplate`, `RestClient`, `WebClient`, `HttpClient`, `HttpURLConnection`, `URLConnection`, `.openConnection(`, `.openStream(` and `java.net.http`; a narrow suppression in `src/test` allows the JDK client in test code only; one seeded run fails in `src/main` and passes in `src/test` (recorded) (SEC-F-089).
   2. Checkstyle 14.3.0 with plugin 3.6.0 is shown to work together, or a re-approval request with working pins is in the delivery (SC-19).
   3. The SpotBugs and Find Security Bugs pins are chosen after checking publishers and Java 21 support, bound to `verify`; every exclusion has a written justification (SC-21).
   4. `verify` is green with the gates active.
@@ -802,6 +803,7 @@ FR4 has no downstream items by design (DEC-003). Plan sections: `plan.md` and `p
 Merging changes the number of reviews, not the hours; each merged task would run 60 to 90 minutes and waives the 45-minute limit. Only low-risk pairs are listed: 10 + 13, 11 + 12, 18 + 19, 39 + 40, 41 + 42, 49 + 50. With all six the total is 50 tasks. The tasks split in round 2 (03, 23, 34) should not be merged back.
 
 ## Changelog
+- 0.5.1 (2026-11-02): Task 02 amended (handoffs 043 and 044): SC-27 outbound-HTTP-client ban in the Checkstyle regex bans with a test-only suppression and one seeded run (SEC-F-089); time rule tightened to `new java.util.Date()` and `.now (` (SEC-F-090).
 - 0.5 (2026-11-02): Round 3, final edits for handoffs 031 and 032. Task 12 depends on 09 (R2-01); the UI Definition-of-Done rule is limited to criteria the real page can provoke, stub-only criteria are evidenced by logic and stub tests, and the missing backend dependencies of Tasks 25, 26, 27, 36, 37, 38 are added (R2-02); totals corrected to 660, 2,055, 2,145 and 1,240 minutes, headline 35.75 h and 20.7 h (R2-04); plan 0.2 cited (R2-05); stored-DDL round trip in Task 04 and the native-SQL grep gate in Task 42 (R2-06); Task 13 working directory, argument names and five hostile variables (R2-07, SEC-F-080); branch types of Tasks 08 and 41 and the `progress.md` exemption (R2-08); sharper oracles in Tasks 34b and 28 (R2-09); README memory bound in Tasks 14 and 41 (SEC-F-081).
 - 0.4 (2026-11-02): Round 2 of Phase 3, resolving handoffs 025 and 026 (answers by finding number in handoff 027). Dependencies corrected (F-01); Task 15 route table scope and Task 31 maintenance (F-02); `status` value check moved to Task 16 (F-03); Task 23 split into 23a and 23b and its capacity clauses limited to add (F-04, F-06); exception mapping in Task 22 (F-05); Task 34 split into 34a and 34b and Task 03 split into 03a and 03b (F-06, SEC-F-067, SEC-F-069); UI-task Definition of Done rule (F-07); release scope = Increments 0 to 3 plus Tasks 49 and 50, Task 48 built last (F-08); Task 43 per the Sponsor decision (F-09); tier register as single authority (F-12); file lists, branch types and README ownership (F-20); 0a/0b acceptance and try-it commands (F-21); CR approval before Task 11 (F-23); US-010.2 tier split (F-24); Security conditions SEC-F-066 to SEC-F-079 attached to Tasks 03a, 03b, 06, 07, 08, 09, 11, 13, 14, 16, 34b, 41, 42, 43, 49.
 - 0.3 (2026-11-02): Sponsor decisions applied: budget accepted, Increment 0 split into 0a and 0b with tags after Task 08 and Task 14, Tasks 49 and 50 before the release tag, accessibility checker in tests only.
