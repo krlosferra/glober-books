@@ -61,3 +61,15 @@
 - Verification commands (Node v24.22.2, from the repository root): `node --test "frontend/**/*.test.js"`; the same command with a glob for a non-existing directory; a negative run of `frontend/js/sources.test.js` on a scratch copy outside the repository with a string-argument `setTimeout` added to `api/http.js`.
 - Result: 43 tests, 43 pass, 0 fail, exit 0, no `package.json` in the root or `frontend/` (only `e2e/package.json`), no module-type warning. Negative run fails on `api/http.js` as required (scratch copy deleted). A glob that matches no file prints 0 tests and returns exit 0.
 - Deviations: none against the brief. Details in handoff 048.
+
+## Task 03b: Start policy and configuration
+
+- Date: 2026-11-02
+- Branch: `feature/task-03b-start-policy-config`
+- Attempt: 1
+- Commits: see `git log main..feature/task-03b-start-policy-config` (all subjects end with `[Task-3b]`)
+- Built: `StartupPolicy` (an `EnvironmentPostProcessor` registered in `META-INF/spring.factories`, so a refusal happens before any bean or file access), `application.yml` (mandatory properties, Tomcat limits, `max-swallow-size 16KB`, Hikari `connection-timeout 5000`), `StartupPolicyTest`, `StartupPolicyIntegrationTest`.
+- Carried conditions: SEC-F-103 (`?` and `#` refused, fixed reasons); SEC-F-100 (ClockConfig suppression scoped to `[\\/]config[\\/]ClockConfig\.java$`, clock test compares the relative path, seeded second `ClockConfig` flagged then reverted); SEC-F-099 (source scan for `Files`, `FileInputStream`, `FileChannel` outside `config/sqlite`).
+- SEC-F-098 (recorded for Task 34a): the `DataDirectoryGuard` must run before `SqliteDataSourceProvider`, and the provider is not the sole start path (it follows symlinks and creates storage itself); the guard, not the provider, is the control.
+- Note: the provider is not yet wired as the application's `DataSource`; until Task 34a/34b the context uses Boot's own pool (the integration test pre-creates the directory of a valid path).
+- Details: handoff 054.
