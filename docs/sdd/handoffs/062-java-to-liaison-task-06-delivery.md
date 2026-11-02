@@ -8,5 +8,5 @@
 (filled at the end)
 
 ## Resume point
-Done: step 1 advice (06b2d65); step 2 TomcatErrorReportCustomizer + TomcatErrorReportIntegrationTest (raw invalid request line: 400 page with title and h1 only, no product, version, report).
-Next: step 3 HeaderPolicy + test; 4 BoundedBodyRequest; 5 RequestGateFilter + test (disable CharacterEncodingFilter); 6 evidence, progress.md, status.md row.
+Done: step 1 advice; step 2 Tomcat valve + raw-socket test; step 3 HeaderPolicy + HeaderPolicyTest (52 cases).
+Next: step 4 BoundedBodyRequest; 5 RequestGateFilter + RequestGateFilterTest + integration evidence (disable CharacterEncodingFilter); 6 evidence, progress.md, status.md row.
