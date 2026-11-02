@@ -16,11 +16,11 @@
   <!--
     Justification: SC-07, SC-14 and the time rule have src/main as scope. Test code
     may hold banned text as fixtures (injection payloads, seeded violations) and
-    SC-27 explicitly allows test-only tooling. Only the four ban messages are
+    SC-27 explicitly allows test-only tooling. Only the ban messages (SC-07, SC-14, SC-27, TIME-RULE) are
     suppressed for tests; all other rules still apply to tests.
     Approver: constitution v1.2 and security.md (scope column of SC-07, SC-14, SC-27).
   -->
-  <suppress message="^(SC-07|SC-14|TIME-RULE):" files="[\\/]src[\\/]test[\\/]"/>
+  <suppress message="^(SC-07|SC-14|SC-27|TIME-RULE):" files="[\\/]backend[\\/]src[\\/]test[\\/]"/>
 
   <!--
     Justification: plan D6 / Task 03a: the single java.time.Clock bean lives in

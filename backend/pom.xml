@@ -127,6 +127,7 @@
         </executions>
       </plugin>
 
+      <!-- SpotBugs must stay declared before the JaCoCo check so it fails first. -->
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>

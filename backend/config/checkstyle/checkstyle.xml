@@ -41,7 +41,7 @@
     <!-- Constitution time rule: business code never calls a wall-clock method. -->
     <module name="RegexpSinglelineJava">
       <property name="format"
-                value="\b(Instant|LocalDate|LocalDateTime|ZonedDateTime|OffsetDateTime)\.now\(|System\.currentTimeMillis\(|new Date\(|Clock\.system(UTC|DefaultZone)\("/>
+                value="\b(Instant|LocalDate|LocalDateTime|ZonedDateTime|OffsetDateTime)\.now\(|System\.currentTimeMillis\(|new\s+(java\.util\.)?Date\s*\(|\.\s*now\s*\(|Clock\.system(UTC|DefaultZone)\("/>
       <property name="message" value="TIME-RULE: wall-clock calls are banned; inject java.time.Clock"/>
       <property name="ignoreComments" value="true"/>
     </module>
@@ -55,6 +55,14 @@
     <module name="RegexpSinglelineJava">
       <property name="format" value="printStackTrace"/>
       <property name="message" value="SC-14: printStackTrace is banned; use SLF4J"/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+
+    <!-- SC-27: no outbound network clients in src/main. -->
+    <module name="RegexpSinglelineJava">
+      <property name="format"
+                value="\b(RestTemplate|RestClient|WebClient|HttpClient|HttpURLConnection|URLConnection)\b|\.openConnection\(|\.openStream\(|java\.net\.http"/>
+      <property name="message" value="SC-27: outbound HTTP clients are banned in src/main"/>
       <property name="ignoreComments" value="true"/>
     </module>
 
