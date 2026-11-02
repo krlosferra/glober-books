@@ -77,13 +77,13 @@ class SqliteStoreIntegrationTest {
 
     @Test
     void doesNotChangeModesOfAnExistingDirectoryAndFile() throws Exception {
-        Path dir = Files.createDirectory(temp.resolve("existing"), FileFacts.dirAttr("rwx------"));
-        Path file = Files.createFile(dir.resolve("books.db"), FileFacts.fileAttr("rw-------"));
+        Path dir = Files.createDirectory(temp.resolve("existing"), FileFacts.dirAttr("rwxr-x---"));
+        Path file = Files.createFile(dir.resolve("books.db"), FileFacts.fileAttr("rw-r-----"));
 
         try (HikariDataSource pool = SqliteDataSourceProvider.create(file)) {
             assertThat(pool.isRunning()).isTrue();
-            assertThat(FileFacts.mode(dir)).isEqualTo("rwx------");
-            assertThat(FileFacts.mode(file)).isEqualTo("rw-------");
+            assertThat(FileFacts.mode(dir)).isEqualTo("rwxr-x---");
+            assertThat(FileFacts.mode(file)).isEqualTo("rw-r-----");
         }
     }
 
@@ -122,7 +122,7 @@ class SqliteStoreIntegrationTest {
                 Connection connection = pool.getConnection();
                 Statement statement = connection.createStatement()) {
             assertThatThrownBy(() -> statement.execute("SELECT load_extension('nonexistent_extension')"))
-                    .isInstanceOf(SQLException.class);
+                    .isInstanceOf(SQLException.class).hasMessageContaining("not authorized");
         }
     }
 

@@ -97,8 +97,8 @@ public final class SqliteDataSourceProvider {
             createDirectory(directory);
             createDirectory(nativeDirectory);
             if (!Files.exists(absoluteFile)) {
-                Files.createFile(absoluteFile);
-                Files.setPosixFilePermissions(absoluteFile, PosixFilePermissions.fromString(FILE_MODE));
+                Files.createFile(absoluteFile, PosixFilePermissions.asFileAttribute(
+                        PosixFilePermissions.fromString(FILE_MODE)));
             }
             return nativeDirectory;
         } catch (IOException | RuntimeException failure) {
@@ -114,8 +114,8 @@ public final class SqliteDataSourceProvider {
         if (parent != null && !Files.isDirectory(parent)) {
             createDirectory(parent);
         }
-        Files.createDirectory(directory);
-        Files.setPosixFilePermissions(directory, PosixFilePermissions.fromString(DIRECTORY_MODE));
+        Files.createDirectory(directory, PosixFilePermissions.asFileAttribute(
+                PosixFilePermissions.fromString(DIRECTORY_MODE)));
     }
 
     private static HikariConfig poolConfig(Path absoluteFile) {
