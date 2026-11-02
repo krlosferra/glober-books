@@ -25,7 +25,7 @@ class ErrorBodyFactoryTest {
 
     private final ErrorBodyFactory factory = new ErrorBodyFactory(Clock.fixed(FIXED, ZoneOffset.UTC));
     private final JsonMapper mapper = JsonMapper.builder().build();
-    private final ErrorResponseWriter writer = new ErrorResponseWriter(factory, mapper);
+    private final ErrorResponseWriter writer = new ErrorResponseWriter(factory);
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> toMap(ErrorBody body) {

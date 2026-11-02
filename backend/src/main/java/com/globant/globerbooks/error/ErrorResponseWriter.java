@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Writes an error envelope, and nothing else, to a servlet response. Used by filters and by
@@ -16,17 +17,15 @@ public class ErrorResponseWriter {
     public static final String CONTENT_TYPE = "application/json; charset=UTF-8";
 
     private final ErrorBodyFactory factory;
-    private final ObjectMapper mapper;
+    private final ObjectMapper mapper = JsonMapper.builder().build();
 
     /**
      * Creates the writer.
      *
      * @param factory the body factory
-     * @param mapper the JSON mapper
      */
-    public ErrorResponseWriter(ErrorBodyFactory factory, ObjectMapper mapper) {
+    public ErrorResponseWriter(ErrorBodyFactory factory) {
         this.factory = factory;
-        this.mapper = mapper;
     }
 
     /**
