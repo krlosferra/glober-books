@@ -26,11 +26,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class RequestGateFilter extends OncePerRequestFilter {
+public final class RequestGateFilter extends OncePerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestGateFilter.class);
 
-    private final ErrorResponseWriter writer;
+    private final Rejecter rejecter;
 
     /**
      * Creates the filter.
@@ -38,7 +38,7 @@ public class RequestGateFilter extends OncePerRequestFilter {
      * @param writer the error writer
      */
     public RequestGateFilter(ErrorResponseWriter writer) {
-        this.writer = writer;
+        this.rejecter = writer::write;
     }
 
     @Override
@@ -107,7 +107,7 @@ public class RequestGateFilter extends OncePerRequestFilter {
             response.setHeader("Connection", "close");
         }
         try {
-            writer.write(response, code);
+            rejecter.write(response, code);
         } catch (IllegalStateException unusable) {
             LOG.error("Error response could not be written: {}", unusable.getClass().getName());
         }
@@ -120,6 +120,12 @@ public class RequestGateFilter extends OncePerRequestFilter {
 
     private static List<String> values(HttpServletRequest request, String name) {
         return Collections.list(request.getHeaders(name));
+    }
+
+    /** Writes the envelope of an error code to a response. */
+    @FunctionalInterface
+    private interface Rejecter {
+        void write(HttpServletResponse response, ErrorCode code) throws IOException;
     }
 
     /** Response that sets the security headers again after {@code reset} and before {@code sendError}. */
