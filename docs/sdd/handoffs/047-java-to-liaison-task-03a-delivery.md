@@ -69,3 +69,57 @@ No behavior differed from the plan: claim, per-connection settings, eviction re-
 - Time rule in tests (043 item 2): proposal to the PM. No test needs a time rule yet; tests use no clock at all (`MutableClock` not needed yet). The test exemption can stay until `BookService` tests need a `MutableClock`. Static-import `now()` (bare call) is not caught by the regex; I avoided it.
 - Unwritable-parent test skips as root; run as non-root in CI to exercise it. "Narrower pre-existing mode" is not tested (a 0400 file is environment dependent as root); only equal modes are asserted unchanged.
 - Test output carries the sandbox `JAVA_TOOL_OPTIONS` banner; harmless.
+
+## 7. Review fixes (handoffs 051, 052), second pass
+- SEC-F-101: `failsToLoadAnExtension` now also asserts the message contains "not authorized" (passes).
+- F4: `doesNotChangeModesOfAnExistingDirectoryAndFile` creates the entries at 0750 directory / 0640 file and asserts both unchanged. What the code does: modes of pre-existing entries are never re-applied or tightened; widening or refusing them belongs to the Task 34a guard (US-009.3 refusal of group/other bits).
+- F1 / SEC-F-102: directory and file are created with the POSIX permission attribute at creation (no create-then-chmod window); exact 0700/0600 still asserted.
+- Deferred, no code here: SEC-F-098 (the provider follows symlinks; the Task 34a guard must run before `create()`, and the 03b/04 brief must say so); SEC-F-099, SEC-F-100 and F6 (`?` and `#` in the URL are rejected by `StartupPolicy` in Task 03b).
+- Build after these fixes: BUILD SUCCESS, Surefire 7, Failsafe 22 (1 skipped, root), Checkstyle 0, SpotBugs 0, JaCoCo met.
+
+## 8. E9 and E10 (real output, taken after the fix commit; the commit that stores this text follows it)
+
+```
+$ git diff --stat main..HEAD
+ .../globant/globerbooks/config/ClockConfig.java    |  23 ++
+ .../config/sqlite/SqliteDataSourceProvider.java    | 203 +++++++++++++++
+ backend/src/main/resources/schema.sql              |  23 ++
+ .../config/sqlite/SqliteStoreIntegrationTest.java  | 287 +++++++++++++++++++++
+ .../com/globant/globerbooks/support/ChildJvm.java  |  95 +++++++
+ .../globerbooks/support/ClaimChildMain.java        |  64 +++++
+ .../com/globant/globerbooks/support/FileFacts.java |  59 +++++
+ .../com/globant/globerbooks/support/PoolFacts.java |  62 +++++
+ .../handoffs/045-liaison-to-java-task-03a-brief.md | 105 ++++++++
+ .../047-java-to-liaison-task-03a-delivery.md       |  71 +++++
+ .../051-liaison-to-orchestrator-task-03a-audit.md  |  48 ++++
+ docs/sdd/progress.md                               |  12 +
+ docs/sdd/status.md                                 |   2 +
+ 13 files changed, 1054 insertions(+)
+
+$ git log main..HEAD --format='%an <%ae>%n%B---'
+krlosferra <carlos.ferra@globant.com>
+fix(sqlite): create storage with the mode at creation and tighten tests [Task-3a]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): record the Liaison audit of Task 03a [Task-3a]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): add Task 03a delivery and progress entry [Task-3a]
+---
+krlosferra <carlos.ferra@globant.com>
+test(sqlite): prove settings, claim from a second JVM and modes [Task-3a]
+---
+krlosferra <carlos.ferra@globant.com>
+feat(sqlite): add single-connection data source with claim [Task-3a]
+---
+krlosferra <carlos.ferra@globant.com>
+feat(config): add schema.sql and the UTC clock bean [Task-3a]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): add the Task 03a brief [Task-3a]
+---
+krlosferra <carlos.ferra@globant.com>
+chore(status): close Tasks 02 and 10 and start Tasks 03a and 11 [Task-3a]
+---
+```
+Note: `status.md` and the 045 brief in the stat come from the two commits already on the branch before this task, not from Task 03a work.
