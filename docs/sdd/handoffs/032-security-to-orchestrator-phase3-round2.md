@@ -75,3 +75,17 @@ R-20 (hot journal beside an invalid file): recommend accept. The documented limi
 
 ## 9. Next step
 The PM adds SEC-F-080 and SEC-F-081 to Tasks 13, 14 and 41 (acceptance criteria only) and the plan owner corrects the N-1 reference at the next edit. The Liaison verdict (handoff 031) and the Sponsor decisions in section 6 then complete the gate. I update `security.md` (0.17) and the Security cell of `status.md`. I edited no plan, task or spec file.
+
+## Amendment check (2026-11-02)
+
+Scope: `git diff 98bad0d -- docs/sdd/constitution.md docs/sdd/security.md`, plan.md section 8, tasks.md Task 13, 14 and 41.
+
+1. **Constitution 1.2.** Only three places changed: version/date header, the E2E isolation (SC-33) bullet, and the changelog line 1.2. No other line differs. The bullet matches my conditions (SEC-F-070 and SEC-F-080): `mkdtemp` 0700 created by `global-setup` or the launcher it delegates to; three command-line arguments (`--server.address`, `--server.port`, `--spring.datasource.url`) overriding environment, `SPRING_APPLICATION_JSON` and system properties; allowlisted environment; working directory inside the temporary directory; datasource path asserted inside it; deletion only of its own directory; busy port fails; hostile-environment run leaves a decoy untouched. Port 18080, `reuseExistingServer: false`, `workers: 1`, `retries: 0` unchanged. VERIFIED.
+2. **security.md SC-33 row** carries the same wording (amendment text, "a run with hostile ambient variables leaves a decoy file untouched"). VERIFIED. R-20 row now reads "Accepted by the Sponsor 2026-11-02 (with the documented limit of Task 34a)". VERIFIED.
+3. **plan.md section 8** (decisions of 2026-11-02): items 1, 2, 4, 5, 6, 8, 10, 11 approved, 3, 7, 9 deferred. Consistent with my recommendations (section 6) and with security.md; item 1 points to constitution 1.2, item 5 to R-20 and Task 34a, item 6 to `-Xmx512m` and `max-swallow-size`. No contradiction. Deferred items 3, 7, 9 need a Sponsor ask only if the case occurs (axe `bypassCSP` is reported before merge: compatible with SEC-F-076).
+4. **SEC-F-080** is reflected in Task 13: AC2 (child `cwd` = its own `mkdtemp`, no config file, argument names exact, allowlist `PATH HOME JAVA_HOME LANG TZ`, no `SPRING_*`, `JAVA_*OPTIONS`, `SERVER_*`) and AC3 (all five hostile variables including `SERVER_ADDRESS=0.0.0.0` and `SERVER_PORT`, pass conditions). CLOSED at design.
+5. **SEC-F-081** is reflected: Task 14 AC3 (both run commands with `-Xmx512m`) and Task 41 lists `README.md` in Production and AC4. CLOSED at design. **SEC-F-082**: plan N-1 now cites CR-9. CLOSED.
+
+Not verified: runtime behaviour (Spring Boot property precedence, Playwright start order) stays for Task 13 evidence.
+
+**Final Phase 3 Security verdict: PASS** (design level). No CRITICAL or HIGH open, no open condition. Phase 4 verification obligations stay as listed in the tasks.
