@@ -31,7 +31,7 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 
 ## Resume point (updated by the orchestrator at every step)
 
-Work can stop at any time for lack of usage. Resume with: `git fetch`, read this section, `docs/sdd/progress.md`, the newest handoffs in `docs/sdd/handoffs/`, and the open pull requests. State on 2026-11-02: Tasks 01, 02, 03a, 10, 11 DONE on `main`. Task 03b IN_REVIEW (pull request 10, Liaison 055, Security 056); once merged it is DONE. Next in order after 03b: 05, 18, 04, 06, 07, 08 (Increment 0a), then 09 and 12 to 14 (0b). Each task: brief, implementation, orchestrator build check, Liaison audit and Security review in parallel, pull request opened by the orchestrator, Sponsor edits the body, squash merge. Compact briefs may be issued by the orchestrator while usage is limited.
+Work can stop at any time for lack of usage. Resume with: `git fetch`, read this section, `docs/sdd/progress.md`, the newest handoffs in `docs/sdd/handoffs/`, and the open pull requests. State on 2026-11-02: Tasks 01, 02, 03a, 03b, 10, 11 DONE on `main`. In progress: Task 05 on branch `feature/task-05-error-foundation` (brief 057, delivery 058, implementer commits after each step; the orchestrator pushes). Next in order after 05: 05, 18, 04, 06, 07, 08 (Increment 0a), then 09 and 12 to 14 (0b). Each task: brief, implementation, orchestrator build check, Liaison audit and Security review in parallel, pull request opened by the orchestrator, Sponsor edits the body, squash merge. Compact briefs may be issued by the orchestrator while usage is limited.
 
 ## Phase gates
 
@@ -53,7 +53,8 @@ Work can stop at any time for lack of usage. Resume with: `git fetch`, read this
 | 10 | E2E toolchain and pins | frontend | DONE | sdd-frontend-developer | `chore/task-10-e2e-toolchain` | 1 | c731108 | ACCEPT WITH FOLLOW-UPS (handoff 041) | PASS WITH CONDITIONS (handoff 042) | | Pull request 6 (squash); brief 037, delivery 038. Follow-ups: re-derive the frontend agent tool list and fix frontend-testing.md section 6 (SEC-F-086) |
 | 03a | SQLite data source, claim and clock | backend | DONE | sdd-java-architect | `feature/task-03a-sqlite-data-source` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 051) | PASS WITH CONDITIONS (handoff 052) | | Merged 2fce30a (pull request 9, squash); brief 045, delivery 047. Conditions carried: SEC-F-098 to 034a and the 03b/04 briefs; SEC-F-099/100/103 to 03b |
 | 11 | Frontend logic and API client (thin) | frontend | DONE | sdd-frontend-developer | `feature/task-11-logic-and-client-thin` | 1 | d8cdb7f | ACCEPT WITH FOLLOW-UPS (handoff 049) | PASS WITH CONDITIONS (handoff 050) | | Merged (pull request 8, squash); brief 046, delivery 048. Conditions carried to Tasks 12, 35 and 45 |
-| 03b | Start policy and configuration | backend | IN_REVIEW | sdd-java-architect | `feature/task-03b-start-policy-config` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 055) | PASS (handoff 056) | | Pull request 10 (squash); compact brief 053, delivery 054. Follow-ups: 34a brief (guard after StartupPolicy, not the sole start path); SEC-F-105 to 34b; SEC-F-106 and System.out cleanup in the next backend task |
+| 03b | Start policy and configuration | backend | DONE | sdd-java-architect | `feature/task-03b-start-policy-config` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 055) | PASS (handoff 056) | | Merged 172e1c3 (pull request 10, squash); compact brief 053, delivery 054. Follow-ups: 34a brief (guard after StartupPolicy, not the sole start path); SEC-F-105 to 34b; SEC-F-106 and System.out cleanup in the next backend task |
+| 05 | Error foundation | backend | IN_PROGRESS | sdd-java-architect | `feature/task-05-error-foundation` | 1 | | | | | Compact brief: handoff 057 |
 
 ## Spec coverage
 
