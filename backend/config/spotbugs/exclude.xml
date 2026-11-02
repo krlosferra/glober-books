@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SpotBugs exclusion filter (SC-21: every exclusion needs a written justification
+  naming pattern or class, the reason and the approver).
+
+  Current exclusions: none. Task 02 (2026-11-02) adds no exclusion because no
+  finding exists. Add a <Match> below only with a comment in the form:
+    Pattern/class: ...  Reason: ...  Approver: ...
+-->
+<FindBugsFilter>
+</FindBugsFilter>

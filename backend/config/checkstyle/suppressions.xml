@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<!--
+  Every suppression carries its justification. Do not add a suppression without
+  a written reason and an approver.
+-->
+<suppressions>
+  <!--
+    Justification: constitution Code Style says Javadoc applies to src/main only,
+    not to tests. Approver: constitution v1.2 (Sponsor).
+  -->
+  <suppress checks="MissingJavadocType|MissingJavadocMethod" files="[\\/]src[\\/]test[\\/]"/>
+
+  <!--
+    Justification: SC-07, SC-14 and the time rule have src/main as scope. Test code
+    may hold banned text as fixtures (injection payloads, seeded violations) and
+    SC-27 explicitly allows test-only tooling. Only the ban messages (SC-07, SC-14, SC-27, TIME-RULE) are
+    suppressed for tests; all other rules still apply to tests.
+    Approver: constitution v1.2 and security.md (scope column of SC-07, SC-14, SC-27).
+  -->
+  <suppress message="^(SC-07|SC-14|SC-27|TIME-RULE):" files="[\\/]backend[\\/]src[\\/]test[\\/]"/>
+
+  <!--
+    Justification: plan D6 / Task 03a: the single java.time.Clock bean lives in
+    ClockConfig and is the only place allowed to call Clock.systemUTC(). Narrow on
+    purpose: one file name, and only the TIME-RULE message; no other ban or rule
+    is suppressed there. Approver: plan.md D6.
+  -->
+  <suppress message="^TIME-RULE:" files="[\\/]src[\\/]main[\\/]java[\\/].*[\\/]ClockConfig\.java$"/>
+</suppressions>
