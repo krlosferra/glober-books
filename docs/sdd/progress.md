@@ -39,6 +39,19 @@
 - MCP: pre-release Playwright `1.64.0-alpha-1790635538000`; 25 tools exposed; 17 match the 24-name allowlist, 7 allowlisted names not exposed with these flags, 8 exposed names not allowlisted (follow-up routed by the orchestrator).
 - Deviations: sandbox default Node was v22.22.0; the pinned Node was supplied from the official tarball (checksum from the same origin). `cdn.playwright.dev` allow-listed by the Sponsor for the browser download. Details in handoff 038.
 
+## Task 03a: SQLite data source, claim and clock
+
+- Date: 2026-11-02
+- Branch: `feature/task-03a-sqlite-data-source`
+- Attempt: 1
+- Commits: see `git log main..feature/task-03a-sqlite-data-source` (all subjects end with `[Task-3a]`)
+- Built: `SqliteDataSourceProvider` (single-connection pool, settings, claim, 0700/0600 storage, `<data dir>/tmp` native directory, `schema.sql` at every start), `ClockConfig`, `schema.sql` (AP-6 verbatim), `SqliteStoreIntegrationTest`, `support/ClaimChildMain` and three test helpers.
+- Evidence (E1 to E10): `./mvnw clean verify` green; Surefire 7, Failsafe 22 (1 skipped: unwritable-parent case, needs a non-root user); Checkstyle 0 violations over 11 files; SpotBugs 0 bugs, 4 classes (5 with the nested data source); JaCoCo `SqliteDataSourceProvider` 52 of 56 lines, project 73 of 79 (92.4%), check met. Claim from a second JVM: "database is locked", exit 2, negative control exit 0, SHA-256 equal; same after a forced eviction. Settings read back equal the plan before and after eviction. One `Clock.systemUTC()`, only in `ClockConfig`. Native SQL only in `config/sqlite`. Dependency tree unchanged.
+- Deviations / notes: `trusted_schema` has no `SQLiteConfig` key in sqlite-jdbc 3.53.4.0, so it is set by `PRAGMA trusted_schema = OFF` inside the data source Hikari wraps (same effect, still not in the URL, not `connection-init-sql`). Hikari `connection-timeout` not set (belongs to 03b `application.yml`; will be a duplicate-free addition there). `schema.sql` is run through Spring's `ResourceDatabasePopulator` (a JDBC `Statement` fed with a loaded string is a Find Security Bugs `SQL_INJECTION_JDBC` finding).
+- Open questions: ClockConfig suppression left file-scoped (see delivery); test-side time rule proposal to the PM (delivery section 6); X-10 outcome: the driver loads from `<data dir>/tmp`, no drop, no `security.md` risk entry needed.
+- [Task-3a] SQLite data source, claim and clock - submitted for audit
+- Review fixes (handoffs 051, 052): extension test asserts "not authorized" (SEC-F-101); existing-mode test uses 0750/0640 and asserts unchanged (F4); storage created with the permission attribute at creation (F1, SEC-F-102). Deferred without code: SEC-F-098 (provider follows symlinks, so the Task 34a guard must run before `create()`; the 03b/04 brief must say so); SEC-F-099, SEC-F-100 and F6 (`?` and `#` rejected by `StartupPolicy` in Task 03b).
+
 ## Task 11: Frontend logic and API client (thin)
 
 - Date: 2026-11-02
