@@ -99,7 +99,7 @@ class StartupPolicyTest {
     @Test
     void mainSourcesOutsideConfigSqliteDoNotUseFileApis() throws IOException {
         Pattern fileApi = Pattern.compile("java\\.nio\\.file\\.Files|FileInputStream|FileChannel");
-        Path root = Path.of("src", "main", "java");
+        Path root = backendDirectory().resolve(Path.of("src", "main", "java"));
         List<String> hits = new ArrayList<>();
         try (Stream<Path> sources = Files.walk(root)) {
             for (Path source : sources.filter(path -> path.toString().endsWith(".java")).toList()) {
@@ -112,5 +112,14 @@ class StartupPolicyTest {
         }
 
         assertThat(hits).isEmpty();
+    }
+
+    private static Path backendDirectory() {
+        try {
+            Path classes = Path.of(StartupPolicy.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            return classes.getParent().getParent();
+        } catch (java.net.URISyntaxException failure) {
+            throw new IllegalStateException(failure);
+        }
     }
 }
