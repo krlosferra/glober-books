@@ -208,3 +208,13 @@ exit=1        (nothing found)
 
 ## 6. Status
 IN_REVIEW is to be set by the orchestrator (status.md untouched). STOP: Task 03a not started. Waiting for the Liaison audit, Security verdict, PM acceptance and Sponsor approval.
+
+## 7. Follow-up round (handoffs 043 and 044), same branch, commits ending `[Task-2]`
+- SEC-F-089: added `RegexpSinglelineJava` ban "SC-27: outbound HTTP clients are banned in src/main" for `RestTemplate|RestClient|WebClient|HttpClient|HttpURLConnection|URLConnection`, `.openConnection(`, `.openStream(`, `java.net.http`. `SC-27` added to the `src/test` suppression (the statement in O-1 that none was needed was wrong). Seeds: in `src/main` lines with `java.net.http.HttpClient` import, `new RestTemplate()`, `.openConnection()`, `.openStream()`, `java.net.HttpURLConnection` all fail with the SC-27 message; the same banned text in `src/test` passes (0 violations). Seeds reverted.
+- SEC-F-090: time rule now also matches `new\s+(java\.util\.)?Date\s*\(` and `\.\s*now\s*\(`. Seeds in `src/main` (all flagged, reverted): `new java.util.Date()`, `new   Date ()`, `.now();` on a continuation line, `java.time.Year . now ()`, `Instant.now ()`.
+- Liaison item 3: pom comment "SpotBugs must stay declared before the JaCoCo check so it fails first".
+- SEC-F-092: the `src/test` suppression path is anchored to `[\\/]backend[\\/]src[\\/]test[\\/]`; behaviour otherwise unchanged.
+- Corrected proposed pin-table text (replaces section 4):
+  - Checkstyle: `maven-checkstyle-plugin` 3.6.0 (Central publishes SHA-1 only; no SHA-512 is published for the plugin jar) and engine `com.puppycrawl.tools:checkstyle` 14.3.0 (SHA-1 and SHA-512 equal), VERIFIED 2026-11-02, resolved together under JDK 21.0.12.1 and Maven 3.9.16.
+  - `spotbugs-maven-plugin` 4.10.5.0 (engine 4.10.5), SHA-1 equal, latest stable; it analyzed Java 21 class files without error in the Task 02 run.
+  - `findsecbugs-plugin` 1.14.0, SHA-1 equal; loaded by SpotBugs 4.10.5 and detects `WEAK_MESSAGE_DIGEST_MD5` and `PREDICTABLE_RANDOM`. Caveat R-1: no documented SpotBugs compatibility statement was found (compatibility rests on the run); a SpotBugs bump needs an FSB re-check. SpotBugs must stay declared before the JaCoCo check in `pom.xml`.
