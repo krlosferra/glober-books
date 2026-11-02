@@ -35,8 +35,8 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 |---|---|---|---|---|---|
 | 1 Constitution | APPROVED: constitution 1.0 | round 3: APPROVED WITH CHANGES (handoff 004), MAJORs applied | round 3: PASS WITH CONDITIONS (handoff 006); guard fixes applied; platform steps verified (security.md section 10) | approved 2026-10-30 | 2026-10-30 |
 | 2 Specify | APPROVED: spec 0.4.1 | round 3: APPROVED (handoff 016) | round 3: PASS at spec level (handoff 019) | approved 2026-10-30 (confirmed: 2 s add bound is a security bound and is never cut; 409 for DUPLICATE_BOOK and LIBRARY_FULL; RATING_NOT_ALLOWED stays 400) | 2026-10-30 |
-| 3 Plan and tasks | in review, round 3 (Liaison round 2: APPROVED WITH CHANGES, applied in tasks.md 0.5; Security round 2: PASS; Sponsor decisions 2026-11-02 recorded in plan.md section 8; constitution 1.2 amendment of SC-33 diff-checked by Security: matches). Earlier: round 1: plan.md 0.1, plan-appendix.md 0.1, tasks.md 0.3 (53 tasks, Increment 0 split into 0a and 0b), spec change requests CR-1 to CR-9 (spec 0.4.2 draft) | round 3 (handoff 031, section "Round 3"): APPROVED. Round 2 findings R2-01 to R2-10 closed; constitution 1.2 amendment limited to SC-33 plus changelog (by reading; mechanical diff by orchestrator); plan section 8 correct. Open for the gate: Sponsor approval of CR-1 to CR-9 and DEC-034 | round 1: PASS WITH CONDITIONS (handoff 026): no CRITICAL or HIGH; 7 MEDIUM conditions SEC-F-066 to SEC-F-072 to close in plan/tasks before the gate; CR-1 to CR-9 acceptable; tiers confirmed; round 2: PASS at design level (handoff 032): SEC-F-066 to 079 closed (071 partly); new SEC-F-080, 081 (LOW, conditions on Tasks 13 and 41), 082 (INFO); spec 0.4.3 diff clean; SEC-F-080 to 082 closed at design; amendment check: final Phase 3 verdict PASS (handoff 032); R-20 accepted by the Sponsor 2026-11-02 | | |
-| 4 Implement | not started | | | | |
+| 3 Plan and tasks | APPROVED and merged: plan 0.2, tasks 0.5, spec 0.4.3, constitution 1.2 (pull request 4, squash) | round 3: APPROVED (handoff 031) | round 2: PASS at design level (handoff 032) | approved 2026-11-02 (35.75 h scope; CR-1 to CR-9 and DEC-034; SC-33 amendment; R-20 accepted) | 2026-11-02 |
+| 4 Implement | in progress: Increment 0a (Tasks 01 to 08) | | | | |
 | 5 Drift / change | not started | | | | |
 | 6 Contrast | not started | | | | |
 
@@ -44,7 +44,7 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 
 | Task | Title | Layer | State | Owner agent | Branch | Attempts | Merge commit | Audit | Security | Acceptance | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| (none yet) | | | | | | | | | | | |
+| 01 | Maven scaffold and build proofs | backend | IN_REVIEW | sdd-java-architect | `chore/task-01-maven-scaffold` | 1 | | ACCEPT (handoff 035) | PASS (handoff 036) | | Awaiting Sponsor approval; brief 033, delivery 034 |
 
 ## Spec coverage
 
