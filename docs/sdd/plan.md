@@ -131,7 +131,9 @@ The task list, estimates and dependencies are in `tasks.md`; this plan fixes onl
 
 Cost: about 35.8 h of task time for the release scope (Increments 0 to 3 plus Tasks 49 and 50, 53 tasks; backend 20.75 h), about 45 h with the rework allowance; the Sponsor accepted about 32 h on 2026-11-02 against the 6 to 8 h of DEC-022 and is asked to confirm the new figure.
 
-## 8. Open Sponsor decisions (items only, none resolved here)
+## 8. Sponsor decisions
+
+Decided on 2026-11-02: items 1, 2, 4, 5, 6, 8, 10 and 11 are approved or accepted as recommended (item 1 as constitution 1.2 and the matching `security.md` text; item 4 at 35.75 h, backend 20.7 h). Items 3, 7 and 9 stay deferred: the task asks the Sponsor only if the case occurs. The list below keeps the original wording for traceability.
 
 1. Amendment of the SC-33 sentence in `constitution.md` and the matching text in `security.md` for the launcher; needed before Task 13.
 2. Whether `SqliteDataSourceProvider` setting the per-connection keys through the wrapped data source counts as the constitution's "JDBC URL or `connection-init-sql`" mechanism, or an amendment is wanted; approval of the native SQL paragraph of section 2.
