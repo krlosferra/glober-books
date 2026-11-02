@@ -55,7 +55,7 @@ Work can stop at any time for lack of usage. Resume with: `git fetch`, read this
 | 11 | Frontend logic and API client (thin) | frontend | DONE | sdd-frontend-developer | `feature/task-11-logic-and-client-thin` | 1 | d8cdb7f | ACCEPT WITH FOLLOW-UPS (handoff 049) | PASS WITH CONDITIONS (handoff 050) | | Merged (pull request 8, squash); brief 046, delivery 048. Conditions carried to Tasks 12, 35 and 45 |
 | 03b | Start policy and configuration | backend | DONE | sdd-java-architect | `feature/task-03b-start-policy-config` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 055) | PASS (handoff 056) | | Merged 172e1c3 (pull request 10, squash); compact brief 053, delivery 054. Follow-ups: 34a brief (guard after StartupPolicy, not the sole start path); SEC-F-105 to 34b; SEC-F-106 and System.out cleanup in the next backend task |
 | 05 | Error foundation | backend | DONE | sdd-java-architect | `feature/task-05-error-foundation` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 059) | PASS WITH CONDITIONS (handoff 060) | | Merged 7a34188 (pull request 11, squash); compact brief 057, delivery 058. Conditions carried: SEC-F-108 (first task that builds details), SEC-F-109 (Task 22), SEC-F-110 (Task 06 brief: no getWriter before the writer) |
-| 06 | Thin gate, exception advice and container error report | backend | IN_PROGRESS | sdd-java-architect | `feature/task-06-thin-gate` | 1 | | | | | Compact brief: handoff 061 |
+| 06 | Thin gate, exception advice and container error report | backend | IN_REVIEW | sdd-java-architect | `feature/task-06-thin-gate` | 1 | | | | | Compact brief 061; delivery 062 (commits local, not pushed) |
 
 ## Spec coverage
 

@@ -84,3 +84,13 @@
 - Carried cleanups from the 03b audit: stray `System.out` removed from `StartupPolicyIntegrationTest`; the file-API scan in `StartupPolicyTest` now resolves `src/main/java` from the class location, not the working directory.
 - Notes: Appendix A gives informative text for 8 codes only; the texts of the other 8 are new fixed strings chosen here (flagged in handoff 058). The writer owns a private `JsonMapper` (SpotBugs EI_EXPOSE_REP2 on an injected mapper). `DuplicateErrorBody` and `ApiException` stay with Task 22.
 - Details: handoff 058.
+
+## Task 06: Thin gate, exception advice and container error report
+
+- Date: 2026-11-02
+- Branch: `feature/task-06-thin-gate`
+- Attempt: 1
+- Commits: see `git log main..feature/task-06-thin-gate` (all subjects end with `[Task-6]`)
+- Built: `GlobalExceptionHandler` (500 and the four routing exceptions, JSON even for `Accept: text/xml`, one log line without the message), `TomcatErrorReportCustomizer` (error valve with `showReport=false`, `showServerInfo=false`; connector `continueResponseTiming=onRead`), `HeaderPolicy`, `BoundedBodyRequest`, `RequestGateFilter` (highest precedence, `final`, security headers re-applied on `reset` and `sendError`).
+- Notes: Boot 4.1.2 differs from the plan: the encoding switch is `spring.servlet.encoding.enabled=false` (plan: `server.servlet.encoding...`); the web server classes live in `org.springframework.boot.tomcat.servlet`. Tomcat sends `100 Continue` before the application runs by default, so `continueResponseTiming=onRead` is set to meet SC-06. SpotBugs (no exclusion allowed) needed the filter to be `final` and to hold a lambda, not the writer.
+- Details: handoff 062.
