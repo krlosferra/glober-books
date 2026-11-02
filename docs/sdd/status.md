@@ -47,8 +47,8 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 | 01 | Maven scaffold and build proofs | backend | DONE | sdd-java-architect | `chore/task-01-maven-scaffold` | 1 | | ACCEPT (handoff 035) | PASS (handoff 036) | | Merged as d6023e1 (pull request 5, squash); brief 033, delivery 034 |
 | 02 | Quality gates | backend | DONE | sdd-java-architect | `chore/task-02-quality-gates` | 1 | | ACCEPT (handoff 043) | PASS (handoff 044) | | Pull request 7 (squash); brief 039, delivery 040 |
 | 10 | E2E toolchain and pins | frontend | DONE | sdd-frontend-developer | `chore/task-10-e2e-toolchain` | 1 | c731108 | ACCEPT WITH FOLLOW-UPS (handoff 041) | PASS WITH CONDITIONS (handoff 042) | | Pull request 6 (squash); brief 037, delivery 038. Follow-ups: re-derive the frontend agent tool list and fix frontend-testing.md section 6 (SEC-F-086) |
-| 03a | SQLite data source, claim and clock | backend | IN_PROGRESS | sdd-java-architect | `feature/task-03a-sqlite-data-source` | 1 | | | | | Brief: handoff 045 |
-| 11 | Frontend logic and API client (thin) | frontend | IN_PROGRESS | sdd-frontend-developer | `feature/task-11-logic-and-client-thin` | 1 | | | | | Parallel to 03a; worktree /home/user/gb-task11; brief 046 |
+| 03a | SQLite data source, claim and clock | backend | IN_REVIEW | sdd-java-architect | `feature/task-03a-sqlite-data-source` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 051) | PASS WITH CONDITIONS (handoff 052) | | Pull request 9 (squash); brief 045, delivery 047. Conditions carried: SEC-F-098 to 034a and the 03b/04 briefs; SEC-F-099/100/103 to 03b |
+| 11 | Frontend logic and API client (thin) | frontend | DONE | sdd-frontend-developer | `feature/task-11-logic-and-client-thin` | 1 | d8cdb7f | ACCEPT WITH FOLLOW-UPS (handoff 049) | PASS WITH CONDITIONS (handoff 050) | | Merged (pull request 8, squash); brief 046, delivery 048. Conditions carried to Tasks 12, 35 and 45 |
 
 ## Spec coverage
 
