@@ -1,0 +1,50 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:./data/globerbooks.db
+    hikari:
+      maximum-pool-size: 1
+      connection-timeout: 5000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
+  sql:
+    init:
+      mode: always
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    deserialization:
+      fail-on-unknown-properties: true
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: false
+    formcontent:
+      filter:
+        enabled: false
+    log-request-details: false
+  servlet:
+    multipart:
+      enabled: false
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+server:
+  address: 127.0.0.1
+  forward-headers-strategy: none
+  max-http-request-header-size: 8KB
+  error:
+    whitelabel:
+      enabled: false
+  tomcat:
+    threads:
+      max: 8
+      min-spare: 2
+    max-connections: 128
+    accept-count: 128
+    connection-timeout: 5s
+    max-swallow-size: 16KB
+    accesslog:
+      enabled: false
