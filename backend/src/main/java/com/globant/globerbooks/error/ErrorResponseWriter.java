@@ -1,0 +1,60 @@
+package com.globant.globerbooks.error;
+
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
+
+/**
+ * Writes an error envelope, and nothing else, to a servlet response. Used by filters and by
+ * the response wrapper.
+ */
+@Component
+public class ErrorResponseWriter {
+
+    /** Explicit content type of every error body. */
+    public static final String CONTENT_TYPE = "application/json; charset=UTF-8";
+
+    private final ErrorBodyFactory factory;
+    private final ObjectMapper mapper;
+
+    /**
+     * Creates the writer.
+     *
+     * @param factory the body factory
+     * @param mapper the JSON mapper
+     */
+    public ErrorResponseWriter(ErrorBodyFactory factory, ObjectMapper mapper) {
+        this.factory = factory;
+        this.mapper = mapper;
+    }
+
+    /**
+     * Resets the response and writes the envelope for a code without details.
+     *
+     * @param response the response
+     * @param code the error code
+     * @throws IOException when the response cannot be written
+     */
+    public void write(HttpServletResponse response, ErrorCode code) throws IOException {
+        write(response, code, factory.create(code));
+    }
+
+    /**
+     * Resets the response and writes a prepared envelope with the status of the code.
+     *
+     * @param response the response
+     * @param code the error code, which decides the status
+     * @param body the envelope
+     * @throws IOException when the response cannot be written
+     */
+    public void write(HttpServletResponse response, ErrorCode code, ErrorBody body) throws IOException {
+        byte[] bytes = mapper.writeValueAsBytes(body);
+        response.resetBuffer();
+        response.setStatus(code.status());
+        response.setContentType(CONTENT_TYPE);
+        response.setContentLength(bytes.length);
+        response.getOutputStream().write(bytes);
+        response.flushBuffer();
+    }
+}
