@@ -45,8 +45,8 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 | Task | Title | Layer | State | Owner agent | Branch | Attempts | Merge commit | Audit | Security | Acceptance | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 01 | Maven scaffold and build proofs | backend | DONE | sdd-java-architect | `chore/task-01-maven-scaffold` | 1 | | ACCEPT (handoff 035) | PASS (handoff 036) | | Merged as d6023e1 (pull request 5, squash); brief 033, delivery 034 |
-| 02 | Quality gates | backend | IN_PROGRESS | sdd-java-architect | `chore/task-02-quality-gates` | 1 | | ACCEPT (handoff 043) | | | Brief: handoff 039 |
-| 10 | E2E toolchain and pins | frontend | IN_PROGRESS | sdd-frontend-developer | `chore/task-10-e2e-toolchain` | 1 | | | | | Parallel to Task 02; worktree /home/user/gb-task10; brief 037 |
+| 02 | Quality gates | backend | DONE | sdd-java-architect | `chore/task-02-quality-gates` | 1 | | ACCEPT (handoff 043) | PASS (handoff 044) | | Pull request 7 (squash); brief 039, delivery 040 |
+| 10 | E2E toolchain and pins | frontend | DONE | sdd-frontend-developer | `chore/task-10-e2e-toolchain` | 1 | c731108 | ACCEPT WITH FOLLOW-UPS (handoff 041) | PASS WITH CONDITIONS (handoff 042) | | Pull request 6 (squash); brief 037, delivery 038. Follow-ups: re-derive the frontend agent tool list and fix frontend-testing.md section 6 (SEC-F-086) |
 
 ## Spec coverage
 
