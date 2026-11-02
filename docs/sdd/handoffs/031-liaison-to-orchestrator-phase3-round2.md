@@ -96,3 +96,34 @@ Plan 0.2 against the constitution: layering, no new technology, native SQL justi
 - Java architect: R2-03.
 - Orchestrator: run `git diff 98bad0d -- docs/sdd/spec.md` against the expectation in section 1 and report; route the above; round 3 is then a check of R2-01 and R2-02 only (the rest can be confirmed by diff at the gate).
 - Next gate unlocked after those: Phase 3 gate (Liaison and Security verdicts, Sponsor approval of the items in plan section 8).
+
+## Round 3 (final Phase 3 check)
+Mode: D, with a read of the constitution amendment. Artifacts: `tasks.md` 0.5, `plan.md` N-1 and section 8, `plan-appendix.md` AP-7.1 and AP-11.1, `constitution.md` 1.2. Limit: this session has no shell, so `git diff 98bad0d -- docs/sdd/constitution.md` was not run; item 2 was checked by reading and the orchestrator must run the diff.
+
+### 1. R2-01 to R2-10
+| ID | Status | Evidence |
+|---|---|---|
+| R2-01 | CLOSED | Task 12 `Depends on: 11, 09`. |
+| R2-02 | CLOSED | Section 0 rule for UI tasks now limits MCP evidence to criteria the real page can provoke against the listed backend dependencies, and evidences stub-only criteria by logic tests plus the later test task. Dependencies added: Task 25 on 23b, 26 and 27 on 23a, 36 on 31, 37 and 38 on 31. |
+| R2-03 | CLOSED | `plan.md` N-1 now says CR-9. |
+| R2-04 | CLOSED | Increment 1 = 660; 625+660+460+310 = 2,055; +90 = 2,145; backend 1,150+90 = 1,240; frontend 905 (sum 2,145); 35.75 h and 20.7 h. Arithmetic is consistent. |
+| R2-05 | CLOSED | Inputs cite `plan.md` and `plan-appendix.md` 0.2. |
+| R2-06 | CLOSED | Task 04 AC1 (stored DDL equals normalised `schema.sql`); Task 42 AC2 (native queries and JDBC outside `config.sqlite`). |
+| R2-07 | CLOSED | Task 13 AC3 lists the five variables of AP-9.2. |
+| R2-08 | CLOSED | Tasks 08, 13, 41, 42 on `chore/` branches; section 0 exempts the `progress.md` note on every branch. |
+| R2-09 | CLOSED | Task 34b AC3 (ii) asserts the hash after the rollback equals the hash after the refusal, non-zero exit, no book data; Task 28 AC3 uses "first successful list load that was requested after the add completed". |
+| R2-10 | CLOSED | AP-7.1 and AP-11.1 cite CR-2 and CR-4. |
+
+### 2. Constitution 1.2
+Version 1.2 and the changelog line describe only SC-33. The SC-33 bullet now lets the launcher create the `mkdtemp` directory, requires command-line arguments, an allowlisted environment, a working directory inside the temporary directory and the hostile-environment decoy run. I found no other section that mentions a 1.2 change. Without the diff I cannot exclude an unmarked edit elsewhere; the orchestrator should confirm that the diff shows hunks only in the SC-33 bullet, the version line and the changelog. Note: the amendment goes beyond "the isolation sentence" in one respect, it also adds the allowlist and the decoy run; this matches handoffs 026 and 029 and Task 13 AC2 and AC3, and the Sponsor approved it on 2026-11-02.
+
+### 3. Plan section 8
+Correct. Items 1, 2, 4, 5, 6, 8, 10, 11 are recorded as decided (item 4 at 35.75 h and 20.7 h); items 3, 7 and 9 are deferred and ask the Sponsor only if the case occurs. Item 1 matches constitution 1.2. Item 8 still names CR-1 to CR-9 and DEC-034 for approval at the Phase 3 gate before Task 11.
+
+### 4. Residual MINOR remarks (no gate effect, for the owners)
+- `plan.md` header line 7 cites `tasks.md` 0.4; it is 0.5.
+- `plan.md` section 7 cost line still says 35.8 h and 20.75 h; section 8 and `tasks.md` say 35.75 h and 20.7 h. Align on one set.
+- The `status.md` header paragraph (line 5) still says "review round 1".
+
+### Final Phase 3 Liaison verdict
+**APPROVED.** No BLOCKER or MAJOR open. The gate still needs the Security verdict (already PASS in handoff 032) and Sponsor approval of CR-1 to CR-9 and DEC-034 (Definition of Ready for Task 11). Next step: the Phase 3 gate, then Phase 4 with Task 01 and Task 09 briefs.

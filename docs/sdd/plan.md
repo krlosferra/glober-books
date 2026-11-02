@@ -3,8 +3,8 @@
 - Owner: Orchestrator (assembled from the Java architect's section, handoff 022, and the frontend developer's section, handoff 021; revised from handoffs 027, 028, 029); the PM owns `tasks.md`
 - Version: 0.2 (Phase 3 draft, review round 2 of 3)
 - Last updated: 2026-11-02
-- Changelog: 0.2 (2026-11-02) applies round 1 findings (handoffs 025, 026) as written in handoffs 027 to 029: task ids follow `tasks.md` 0.4 (03a/03b, 23a/23b, 34a/34b); error report, limits, start order, claim and pool, validator order, native SQL paragraph, launcher, risks X-12 and N-10; details moved to AP-12; open Sponsor items listed at the end. 0.1: first draft.
-- Inputs: `constitution.md` 1.1, `spec.md` 0.4.3 (change requests CR-1 to CR-9 pending), `security.md`, `delivery-strategy.md` 1.0, `tasks.md` 0.4
+- Changelog: 0.2 (2026-11-02) applies round 1 findings (handoffs 025, 026) as written in handoffs 027 to 029: task ids follow `tasks.md` 0.5 (03a/03b, 23a/23b, 34a/34b); error report, limits, start order, claim and pool, validator order, native SQL paragraph, launcher, risks X-12 and N-10; details moved to AP-12; open Sponsor items listed at the end. 0.1: first draft.
+- Inputs: `constitution.md` 1.1, `spec.md` 0.4.3 (change requests CR-1 to CR-9 pending), `security.md`, `delivery-strategy.md` 1.0, `tasks.md` 0.5
 - Detail that does not fit three to five pages is in `plan-appendix.md` (class table, request pipeline, code sources, tiers by task, frontend logic tests, E2E layout, tooling checks, SQLite start-up details, open assumptions). The appendix is part of the plan; the plan never overrides the constitution or the spec.
 
 ## 1. Shape of the solution
@@ -129,7 +129,7 @@ The task list, estimates and dependencies are in `tasks.md`; this plan fixes onl
 | N-10 | Planted or hot journal beside an invalid file (R-20 proposed) | Cases in Task 34b AC3; accepted residual risk is a Sponsor matter |
 | F-axe | The accessibility checker may be blocked by the CSP or Trusted Types | Runs in test code only; first try with no bypass; if one is needed it is a `bypassCSP` on a dedicated context inside `us-014-accessibility.spec.ts` (never global, never for the guard tests); the application CSP and headers are never relaxed (Sponsor decision 2026-11-02; SEC-F-076) |
 
-Cost: about 35.8 h of task time for the release scope (Increments 0 to 3 plus Tasks 49 and 50, 53 tasks; backend 20.75 h), about 45 h with the rework allowance; the Sponsor accepted about 32 h on 2026-11-02 against the 6 to 8 h of DEC-022 and is asked to confirm the new figure.
+Cost: about 35.75 h of task time for the release scope (Increments 0 to 3 plus Tasks 49 and 50, 53 tasks; backend 20.7 h), about 45 h with the rework allowance; the Sponsor accepted about 32 h on 2026-11-02 against the 6 to 8 h of DEC-022 and is asked to confirm the new figure.
 
 ## 8. Sponsor decisions
 
@@ -138,7 +138,7 @@ Decided on 2026-11-02: items 1, 2, 4, 5, 6, 8, 10 and 11 are approved or accepte
 1. Amendment of the SC-33 sentence in `constitution.md` and the matching text in `security.md` for the launcher; needed before Task 13.
 2. Whether `SqliteDataSourceProvider` setting the per-connection keys through the wrapped data source counts as the constitution's "JDBC URL or `connection-init-sql`" mechanism, or an amendment is wanted; approval of the native SQL paragraph of section 2.
 3. Approval, at the time and never before, of the two `schema.sql` fallbacks (`typeof` CHECKs; stored key and index).
-4. Confirmation of the release-scope figure (35.8 h, backend 20.75 h) against the accepted figure of about 32 h.
+4. Confirmation of the release-scope figure (35.75 h, backend 20.7 h) against the accepted figure of about 32 h.
 5. The documented limit for the race between the directory check and the pool opening (Task 34a); residual risk R-20 (hot journal beside an invalid file) and the CR-9 closing clause.
 6. `-Xmx512m` as a README run requirement and the course of action if Task 41 cannot pass (X-12); `max-swallow-size 16KiB` as a limit next to the SC-06 values.
 7. If the Task 16 drip test shows a connection surviving: a total read deadline or an accepted limit.
