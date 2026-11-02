@@ -14,3 +14,14 @@
 - Pins verified: JDK 21.0.12.1 (`--release 21`); Maven 3.9.16 and maven-wrapper 3.3.4 (only-script form, so no `wrapperSha256Sum`); Spring Boot parent 4.1.2; `jacoco-maven-plugin` 0.8.16; compiler 3.15.0 and Surefire 3.5.6 as managed by the BOM. Maven distribution SHA-256 `5af3b743dd8b876b5c45da33b676251e5f1687712644abb4ee519ca56e1d89ce` computed from the downloaded zip; Central publishes only `.sha512` (`ed41650d...454af3`), and the SHA-512 computed from the same zip equals it.
 - Recorded negative runs (all reverted): wrong `distributionSha256Sum` fails; impossible JaCoCo threshold fails; raw-type warning fails under `-Xlint:all -Werror`; banned coordinate in the committed tree fails `RuntimeClasspathBanTest`; test scripts, source maps and dotfiles in `frontend/` are absent from the jar.
 - Deviations: placeholder `frontend/index.html` (orchestrator ruling); JaCoCo gate is vacuous (0 classes) while `GloberBooksApplication` is excluded; SC-30 class and mandatory-property proofs deferred to Tasks 08 and 03b (orchestrator ruling). Details in handoff 034.
+
+## Task 10: E2E toolchain and pins
+
+- Date: 2026-11-02
+- Branch: `chore/task-10-e2e-toolchain`
+- Attempt: 1
+- Commits: see `git log chore/task-10-e2e-toolchain` (all subjects end with `[Task-10]`)
+- Verification commands (from `e2e/`, Node v24.22.2): `npm ci`; `npx playwright --version`; `npx playwright install chromium`; `npm audit --audit-level=high`; `npm ls --all`; lockfile `resolved` host check; one run of `npx @playwright/mcp@0.0.83` with the explicit flags (`initialize` and `tools/list` only).
+- Result: `@playwright/test` 1.64.1 exact, `engines.node` 24.22.2, `.nvmrc` 24.22.2, `.npmrc` with `ignore-scripts`, `save-exact`, `engine-strict`. `npm ci` installs 3 packages; audit 0 vulnerabilities; 3 `resolved` entries, all `registry.npmjs.org`; no `typescript`, no `tsconfig`. Chromium v1248 installed (about 681M added).
+- MCP: pre-release Playwright `1.64.0-alpha-1790635538000`; 25 tools exposed; 17 match the 24-name allowlist, 7 allowlisted names not exposed with these flags, 8 exposed names not allowlisted (follow-up routed by the orchestrator).
+- Deviations: sandbox default Node was v22.22.0; the pinned Node was supplied from the official tarball (checksum from the same origin). `cdn.playwright.dev` allow-listed by the Sponsor for the browser download. Details in handoff 038.

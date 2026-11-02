@@ -7,7 +7,7 @@
 
 Created: `.nvmrc`, `e2e/package.json`, `e2e/.npmrc`, `e2e/package-lock.json`, `docs/sdd/progress-task-10.md`, this handoff. Nothing else changed. `.gitignore` already covers `node_modules/`; nothing from the browser cache or the MCP output directory is staged.
 
-Progress record: `docs/sdd/progress.md` was absent, so I created `docs/sdd/progress-task-10.md` (the orchestrator merges it). `status.md` has no Task 10 row; I proceeded on the orchestrator's READY ruling and did not edit `status.md`.
+Progress record (updated after review fix F1): main with Task 01 was merged into the branch, the Task 10 entry was appended to `docs/sdd/progress.md` and the temporary `docs/sdd/progress-task-10.md` was deleted (one commit, `docs(progress): ... [Task-10]`). `status.md` has no Task 10 row; I proceeded on the orchestrator's READY ruling and did not edit `status.md`.
 
 ## 2. How the pinned Node was supplied (deviation)
 
@@ -61,7 +61,29 @@ npx @playwright/mcp@0.0.83 --headless --isolated --block-service-workers --no-we
 - npx downloaded the MCP package from the registry during this run; its dependency tree was not audited (it is not in `package.json`).
 
 ### Scope
-`git status --short` and `git diff --stat` of the commit show only the files of section 1.
+Commit author line: `krlosferra <carlos.ferra@globant.com>` (configured human identity, unchanged).
+
+`git diff --stat FETCH_HEAD...HEAD` (branch against main with Task 01, taken before the F1 commit; the F1 commit then removes `progress-task-10.md` and adds 11 lines to `progress.md`, and this handoff edit adds a few lines):
+```
+ .../037-liaison-to-frontend-task-10-brief.md       | 97 ++++++++++++++++++++++
+ .../038-frontend-to-liaison-task-10-delivery.md    | 73 ++++++++++++++++
+ docs/sdd/progress-task-10.md                       |  7 ++
+ e2e/.npmrc                                         |  3 +
+ e2e/package-lock.json                              | 63 ++++++++++++++
+ e2e/package.json                                   | 12 +++
+ 6 files changed, 255 insertions(+)
+```
+`git status --short` before the F1 commit (the two untracked files are the Liaison and Security handoffs 041 and 042, not mine and not committed by me):
+```
+D  docs/sdd/progress-task-10.md
+M  docs/sdd/progress.md
+?? docs/sdd/handoffs/041-liaison-to-orchestrator-task-10-audit.md
+?? docs/sdd/handoffs/042-security-to-orchestrator-task-10-review.md
+```
+The `.nvmrc` already existed on main with `24.22.2`, so it is unchanged.
+
+### Setup note: how the pinned Node was supplied
+The sandbox default is Node v22.22.0, not the pin. The pinned Node v24.22.2 came from the official linux-x64 tarball on nodejs.org, unpacked outside the repository, with `PATH` prefixed for every command. Its SHA-256 was checked against the SHASUMS256.txt published at the same origin. Provenance beyond that same-origin checksum is not proven (no independent signature or second source was verified).
 
 ## 4. Issues for the Liaison and Sponsor
 1. Allowlist vs server tool names mismatch (7 missing, 8 extra exposed), see AC4. The `tools:` list probably needs a capability flag or an update (SC-23 re-derivation). I did not edit the agent files.
