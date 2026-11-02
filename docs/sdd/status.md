@@ -35,7 +35,7 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 |---|---|---|---|---|---|
 | 1 Constitution | APPROVED: constitution 1.0 | round 3: APPROVED WITH CHANGES (handoff 004), MAJORs applied | round 3: PASS WITH CONDITIONS (handoff 006); guard fixes applied; platform steps verified (security.md section 10) | approved 2026-10-30 | 2026-10-30 |
 | 2 Specify | APPROVED: spec 0.4.1 | round 3: APPROVED (handoff 016) | round 3: PASS at spec level (handoff 019) | approved 2026-10-30 (confirmed: 2 s add bound is a security bound and is never cut; 409 for DUPLICATE_BOOK and LIBRARY_FULL; RATING_NOT_ALLOWED stays 400) | 2026-10-30 |
-| 3 Plan and tasks | in review, round 1: plan.md 0.1, plan-appendix.md 0.1, tasks.md 0.3 (53 tasks, Increment 0 split into 0a and 0b), spec change requests CR-1 to CR-9 (spec 0.4.2 draft) | | | | |
+| 3 Plan and tasks | in review, round 1: plan.md 0.1, plan-appendix.md 0.1, tasks.md 0.3 (53 tasks, Increment 0 split into 0a and 0b), spec change requests CR-1 to CR-9 (spec 0.4.2 draft) | | round 1: PASS WITH CONDITIONS (handoff 026): no CRITICAL or HIGH; 7 MEDIUM conditions SEC-F-066 to SEC-F-072 to close in plan/tasks before the gate; CR-1 to CR-9 acceptable; tiers confirmed | | |
 | 4 Implement | not started | | | | |
 | 5 Drift / change | not started | | | | |
 | 6 Contrast | not started | | | | |
