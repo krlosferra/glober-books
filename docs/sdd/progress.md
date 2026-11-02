@@ -73,3 +73,14 @@
 - SEC-F-098 (recorded for Task 34a): the `DataDirectoryGuard` must run before `SqliteDataSourceProvider`, and the provider is not the sole start path (it follows symlinks and creates storage itself); the guard, not the provider, is the control.
 - Note: the provider is not yet wired as the application's `DataSource`; until Task 34a/34b the context uses Boot's own pool (the integration test pre-creates the directory of a valid path).
 - Details: handoff 054.
+
+## Task 05: Error foundation
+
+- Date: 2026-11-02
+- Branch: `feature/task-05-error-foundation`
+- Attempt: 1
+- Commits: see `git log main..feature/task-05-error-foundation` (all subjects end with `[Task-5]`)
+- Built: `ErrorCode` (16 codes, statuses and fixed texts of Appendix A), `ErrorBody` (with nested `FieldProblem`; `details` is a typed list, never `Object`), `ErrorBodyFactory` (the one factory, injected `Clock`, format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`), `ErrorResponseWriter` (explicit `application/json; charset=UTF-8`, writes only the envelope), `ErrorBodyFactoryTest` (33 cases).
+- Carried cleanups from the 03b audit: stray `System.out` removed from `StartupPolicyIntegrationTest`; the file-API scan in `StartupPolicyTest` now resolves `src/main/java` from the class location, not the working directory.
+- Notes: Appendix A gives informative text for 8 codes only; the texts of the other 8 are new fixed strings chosen here (flagged in handoff 058). The writer owns a private `JsonMapper` (SpotBugs EI_EXPOSE_REP2 on an injected mapper). `DuplicateErrorBody` and `ApiException` stay with Task 22.
+- Details: handoff 058.
