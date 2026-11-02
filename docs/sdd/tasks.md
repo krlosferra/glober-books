@@ -1,11 +1,11 @@
 # GloberBooks Task Backlog
 
 - Owner: PM (`sdd-product-manager`)
-- Version: 0.2
-- Last updated: 2026-10-30
+- Version: 0.3
+- Last updated: 2026-11-02
 - Status: Draft (Phase 3, review round 1 of 3). Awaiting the Liaison and Security reviews and the Sponsor gate. Definitions only: task state lives in `status.md`.
 - Inputs: `delivery-strategy.md` v1.0, `spec.md` v0.4.2 (draft change requests CR-1 to CR-9 on top of the approved 0.4.1), `constitution.md` 1.1, `security.md`, handoff 022 (lean backend plan, tasks B01 to B27; it replaces handoff 020) and handoff 021 (frontend plan, candidates F0.1 to F4.3).
-- Sponsor decisions applied (2026-10-30): spec frozen except change requests; exercise release = Increments 0 to 3 with every P0 row; Increment 4 = P1 hardening, later and time permitting; Increment 0 is a thin walking skeleton; SQLite uses the default rollback journal with exclusive locking (no WAL) and the schema of handoff 022 part A.4; static content by our own controller; `TRACE` answered by the container with a pre-application `405`. Still open and not decided here: whether to accept about 21 h of P0 backend work against the indicative 6 to 8 h (022 question S-1), and where the tag `v0.1` goes (022 question S-2).
+- Sponsor decisions applied (2026-10-30): spec frozen except change requests; exercise release = Increments 0 to 3 with every P0 row; Increment 4 = P1 hardening, later and time permitting; Increment 0 is a thin walking skeleton; SQLite uses the default rollback journal with exclusive locking (no WAL) and the schema of handoff 022 part A.4; static content by our own controller; `TRACE` answered by the container with a pre-application `405`. Sponsor decisions of 2026-11-02: the full P0 scope (about 32 h of task time for Increments 0 to 3) is accepted against the indicative 6 to 8 h; Increment 0 is split into 0a (Tasks 01 to 08, API skeleton) and 0b (Tasks 09 to 14, page and smoke); change requests CR-1 to CR-9 go to review; Tasks 49 and 50 run before the release tag and the accessibility checker of Task 43 runs in tests only, without relaxing the application CSP. The tag `v0.1` goes after Task 08 (0a) and `v0.2` after Task 14 (0b); the release tag follows the end of Increment 3 and Tasks 49 and 50, and the Sponsor names later tags at each increment plan.
 
 ## 0. How to read this backlog
 
@@ -45,7 +45,9 @@ Findings the Sponsor must see:
 5. **PM deviation from 022 (for the Liaison and Security):** the release sweep (SpotBugs triage, grep gates, dependency tree against baseline, coverage review) is split out of B27 into Task 42, in Increment 3, because the release definition (criteria 5 and 6) needs it before the Security pre-release verdict; the long runs stay in Increment 4 (Task 51).
 6. **P1 rows after the release (022 question P-2).** `spec.md` section 1 allows only measurements to be cut. Tasks 49 and 50 are not measurements. The PM recommends running Tasks 49 and 50 (90 minutes) before the release tag; otherwise the delivery report must list those rows as open, as the spec requires.
 
-## 2. Increment 0: walking skeleton (Tasks 01 to 14)
+## 2. Increment 0: walking skeleton (Tasks 01 to 14), split by the Sponsor into 0a and 0b
+
+**0a (Tasks 01 to 08): API skeleton.** Runs with `./mvnw spring-boot:run`, adds and lists books through the API, every gate green. Tag `v0.1` after Task 08. **0b (Tasks 09 to 14): page and smoke.** The page is served, one Playwright smoke passes, README run instructions work on a clean clone. Tag `v0.2` after Task 14. Each part ends with the Sponsor trying it and a short `progress.md` note.
 
 Goal: a running application that adds and lists books through the API and the page, with every gate green. Gate rows (P0): E-04, E-07 to E-11, E-12 to E-14, E-16, E-21, E-23, E-09 (declared and chunked rows), E-15 and E-39 (application rows) and E-30 as exercised by Task 09, mandatory properties effective, US-010.1, US-011.1, US-011.2, US-014.6 (smoke), `hygiene` green. Deferred to Increment 1: route table, `Accept`, query and id checks, container error path, text policy, duplicates, capacity, filter, dialogs.
 
@@ -594,6 +596,8 @@ Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-0
 
 ## 6. Increment 4: P1 hardening (Tasks 49 to 53), later and time permitting
 
+Sponsor decision 2026-11-02: Tasks 49 and 50 run before the release tag; Tasks 51 to 53 stay after it, time permitting.
+
 Every task is P1 or P2 and never blocks the release (P0 rows that touch the never-cut list are already in Increments 1 to 3). See finding 6 of section 1 about running Tasks 49 and 50 before the tag.
 
 ### Task 49: Raw-socket run (pre-application answers)
@@ -781,5 +785,6 @@ Merging changes the number of reviews, not the hours; each merged task would run
 With all eleven merges the total is 42 tasks and Increment 0 has 12. Reaching about 8 in Increment 0 is possible only by splitting it as in finding 2 of section 1 (eight backend tasks first, the page and smoke as "0b").
 
 ## Changelog
+- 0.3 (2026-11-02): Sponsor decisions applied: budget accepted, Increment 0 split into 0a and 0b with tags after Task 08 and Task 14, Tasks 49 and 50 before the release tag, accessibility checker in tests only.
 - 0.2 (2026-10-30): Re-baselined on handoff 022 (27 backend tasks, files rule accepted) and 021; Increment 0 redrawn to 14 tasks with the page and the smoke; sweep split out of B27 into Increment 3; tier table rebuilt from 022 AP-5 with differences flagged; spec change request CR-9 acknowledged.
 - 0.1 (2026-10-30): First draft on handoff 020 (superseded).
