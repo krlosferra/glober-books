@@ -27,9 +27,13 @@ class RuntimeClasspathBanTest {
     private static final Path TREE_FILE = Path.of("config", "dependency-tree.txt");
 
     private static final Pattern COORDINATE =
-            Pattern.compile("([\\w.\\-]+):([\\w.\\-]+):jar:(?:([\\w.\\-]+):)?([\\w.\\-]+):(compile|runtime|test|provided)");
+            Pattern.compile("([\\w.\\-]+):([\\w.\\-]+):jar:(?:([\\w.\\-]+):)?([\\w.\\-]+)"
+                    + ":(compile|runtime|test|provided)");
 
-    /** Banned coordinates as {@code group:artifact}; {@code *} is a wildcard, a trailing {@code .*} in the group means sub-groups. */
+    /**
+     * Banned coordinates as {@code group:artifact}; {@code *} is a wildcard, a trailing {@code .*} in the group
+     * means sub-groups.
+     */
     private static final List<String> BANNED = List.of(
             "org.springframework.boot:spring-boot-starter-actuator",
             "org.springframework.boot:spring-boot-devtools",
@@ -137,7 +141,8 @@ class RuntimeClasspathBanTest {
             int split = pattern.indexOf(':');
             String groupPattern = pattern.substring(0, split);
             String artifactPattern = pattern.substring(split + 1);
-            if (groupMatches(groupPattern, coordinate.group()) && artifactMatches(artifactPattern, coordinate.artifact())) {
+            if (groupMatches(groupPattern, coordinate.group())
+                    && artifactMatches(artifactPattern, coordinate.artifact())) {
                 return true;
             }
         }

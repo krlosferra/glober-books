@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<!--
+  GloberBooks Checkstyle rule set (Checkstyle 14.3.0).
+  Source of the rules: docs/sdd/constitution.md, sections "Code Style" and
+  "Persistence Standards" (time rule); docs/sdd/security.md SC-07, SC-14, SC-27.
+  Every violation is reported with severity "error" and fails the build.
+-->
+<module name="Checker">
+  <property name="severity" value="error"/>
+  <property name="charset" value="UTF-8"/>
+  <property name="fileExtensions" value="java"/>
+
+  <!-- Constitution: max file length 300, physical lines including comments and blank lines. -->
+  <module name="FileLength">
+    <property name="max" value="300"/>
+  </module>
+
+  <!-- Constitution: line length at most 120 (Checker-level module in Checkstyle 14). -->
+  <module name="LineLength">
+    <property name="max" value="120"/>
+    <property name="ignorePattern" value="^package .*|^import .*"/>
+  </module>
+
+  <!-- Bans that need whole-file context (a text block spans several lines). -->
+  <!-- SC-07: no "select *" (also "select t.*"), case-insensitive, may span lines. -->
+  <module name="RegexpMultiline">
+    <property name="format" value="(?i)select\s+([a-z_]+\.)?\*"/>
+    <property name="message" value="SC-07: select * is banned; list the columns explicitly"/>
+  </module>
+
+  <module name="SuppressionFilter">
+    <property name="file" value="${checkstyle.suppressions.file}"/>
+  </module>
+
+  <module name="TreeWalker">
+    <!-- Single-line bans (Java-aware variant of RegexpSingleline: ignores comments).
+         Applied to src/main only through suppressions.xml. -->
+    <!-- Constitution time rule: business code never calls a wall-clock method. -->
+    <module name="RegexpSinglelineJava">
+      <property name="format"
+                value="\b(Instant|LocalDate|LocalDateTime|ZonedDateTime|OffsetDateTime)\.now\(|System\.currentTimeMillis\(|new Date\(|Clock\.system(UTC|DefaultZone)\("/>
+      <property name="message" value="TIME-RULE: wall-clock calls are banned; inject java.time.Clock"/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+
+    <!-- SC-14: logging through SLF4J only. -->
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="System\.(out|err)\b"/>
+      <property name="message" value="SC-14: System.out and System.err are banned; use SLF4J"/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="printStackTrace"/>
+      <property name="message" value="SC-14: printStackTrace is banned; use SLF4J"/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+
+    <!-- Imports. -->
+    <module name="AvoidStarImport"/>
+    <module name="UnusedImports"/>
+    <module name="RedundantImport"/>
+
+    <!-- Layout. -->
+    <module name="OneStatementPerLine"/>
+    <module name="OneTopLevelClass"/>
+
+    <!-- Constitution: max function length 50, physical lines including comments and blank lines. -->
+    <module name="MethodLength">
+      <property name="max" value="50"/>
+      <property name="countEmpty" value="true"/>
+      <property name="tokens" value="METHOD_DEF,CTOR_DEF,COMPACT_CTOR_DEF"/>
+    </module>
+
+    <!-- Naming: camelCase, at least 3 characters, "id" is the only shorter name. -->
+    <module name="PackageName">
+      <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+    </module>
+    <module name="TypeName"/>
+    <module name="ConstantName"/>
+    <module name="StaticVariableName">
+      <property name="format" value="^(id|[a-z][a-z0-9][a-zA-Z0-9]+)$"/>
+    </module>
+    <module name="MemberName">
+      <property name="format" value="^(id|[a-z][a-z0-9][a-zA-Z0-9]+)$"/>
+    </module>
+    <module name="MethodName">
+      <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
+    </module>
+    <module name="ParameterName">
+      <property name="format" value="^(id|[a-z][a-z0-9][a-zA-Z0-9]+)$"/>
+    </module>
+    <module name="LocalVariableName">
+      <property name="format" value="^(id|[a-z][a-z0-9][a-zA-Z0-9]+)$"/>
+      <property name="allowOneCharVarInForLoop" value="false"/>
+    </module>
+    <module name="LambdaParameterName">
+      <property name="format" value="^(id|[a-z][a-z0-9][a-zA-Z0-9]+)$"/>
+    </module>
+    <module name="CatchParameterName">
+      <property name="format" value="^(id|[a-z][a-z0-9][a-zA-Z0-9]+)$"/>
+    </module>
+    <module name="PatternVariableName">
+      <property name="format" value="^(id|[a-z][a-z0-9][a-zA-Z0-9]+)$"/>
+    </module>
+    <module name="RecordComponentName">
+      <property name="format" value="^(id|[a-z][a-z0-9][a-zA-Z0-9]+)$"/>
+    </module>
+
+    <!-- Javadoc on public classes and methods; @Override methods are exempt by the check itself. -->
+    <module name="MissingJavadocType">
+      <property name="scope" value="public"/>
+    </module>
+    <module name="MissingJavadocMethod">
+      <property name="scope" value="public"/>
+      <property name="allowMissingPropertyJavadoc" value="false"/>
+    </module>
+  </module>
+</module>
