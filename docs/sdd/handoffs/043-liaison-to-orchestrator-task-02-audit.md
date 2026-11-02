@@ -60,3 +60,9 @@ Readable configuration with clear comments. The seeds were never committed. No h
 2. Send the PM the one-line amendment of Task 02 (item 1) and Security the SC-27 pattern; send Security the whole delivery for its verdict.
 3. Java: a single fixup (SC-27 module, a seeded run, a pom comment for item 3, the `progress.md` line for item 13), then STOP again.
 4. The Sponsor applies the pin-table text of item 6. Task 02 can then go to the PM for acceptance and the Sponsor for approval. On approval the orchestrator updates `status.md`, opens the pull request (squash), and `progress.md` receives `[Task-2] Quality gates - ACCEPTED`. Task 03a stays blocked until then. Carry items 2 and 10 into the Task 03a brief.
+
+## Confirmation (follow-up closure)
+
+Verified by reading (no shell): `tasks.md` 0.5.1 Task 02 has AC 1a (SC-27, SEC-F-089) and the tightened time rule (`new java.util.Date()`, `.now (`, SEC-F-090); `checkstyle.xml` matches the rule and carries the SC-27 ban; `suppressions.xml` includes SC-27 and the anchored test path; `pom.xml` has the comment that SpotBugs must stay before the JaCoCo check; delivery 040 section 7 carries the three pin-table edits (Checkstyle SHA-1 only, SpotBugs "analyzed Java 21 class files without error", FSB run-only caveat plus the SpotBugs-before-JaCoCo note); `progress.md` line 29 records the SC-27 ban and the widened time rule. Not verified: `git diff --stat main..HEAD` and commit hygiene (items 7 and 8), which need a shell; the orchestrator must confirm them before opening the pull request.
+
+Final verdict: ACCEPT. The Security verdict, PM acceptance and Sponsor approval are still required.

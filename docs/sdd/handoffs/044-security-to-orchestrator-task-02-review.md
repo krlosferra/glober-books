@@ -57,3 +57,17 @@ Findings log rows:
 
 Changelog line:
 - 0.20 (2026-11-02): Task 02 review (handoff 044): SC-07, SC-14, SC-19, SC-21 evidence for the quality gates; SC-27 gate gap; SEC-F-089 to 093 added (1 MEDIUM, 2 LOW, 2 INFO). Verdict PASS WITH CONDITIONS.
+
+## Confirmation (re-verification of conditions, commits 33fe549, 168f47f, cc2ea5c)
+
+Method: read `checkstyle.xml`, `suppressions.xml`, `pom.xml`; ran `./mvnw validate` with throwaway seeds under `src/main/java/zz` and `src/test/java/zz`, then deleted them (working tree has no seed residue; clean run exit 0).
+
+- SEC-F-089 (SC-27): CLOSED. `RegexpSinglelineJava` bans `RestTemplate|RestClient|WebClient|HttpClient|HttpURLConnection|URLConnection`, `.openConnection(`, `.openStream(`, `java.net.http` (comments ignored). `SC-27` is in the test suppression message list. Seed in src/main (`new java.net.URL(..).openStream()`) fails the build (SC-27 reported among 4 errors); the same text in src/test raises no SC-27 or TIME-RULE error. The only error in the test seed was `OneStatementPerLine`, from my own seed layout, which also shows non-ban rules still apply to tests.
+- SEC-F-090 (time rule): CLOSED. Regex now covers `new\s+(java\.util\.)?Date\s*\(` and `\.\s*now\s*\(`. Seeds `new java.util.Date ()` and `java.time.Instant . now ()` fail in src/main (main-only seed `new java.util.Date ()` rc=1); both pass in src/test. Broad `.now(` also flags `Instant.now(clock)`, accepted as SEC-F-091.
+- SEC-F-092 (anchored path): CLOSED. Suppression files pattern is `[\\/]backend[\\/]src[\\/]test[\\/]`, and ClockConfig suppression is `[\\/]src[\\/]main[\\/]java[\\/].*[\\/]ClockConfig\.java$` limited to `^TIME-RULE:`. Residual hardening (inline `@SuppressFBWarnings` not governed) stays LOW, non-blocking.
+- pom: only one added line (`checkstyle`-related, no version change); pins still exact properties, no ranges.
+
+Not verified: pattern hits from fully-qualified/aliased static imports (`import static ...Instant.now` then bare `now()`): the `\.\s*now` rule needs a dot, so a bare `now()` after a static import is not caught. LOW, recommend a reviewer note; not blocking.
+
+### Final verdict: PASS
+Conditions 1 and 2 are met with evidence. Next step: Sponsor gate for Task 02. security.md update (SEC-F-089/090/092 to CLOSED, SC-27 gate evidence) is left to the owner branch, per the appendix text above.

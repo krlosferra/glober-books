@@ -45,7 +45,7 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 | Task | Title | Layer | State | Owner agent | Branch | Attempts | Merge commit | Audit | Security | Acceptance | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 01 | Maven scaffold and build proofs | backend | DONE | sdd-java-architect | `chore/task-01-maven-scaffold` | 1 | | ACCEPT (handoff 035) | PASS (handoff 036) | | Merged as d6023e1 (pull request 5, squash); brief 033, delivery 034 |
-| 02 | Quality gates | backend | IN_PROGRESS | sdd-java-architect | `chore/task-02-quality-gates` | 1 | | | | | Brief: handoff 039 |
+| 02 | Quality gates | backend | IN_PROGRESS | sdd-java-architect | `chore/task-02-quality-gates` | 1 | | ACCEPT (handoff 043) | | | Brief: handoff 039 |
 | 10 | E2E toolchain and pins | frontend | IN_PROGRESS | sdd-frontend-developer | `chore/task-10-e2e-toolchain` | 1 | | | | | Parallel to Task 02; worktree /home/user/gb-task10; brief 037 |
 
 ## Spec coverage
