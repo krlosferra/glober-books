@@ -8,5 +8,5 @@
 (filled at the end)
 
 ## Resume point
-Done: step 1 advice; step 2 Tomcat valve + raw-socket test; step 3 HeaderPolicy + HeaderPolicyTest (52 cases).
+Done: steps 1-5 committed except the integration evidence test (RequestGateFilterTest 20 tests green; application.yml spring.servlet.encoding.enabled=false added: Boot 4 key differs from plan server.servlet.encoding.enabled).
 Step 4 BoundedBodyRequest written (tested through the filter tests). Next: 5 RequestGateFilter + RequestGateFilterTest + integration evidence (disable CharacterEncodingFilter); 6 evidence, progress.md, status.md row.
