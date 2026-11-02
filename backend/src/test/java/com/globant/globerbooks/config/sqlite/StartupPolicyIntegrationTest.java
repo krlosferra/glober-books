@@ -89,7 +89,6 @@ class StartupPolicyIntegrationTest {
             expected.put("server.tomcat.accept-count", "128");
             expected.put("server.tomcat.max-swallow-size", "16KB");
             expected.forEach((key, value) -> {
-                System.out.println("EFFECTIVE " + key + " = " + env.getProperty(key));
                 assertThat(env.getProperty(key)).as(key).isEqualTo(value);
             });
             assertBoundValues(context);
