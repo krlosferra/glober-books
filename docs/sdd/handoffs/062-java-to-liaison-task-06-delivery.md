@@ -9,4 +9,4 @@
 
 ## Resume point
 Done: step 1 advice; step 2 Tomcat valve + raw-socket test; step 3 HeaderPolicy + HeaderPolicyTest (52 cases).
-Next: step 4 BoundedBodyRequest; 5 RequestGateFilter + RequestGateFilterTest + integration evidence (disable CharacterEncodingFilter); 6 evidence, progress.md, status.md row.
+Step 4 BoundedBodyRequest written (tested through the filter tests). Next: 5 RequestGateFilter + RequestGateFilterTest + integration evidence (disable CharacterEncodingFilter); 6 evidence, progress.md, status.md row.
