@@ -44,7 +44,7 @@ Any ──► SUPERSEDED (replaced by another item; never deleted)
 
 | Task | Title | Layer | State | Owner agent | Branch | Attempts | Merge commit | Audit | Security | Acceptance | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 01 | Maven scaffold and build proofs | backend | IN_PROGRESS | sdd-java-architect | `chore/task-01-maven-scaffold` | 1 | | | | | Brief: handoff 033 |
+| 01 | Maven scaffold and build proofs | backend | IN_REVIEW | sdd-java-architect | `chore/task-01-maven-scaffold` | 1 | | ACCEPT (handoff 035) | PASS (handoff 036) | | Awaiting Sponsor approval; brief 033, delivery 034 |
 
 ## Spec coverage
 
