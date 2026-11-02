@@ -28,5 +28,5 @@
     purpose: one file name, and only the TIME-RULE message; no other ban or rule
     is suppressed there. Approver: plan.md D6.
   -->
-  <suppress message="^TIME-RULE:" files="[\\/]src[\\/]main[\\/]java[\\/].*[\\/]ClockConfig\.java$"/>
+  <suppress message="^TIME-RULE:" files="[\\/]config[\\/]ClockConfig\.java$"/>
 </suppressions>

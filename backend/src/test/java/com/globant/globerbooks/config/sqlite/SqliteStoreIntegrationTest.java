@@ -267,16 +267,17 @@ class SqliteStoreIntegrationTest {
         Pattern wallClock = Pattern.compile(
                 "Clock\\.systemUTC|Instant\\.now|LocalDate(Time)?\\.now|new Date\\(|currentTimeMillis");
         List<String> hits = new ArrayList<>();
-        try (Stream<Path> sources = Files.walk(Path.of("src", "main", "java"))) {
+        Path root = Path.of("src", "main", "java", "com", "globant", "globerbooks");
+        try (Stream<Path> sources = Files.walk(root)) {
             for (Path source : sources.filter(path -> path.toString().endsWith(".java")).toList()) {
                 String text = Files.readString(source, StandardCharsets.UTF_8);
                 if (wallClock.matcher(text.replaceAll("(?s)/\\*.*?\\*/", "")).find()) {
-                    hits.add(source.getFileName().toString());
+                    hits.add(root.relativize(source).toString().replace('\\', '/'));
                 }
             }
         }
 
-        assertThat(hits).containsExactly("ClockConfig.java");
+        assertThat(hits).containsExactly("config/ClockConfig.java");
     }
 
     private static void assertExpectedSettings(Map<String, String> values) {
