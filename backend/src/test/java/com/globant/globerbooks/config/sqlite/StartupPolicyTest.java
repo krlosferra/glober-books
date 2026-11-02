@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.core.Ordered;
 import org.springframework.mock.env.MockEnvironment;
 
 class StartupPolicyTest {
@@ -73,13 +74,17 @@ class StartupPolicyTest {
     }
 
     @Test
-    void componentReadsTheEnvironmentAtConstruction() {
+    void postProcessorReadsTheEnvironment() {
         MockEnvironment good = new MockEnvironment().withProperty("server.address", "127.0.0.1")
                 .withProperty("spring.datasource.url", GOOD_URL);
         MockEnvironment bad = new MockEnvironment().withProperty("server.address", "0.0.0.0")
                 .withProperty("spring.datasource.url", GOOD_URL);
 
-        assertThat(new StartupPolicy(good)).isNotNull();
-        assertThatThrownBy(() -> new StartupPolicy(bad)).isInstanceOf(IllegalStateException.class);
+        StartupPolicy policy = new StartupPolicy();
+
+        assertThatCode(() -> policy.postProcessEnvironment(good, null)).doesNotThrowAnyException();
+        assertThatThrownBy(() -> policy.postProcessEnvironment(bad, null))
+                .isInstanceOf(IllegalStateException.class).hasMessage(StartupPolicy.REASON_ADDRESS);
+        assertThat(policy.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
     }
 }

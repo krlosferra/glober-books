@@ -4,16 +4,19 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.regex.Pattern;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.EnvironmentPostProcessor;
+import org.springframework.boot.SpringApplication;
+import org.springframework.core.Ordered;
+import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
  * Fail-closed start policy (SC-01, SC-39). The application starts only when the bound address is a
  * loopback literal and the datasource URL has the fixed form {@code jdbc:sqlite:<file>} with no
- * parameters. Every refusal carries a fixed reason: no URL, path, address text or book data.
+ * parameters. It runs as an environment post-processor, after the configuration files are loaded
+ * and before any bean exists, so nothing touches the database file when the start is refused.
+ * Every refusal carries a fixed reason: no URL, path, address text or book data.
  */
-@Component
-public final class StartupPolicy {
+public class StartupPolicy implements EnvironmentPostProcessor, Ordered {
 
     /** Reason used when the bound address is missing, not a literal, or not loopback. */
     public static final String REASON_ADDRESS = "Start refused: the bind address must be a loopback address.";
@@ -29,13 +32,14 @@ public final class StartupPolicy {
     private static final Pattern IPV4_LITERAL = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3}");
     private static final Pattern IPV6_LITERAL = Pattern.compile("[0-9a-fA-F:.]*:[0-9a-fA-F:.]*");
 
-    /**
-     * Checks the effective configuration at context creation, before the web server starts.
-     *
-     * @param environment the application environment (properties, environment variables, arguments)
-     */
-    public StartupPolicy(Environment environment) {
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         validate(environment.getProperty("server.address"), environment.getProperty("spring.datasource.url"));
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 
     /**

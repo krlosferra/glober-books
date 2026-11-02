@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.globant.globerbooks.GloberBooksApplication;
 import com.zaxxer.hikari.HikariDataSource;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -47,8 +49,8 @@ class StartupPolicyIntegrationTest {
     }
 
     @Test
-    void startsWithAnotherDatabasePath() {
-        Path other = tempDir.resolve("other").resolve("library.db");
+    void startsWithAnotherDatabasePath() throws IOException {
+        Path other = Files.createDirectory(tempDir.resolve("other")).resolve("library.db");
 
         try (ConfigurableApplicationContext context = start("127.0.0.1", "jdbc:sqlite:" + other)) {
             assertThat(context.isRunning()).isTrue();
