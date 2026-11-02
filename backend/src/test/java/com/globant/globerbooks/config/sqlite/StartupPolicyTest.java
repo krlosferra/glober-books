@@ -4,6 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -86,5 +94,23 @@ class StartupPolicyTest {
         assertThatThrownBy(() -> policy.postProcessEnvironment(bad, null))
                 .isInstanceOf(IllegalStateException.class).hasMessage(StartupPolicy.REASON_ADDRESS);
         assertThat(policy.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
+    }
+
+    @Test
+    void mainSourcesOutsideConfigSqliteDoNotUseFileApis() throws IOException {
+        Pattern fileApi = Pattern.compile("java\\.nio\\.file\\.Files|FileInputStream|FileChannel");
+        Path root = Path.of("src", "main", "java");
+        List<String> hits = new ArrayList<>();
+        try (Stream<Path> sources = Files.walk(root)) {
+            for (Path source : sources.filter(path -> path.toString().endsWith(".java")).toList()) {
+                String relative = root.relativize(source).toString().replace('\\', '/');
+                String text = Files.readString(source, StandardCharsets.UTF_8);
+                if (!relative.contains("/config/sqlite/") && fileApi.matcher(text).find()) {
+                    hits.add(relative);
+                }
+            }
+        }
+
+        assertThat(hits).isEmpty();
     }
 }
