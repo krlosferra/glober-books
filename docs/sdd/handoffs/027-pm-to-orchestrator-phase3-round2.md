@@ -99,5 +99,25 @@ No other sentence changed. The orchestrator's `git diff` against the 0.4.1 merge
 7. **Approval of CR-1 to CR-9 and DEC-034** at the Phase 3 gate before Task 11 is briefed; the 15-second figure remains the only new number.
 8. If the Task 43 scan cannot run without relaxing the application, the Sponsor decides (not the task).
 
+## Round 3 (answers to handoffs 031 and 032; `tasks.md` 0.5; `spec.md` 0.4.3 unchanged)
+
+| Finding | Resolution |
+|---|---|
+| R2-01 | Task 12 `Depends on: 11, 09`. |
+| R2-02 | Section 0 rule narrowed: MCP exploration evidence only for criteria the real page can provoke against the backend tasks the UI task depends on (the MCP profile has no route, evaluate or storage tools); criteria that only a stubbed response can provoke (failed list load, `LIBRARY_FULL`, network failure, `INVALID_RATING` and similar) are evidenced by logic tests and the stub tests of the named later test task. Dependencies added: Task 25 on 23b, Tasks 26 and 27 on 23a, Tasks 36, 37, 38 on 31. Item (a) is confirmed on the PM side; the frontend developer confirms AP-9.7. |
+| R2-03 | Plan text (CR-8 to CR-9 in N-1); not a PM file. Also SEC-F-082. |
+| R2-04 | Recomputed from the per-task estimates: Increment 1 is 660 min (backend 410, frontend 250); Increments 0 to 3 = 2,055 min (34.25 h); release = 2,145 min (35.75 h); backend release 1,240 min (20.7 h; 1,150 min or 19.2 h for Increments 0 to 3); frontend 905 min; after the tag 120 min; all 2,265 min (37.75 h). Increments 0, 2, 3 unchanged (625, 460, 310). The figures to confirm are therefore 35.75 h and 20.7 h; rounding to 35.8 and 20.75 in earlier handoffs is superseded. |
+| R2-05 | Header cites `plan.md` and `plan-appendix.md` 0.2. |
+| R2-06 | (a) Task 04 AC1 adds the test that the DDL in `sqlite_master` after the start equals the normalised `schema.sql` statement (the proof Task 34b compares against). (b) Task 42 AC2 adds the grep gate for native queries and JDBC statements outside `config.sqlite` (AP-12.3). |
+| R2-07, SEC-F-080 | Task 13 AC2: arguments `--server.address=127.0.0.1 --server.port=18080 --spring.datasource.url=jdbc:sqlite:<dir>/library.db`; child working directory is the launcher's own `mkdtemp` directory with no configuration file; no `SERVER_*` in the environment. AC3: the five hostile variables of AP-9.2 and the pass conditions (decoy byte-identical, serves on `127.0.0.1:18080` only, nothing on the other port or interface, data in the launcher's directory). |
+| R2-08 | Task 08 and Task 41 branches are now `chore/`; section 0 states that the `progress.md` note is exempt on every branch and that README or configuration changes use `chore/`, `feature/` or `docs/`. |
+| R2-09 | Task 34b AC3 (ii): non-zero exit with a fixed reason without book data, and the SHA-256 after the rollback equals the SHA-256 after the refusal. Task 28 AC3 uses the spec wording of US-010.7 ("first successful list load that was requested after the add completed"). |
+| R2-10 | Frontend developer (AP-7.1, AP-11.1). |
+| SEC-F-081 | Task 14 AC3: the README gives `./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m` and `java -Xmx512m -jar backend/target/globerbooks.jar`; Task 41 lists `README.md` (edit) and AC4 requires both forms with the value confirmed by the measurement. |
+| SEC-F-082 | Plan text only (see R2-03). |
+| 031 section 4, item 11 (U+0000 in a stored cell) | The PM confirms that refusing it is an application of existing text, not a new rule, with one qualification. Section 4 gives title and author the rules of BR-006 (counted in code points) and US-009.5 requires every row to satisfy the formats and limits of Section 4 with the length counted in code points; a NUL cannot be counted by the database (SQLite's `length()` stops at it, so the CHECK constraints cannot establish the stored length), so a cell containing U+0000 does not satisfy the length limit as the spec defines it, and BR-006 item 6 also forbids NUL. The qualification: US-009.5 lists only length among the text rules, so this is not a general check of BR-006 categories on stored rows (Security accepted that limit, SEC-F-077); the validator rule is "a cell with U+0000 is invalid because its length cannot be established". No spec change and no Sponsor decision needed; the Liaison may disagree and ask for a one-line clarification in US-009.5 as a further change request. |
+
+Checks I made in the file after the edits: dependencies of Tasks 12, 25, 26, 27, 36, 37, 38 and 13 as above; no number other than the totals changed; spec 0.4.3 needed no edit for these fixes.
+
 ## Requested response
 Liaison and Security: diff check of `tasks.md` 0.4 and `spec.md` 0.4.3 against the findings above (round 2); the architects: the plan changes of section 4.
