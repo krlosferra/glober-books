@@ -3,6 +3,7 @@
 - Owner: Orchestrator (proposals that change a binding rule go through the constitution's Amendment Procedure)
 - Version: 1.0
 - Last updated: 2026-10-30
+- Changelog: 2026-11-02, section 5: Increment 0 recorded as 0a (Tasks 01 to 08, tag `v0.1`) and 0b (Tasks 09 to 14, tag `v0.2`), Sponsor decision of 2026-11-02 (handoff 027). No other change.
 - Status: Approved by the Sponsor on 2026-10-30 ("accept all recommendations"). S-1 to S-5 adopted; S-6 adopted in principle and needs a constitution amendment proposal after Phase 2 closes.
 
 ## 1. Why this document exists
@@ -35,7 +36,7 @@ Each increment is a branch series merged by pull request, tagged `v0.N`, runnabl
 
 | Increment | Goal | Includes (by theme, exact tasks come from Phase 3) | Done when |
 |---|---|---|---|
-| **0. Walking skeleton** (this is Task 1) | Everything wired and green with one thin feature | Maven scaffold and pins verified, `schema.sql`, config and mandatory properties, transport filter (headers, Host, content type, body cap), error factory and global handler, add and list books through API and page, JaCoCo, Checkstyle, a minimal real-port security test, one Playwright smoke | `./mvnw verify` green, `npx playwright test --grep @smoke` green, the page lists and adds a book, `hygiene` green, README run instructions work on a clean clone |
+| **0. Walking skeleton** (this is Task 1), recorded as **0a** (API skeleton, `v0.1`) and **0b** (page and smoke, `v0.2`) | Everything wired and green with one thin feature | Maven scaffold and pins verified, `schema.sql`, config and mandatory properties, transport filter (headers, Host, content type, body cap), error factory and global handler, add and list books through API and page, JaCoCo, Checkstyle, a minimal real-port security test, one Playwright smoke | `./mvnw verify` green, `npx playwright test --grep @smoke` green, the page lists and adds a book, `hygiene` green, README run instructions work on a clean clone |
 | **1. Core library** | The reader can manage a list | Full add validation, list with filter and ordering, duplicate detection and confirmation, capacity rule | All Must stories of this slice pass their API and E2E tests |
 | **2. Progress and rating** | Track reading and rate | Status change, rating set and clear, invariants on regression, delete, get by id | Invariant and rule tests green |
 | **3. Interface quality** | Usable and accessible | Confirmations, error and empty states, loading states, accessibility and responsive criteria, remaining E2E breadth | P0 UI criteria green; cut-list items scheduled or cut |
