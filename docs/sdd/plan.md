@@ -122,7 +122,7 @@ The task list, estimates and dependencies are in `tasks.md`; this plan fixes onl
 | X-10 | `org.sqlite.tmpdir` under the data directory | Task 03a; if the driver cannot load from it the property is dropped and the risk recorded in `security.md` |
 | X-11 | The gate's route table duplicates the MVC mappings | `RouteTableTest` enumerates the controllers' mappings and fails on any difference. The table holds the routes that exist at that task: two in Task 15, seven after Task 31, which edits `RouteTable` and keeps the test green |
 | X-12 | Memory: a maximum list is about 31 MB of strings and entities per in-flight request, up to 8 in flight | Fixed `-Xmx` (proposed 512 MB, final value from Task 41) in the README command and in the C-11 (c) JVM; Task 41 AC4 passes when 8 slow readers end without `OutOfMemoryError` and the process then serves; failure goes to the Sponsor |
-| N-1 | Hot journal rollback at first open is a write before validation | Spec change CR-8 states it is not a violation |
+| N-1 | Hot journal rollback at first open is a write before validation | Spec change CR-9 states it is not a violation |
 | N-2, N-3 | Claim semantics, per-connection init and sqlite-jdbc keys come from knowledge | Task 03a reads effective values back with pragmas, proves the claim from a child JVM and after a forced eviction; fallback a no-op write transaction, decided in Task 03a |
 | N-6 | Tasks at the 45-minute ceiling (01, 03a, 06, 08, 14, 16, 21, 31, 34b) | A task that overruns is split, never extended; the first failed spike stops the task for a split (done so far: 03a/03b, 23a/23b, 34a/34b) |
 | N-9 | Exclusive lock: the database cannot be inspected with another tool while the application runs | README states it |

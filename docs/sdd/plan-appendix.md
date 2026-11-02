@@ -120,7 +120,7 @@ STRICT keeps text out of `rating`; `length()` counts code points (BR-006); NFC a
 
 | Event | Transition (spec) |
 |---|---|
-| `loadStarted(filter)` | new sequence number; `phase=loading`; entries cleared (list region shows only "Loading your books…"; no entry actions exist during a load: assumption Q-F3); count hidden |
+| `loadStarted(filter)` | new sequence number; `phase=loading`; entries cleared (list region shows only "Loading your books…"; no entry actions exist during a load: CR-2, US-010.2); count hidden |
 | `loadSucceeded(seq, response)` | ignored when `seq` is not the latest (US-010.10); else entries from the API order, `count=total`, `phase=loaded`, `everLoaded=true`, flags cleared |
 | `loadFailed(seq, failure)` | ignored when stale; else `phase=failed`, entries cleared, count hidden (US-010.7) |
 | `bookAdded(book)` | inserted at index 0 and `count+1` only when `phase=loaded` and the book matches the filter; otherwise unchanged (US-011.5, US-010.7) |
@@ -148,7 +148,7 @@ The page never sorts: it shows the API order (US-010.4) and prepends adds.
 | URLs | Root-relative `/api/v1/books...`, built only through `bookPath(id)`; no host, no port; a query only on the list and only `status` with one of the three values |
 | Requests | `Accept: application/json`; on every non-GET `Content-Type: application/json` **including `DELETE` with no body** (5.0, 5.6, 5.7, E-07). `redirect: 'error'`, `cache: 'no-store'`, no credentials. GET and DELETE carry no body at all. POST body members: `title`, `author`, `status`, and `allow_duplicate` only when true |
 | Result type | Never throws for HTTP outcomes: `{ok: true, data}` or `{ok: false, failure}` with `failure.kind` = `api` (status, `code`, mapped `fields` from `details[].field`/`message`, `existingBook` mapped by `toBook`), `network` (no response, timeout) or `unreadable` (not JSON, missing or unknown `code`, success body of the wrong shape). Branches on `code` only; `error` text is never read for display (US-013.1, US-013.5) |
-| Timeout | An `AbortController` armed with `setTimeout(function, 15000)` (a function argument, allowed by the NEVER list; a library timer so the E2E fake clock can drive it). The spec has no timeout; US-013.6 (no permanent disabled state) needs one: assumption Q-F6. Timeout and abort count as `network` (US-013.2); an aborted superseded list request is ignored, not shown |
+| Timeout | An `AbortController` armed with `setTimeout(function, 15000)` (a function argument, allowed by the NEVER list; a library timer so the E2E fake clock can drive it). The spec has no timeout; US-013.6 as changed by CR-4 states it. Timeout and abort count as `network` (US-013.2); an aborted superseded list request is ignored, not shown |
 | Concurrency | One in-flight request per form and per entry (flag checked in the handler, not only the disabled attribute: US-011.4); several entries may be in flight together; list requests carry a sequence number (Task 25) |
 | Validation | Client-side only for UX; ids from the DOM are re-validated by `bookPath` before they reach a URL |
 
@@ -280,8 +280,8 @@ Cut list (`spec.md` Section 1) in tests: `@cutlist` items live in `measurements.
 1. Maven copies `frontend/` to `static/` as in `plan.md` section 4 (one `<resources>` entry, Task 01) and the backend serves the static paths of Task 09.
 2. Root-relative URLs (`/api/v1/...`) satisfy "relative URLs" in the constitution.
 3. Native controls are used: `select` for statuses (role combobox), radio groups for filter and rating, `<dialog>`. The tests' locators depend on this (Q-F1).
-4. During a list load the entries are removed and only the loading text is shown (Q-F3).
-5. A 15 s request timeout (Q-F6).
+4. During a list load the entries are removed and only the loading text is shown (CR-2, US-010.2).
+5. A 15 s request timeout (CR-4, US-013.6).
 
 
 ### AP-11.2 Criteria hard or impossible to test or implement as written
