@@ -1,0 +1,12 @@
+{
+  "name": "glober-books-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "End-to-end tests for GloberBooks",
+  "engines": {
+    "node": "24.22.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}
