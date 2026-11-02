@@ -54,7 +54,7 @@ Work can stop at any time for lack of usage. Resume with: `git fetch`, read this
 | 03a | SQLite data source, claim and clock | backend | DONE | sdd-java-architect | `feature/task-03a-sqlite-data-source` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 051) | PASS WITH CONDITIONS (handoff 052) | | Merged 2fce30a (pull request 9, squash); brief 045, delivery 047. Conditions carried: SEC-F-098 to 034a and the 03b/04 briefs; SEC-F-099/100/103 to 03b |
 | 11 | Frontend logic and API client (thin) | frontend | DONE | sdd-frontend-developer | `feature/task-11-logic-and-client-thin` | 1 | d8cdb7f | ACCEPT WITH FOLLOW-UPS (handoff 049) | PASS WITH CONDITIONS (handoff 050) | | Merged (pull request 8, squash); brief 046, delivery 048. Conditions carried to Tasks 12, 35 and 45 |
 | 03b | Start policy and configuration | backend | DONE | sdd-java-architect | `feature/task-03b-start-policy-config` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 055) | PASS (handoff 056) | | Merged 172e1c3 (pull request 10, squash); compact brief 053, delivery 054. Follow-ups: 34a brief (guard after StartupPolicy, not the sole start path); SEC-F-105 to 34b; SEC-F-106 and System.out cleanup in the next backend task |
-| 05 | Error foundation | backend | IN_PROGRESS | sdd-java-architect | `feature/task-05-error-foundation` | 1 | | | | | Compact brief: handoff 057 |
+| 05 | Error foundation | backend | IN_REVIEW | sdd-java-architect | `feature/task-05-error-foundation` | 1 | | | | | Compact brief: handoff 057 |
 
 ## Spec coverage
 
