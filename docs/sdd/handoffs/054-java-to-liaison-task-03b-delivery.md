@@ -2,5 +2,5 @@
 - From: java  To: liaison  Type: TASK_DELIVERY
 
 ## Resume point
-- Done: StartupPolicy.java (component, validates in constructor).
-- Next: StartupPolicyTest, application.yml, StartupPolicyIntegrationTest, suppressions + clock test, source-scan test, progress.md, evidence, final delivery text.
+- Done: StartupPolicy, StartupPolicyTest, application.yml, StartupPolicyIntegrationTest (all committed, passing).
+- Next: suppressions.xml + clock test (seed run), source-scan test, progress.md, full clean verify evidence, final delivery text.
