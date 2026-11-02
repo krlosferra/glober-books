@@ -53,7 +53,7 @@ Work can stop at any time for lack of usage. Resume with: `git fetch`, read this
 | 10 | E2E toolchain and pins | frontend | DONE | sdd-frontend-developer | `chore/task-10-e2e-toolchain` | 1 | c731108 | ACCEPT WITH FOLLOW-UPS (handoff 041) | PASS WITH CONDITIONS (handoff 042) | | Pull request 6 (squash); brief 037, delivery 038. Follow-ups: re-derive the frontend agent tool list and fix frontend-testing.md section 6 (SEC-F-086) |
 | 03a | SQLite data source, claim and clock | backend | IN_REVIEW | sdd-java-architect | `feature/task-03a-sqlite-data-source` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 051) | PASS WITH CONDITIONS (handoff 052) | | Pull request 9 (squash); brief 045, delivery 047. Conditions carried: SEC-F-098 to 034a and the 03b/04 briefs; SEC-F-099/100/103 to 03b |
 | 11 | Frontend logic and API client (thin) | frontend | DONE | sdd-frontend-developer | `feature/task-11-logic-and-client-thin` | 1 | d8cdb7f | ACCEPT WITH FOLLOW-UPS (handoff 049) | PASS WITH CONDITIONS (handoff 050) | | Merged (pull request 8, squash); brief 046, delivery 048. Conditions carried to Tasks 12, 35 and 45 |
-| 03b | Start policy and configuration | backend | IN_PROGRESS | sdd-java-architect | `feature/task-03b-start-policy-config` | 1 | | | | | Compact brief: handoff 053 |
+| 03b | Start policy and configuration | backend | IN_REVIEW | sdd-java-architect | `feature/task-03b-start-policy-config` | 1 | | | | | Compact brief: handoff 053; delivery 054 |
 
 ## Spec coverage
 
