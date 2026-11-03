@@ -25,6 +25,8 @@ spring:
         enabled: false
     log-request-details: false
   servlet:
+    encoding:
+      enabled: false
     multipart:
       enabled: false
   web:
