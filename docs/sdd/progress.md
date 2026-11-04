@@ -105,3 +105,14 @@
 - Result: Hibernate `validate` passes on the STRICT table with its CHECKs (X-06 spike succeeded, no fallback); the stored DDL text equals the normalised `schema.sql` statement (AP-12.1 comparison stays whole-statement).
 - Notes: STRICT converts a numeric text such as `'3'` to an integer for `rating`, so only non-numeric text is rejected there. The test sets the community dialect by property; the production dialect setting is left to a later task.
 - Details: handoff 066.
+
+## Task 07: Add and list API (thin)
+
+- Date: 2026-11-04
+- Branch: `feature/task-07-add-and-list-thin`
+- Attempt: 1
+- Commits: see `git log main..feature/task-07-add-and-list-thin` (all subjects end with `[Task-7]`)
+- Built: `service/BookService` (`create` one transaction, `list` read-only), `service/BookValidationException`, `config/IdConfig`, `controller/BookController`, `dto/CreateBookRequest`, `dto/BookListResponse`, advice mappings for validation, unreadable body and Bean Validation, SQLite dialect in `application.yml`, `BookServiceTest`, `BookControllerTest`, `BookApiIntegrationTest`, `ApplicationStartupIntegrationTest`
+- Result: `./mvnw verify` green; real-port POST and GET round trip, wire format with 24-character dates, a list writes nothing (database hash unchanged).
+- Notes: Jackson 3 writes an `Instant` with zero milliseconds without the fraction, so `BookResponse` dates carry a `@JsonFormat` pattern. The service method is named `create` because SpotBugs treats a class with an `add*` method as mutable (EI_EXPOSE_REP2 in the controller).
+- Details: handoff 070.

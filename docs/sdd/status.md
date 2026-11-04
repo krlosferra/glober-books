@@ -57,7 +57,7 @@ Work can stop at any time for lack of usage. Resume with: `git fetch`, read this
 | 05 | Error foundation | backend | DONE | sdd-java-architect | `feature/task-05-error-foundation` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 059) | PASS WITH CONDITIONS (handoff 060) | | Merged 7a34188 (pull request 11, squash); compact brief 057, delivery 058. Conditions carried: SEC-F-108 (first task that builds details), SEC-F-109 (Task 22), SEC-F-110 (Task 06 brief: no getWriter before the writer) |
 | 06 | Thin gate, exception advice and container error report | backend | DONE | sdd-java-architect | `feature/task-06-thin-gate` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 063) | PASS WITH CONDITIONS (handoff 064) | | Merged 91702a9 (pull request 12, squash); compact brief 061, delivery 062. Conditions: SEC-F-112/R-23 (Sponsor), SEC-F-113 and 114 to Task 17; plan amendment for the encoding key and onRead |
 | 04 | Domain and repository | backend | DONE | sdd-java-architect | `feature/task-04-domain-repository` | 1 | | ACCEPT WITH FOLLOW-UPS (handoff 067) | PASS WITH CONDITIONS (handoff 068) | | Merged 6a4f35e (pull request 13, squash); compact brief 065, delivery 066. Carried: Task 07 contract test for the 24-character dates and snake_case, dialect property (SEC-F-118), no entity in controller signatures; Tasks 15 and 30 NUL and control-character checks (SEC-F-117); Task 09 tests cover a JSON string rating |
-| 07 | Add and list API (thin) | backend | IN_PROGRESS | sdd-java-architect | `feature/task-07-add-and-list-thin` | 1 | | | | | Compact brief: handoff 069 |
+| 07 | Add and list API (thin) | backend | IN_REVIEW | sdd-java-architect | `feature/task-07-add-and-list-thin` | 1 | | | | | Compact brief: handoff 069; delivery handoff 070 |
 
 ## Spec coverage
 
