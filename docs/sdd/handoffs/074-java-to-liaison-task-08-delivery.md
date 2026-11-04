@@ -120,3 +120,39 @@ PROOF spring.web.resources.static-locations => classpath:/static/
 PROOF unknown field over HTTP => 400 67 {"error":"The request is malformed.","code":"MALFORMED_REQUEST","timestamp":"2026-11-04T16:13:51.197Z"} 0  
 ```
 
+## Evidence: git (final)
+```
+ backend/src/main/resources/application.yml         |   9 +
+ .../MandatoryPropertiesIntegrationTest.java        | 254 ++++++++++++++++++++
+ .../TransportSecurityIntegrationTest.java          | 258 +++++++++++++++++++++
+ .../globant/globerbooks/support/RawHttpClient.java | 130 +++++++++++
+ .../073-orchestrator-to-java-task-08-brief.md      |  24 ++
+ .../074-java-to-liaison-task-08-delivery.md        | 122 ++++++++++
+ docs/sdd/progress.md                               |  14 ++
+ docs/sdd/status.md                                 |   5 +-
+ 8 files changed, 814 insertions(+), 2 deletions(-)
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): complete the Task 08 delivery [Task-8]
+---
+krlosferra <carlos.ferra@globant.com>
+test(config): prove every mandatory property is effective [Task-8]
+---
+krlosferra <carlos.ferra@globant.com>
+fix(config): add log sanitising pattern and pinned log levels [Task-8]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): add the partial Task 08 delivery [Task-8]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): add the 0a note to progress [Task-8]
+---
+krlosferra <carlos.ferra@globant.com>
+test(transport): add real-port transport security baseline [Task-8]
+---
+krlosferra <carlos.ferra@globant.com>
+test(support): add raw-socket HTTP client [Task-8]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): add the Task 08 brief and update the resume point [Task-8]
+---
+```
