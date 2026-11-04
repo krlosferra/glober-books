@@ -5,6 +5,7 @@ spring:
       maximum-pool-size: 1
       connection-timeout: 5000
   jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
     hibernate:
       ddl-auto: validate
     open-in-view: false

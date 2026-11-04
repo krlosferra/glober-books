@@ -1,5 +1,6 @@
 package com.globant.globerbooks.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.globant.globerbooks.domain.Book;
 import java.time.Instant;
 
@@ -16,7 +17,11 @@ import java.time.Instant;
  * @param dateCompleted completion instant, or null
  */
 public record BookResponse(String id, String title, String author, String status, Integer rating,
-        Instant dateAdded, Instant dateCompleted) {
+        @JsonFormat(pattern = BookResponse.STAMP, timezone = "UTC") Instant dateAdded,
+        @JsonFormat(pattern = BookResponse.STAMP, timezone = "UTC") Instant dateCompleted) {
+
+    /** Wire pattern of both dates: 24 characters, UTC, always three fraction digits. */
+    static final String STAMP = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     /**
      * Maps an entity to its response.
