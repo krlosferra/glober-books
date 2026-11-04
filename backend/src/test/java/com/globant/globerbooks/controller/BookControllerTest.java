@@ -72,7 +72,7 @@ class BookControllerTest {
 
     @Test
     void addReturns201WithTheBook() throws Exception {
-        when(service.add(any(CreateBookRequest.class))).thenReturn(STORED);
+        when(service.create(any(CreateBookRequest.class))).thenReturn(STORED);
 
         add("{\"title\":\"Clean Code\",\"author\":\"Robert Martin\",\"allow_duplicate\":false}")
                 .andExpect(status().isCreated())
@@ -84,12 +84,12 @@ class BookControllerTest {
 
     @Test
     void addPassesSnakeCaseMembersToTheService() throws Exception {
-        when(service.add(any(CreateBookRequest.class))).thenReturn(STORED);
+        when(service.create(any(CreateBookRequest.class))).thenReturn(STORED);
 
         add("{\"title\":\"T\",\"author\":\"A\",\"status\":\"reading\",\"allow_duplicate\":true}")
                 .andExpect(status().isCreated());
 
-        verify(service).add(new CreateBookRequest("T", "A", "reading", true));
+        verify(service).create(new CreateBookRequest("T", "A", "reading", true));
     }
 
     @Test
@@ -102,7 +102,7 @@ class BookControllerTest {
                 .andExpect(jsonPath("$.details[0].message").value("must be between 1 and 500 characters"))
                 .andExpect(jsonPath("$.timestamp").value("2026-02-19T10:00:00.000Z"));
 
-        verify(service, never()).add(any());
+        verify(service, never()).create(any());
     }
 
     @Test
@@ -115,7 +115,7 @@ class BookControllerTest {
 
     @Test
     void addMapsServiceValidationFailure() throws Exception {
-        when(service.add(any(CreateBookRequest.class))).thenThrow(new BookValidationException(
+        when(service.create(any(CreateBookRequest.class))).thenThrow(new BookValidationException(
                 ErrorCode.INVALID_STATUS,
                 List.of(new FieldProblem("status", "must be one of: unread, reading, completed"))));
 

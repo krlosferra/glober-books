@@ -44,7 +44,7 @@ public class BookController {
      */
     @PostMapping
     public ResponseEntity<BookResponse> add(@Valid @RequestBody CreateBookRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).contentType(JSON_UTF8).body(service.add(request));
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(JSON_UTF8).body(service.create(request));
     }
 
     /**

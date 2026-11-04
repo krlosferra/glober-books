@@ -46,14 +46,14 @@ public class BookService {
     }
 
     /**
-     * Adds a book in one transaction. {@code allowDuplicate} has no effect yet.
+     * Creates a book in one transaction. {@code allowDuplicate} has no effect yet.
      *
      * @param request the new book
      * @return the stored book
      * @throws BookValidationException when title, author or status is invalid
      */
     @Transactional
-    public BookResponse add(CreateBookRequest request) {
+    public BookResponse create(CreateBookRequest request) {
         String title = request.title() == null ? "" : request.title().strip();
         String author = request.author() == null ? "" : request.author().strip();
         BookStatus status = request.status() == null

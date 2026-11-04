@@ -37,7 +37,7 @@ class BookServiceTest {
 
     private BookResponse addSaved(CreateBookRequest request) {
         when(repository.save(any(Book.class))).thenAnswer(call -> call.getArgument(0));
-        return service.add(request);
+        return service.create(request);
     }
 
     @Test
@@ -153,16 +153,16 @@ class BookServiceTest {
 
     @Test
     void addIsTransactionalAndListIsReadOnlyTransactional() throws NoSuchMethodException {
-        Method add = BookService.class.getMethod("add", CreateBookRequest.class);
+        Method create = BookService.class.getMethod("create", CreateBookRequest.class);
         Method list = BookService.class.getMethod("list");
 
-        assertThat(add.getAnnotation(Transactional.class).readOnly()).isFalse();
+        assertThat(create.getAnnotation(Transactional.class).readOnly()).isFalse();
         assertThat(list.getAnnotation(Transactional.class).readOnly()).isTrue();
     }
 
     private BookValidationException failureOf(CreateBookRequest request) {
         BookValidationException[] holder = new BookValidationException[1];
-        assertThatThrownBy(() -> service.add(request)).isInstanceOfSatisfying(
+        assertThatThrownBy(() -> service.create(request)).isInstanceOfSatisfying(
                 BookValidationException.class, thrown -> holder[0] = thrown);
         return holder[0];
     }
