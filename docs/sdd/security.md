@@ -1,7 +1,7 @@
 # Security Requirements, Threat Model and Risk Register
 
 - Owner: Security reviewer (`sdd-security-reviewer`)
-- Version: 0.26 (Task 06 review, handoff 064; see changelog)
+- Version: 0.27 (R-23 accepted; see changelog)
 - Last updated: 2026-11-02
 - Status: Phase 1 Security verdict: PASS WITH CONDITIONS (round 3, see `handoffs/006-security-to-sponsor-phase1-review-round3.md`; conditions: SEC-F-038, SEC-F-039, plus the Sponsor platform steps in section 10); round 2 was PASS WITH CONDITIONS (handoff 005); round 1 was FAIL (handoff 003)
 
@@ -155,7 +155,7 @@ Copy `.githooks/` into a scratch repository with a scratch bare remote; set a hu
 | R-20 | SQLite's own recovery of a hot `-journal` runs before the stored-library validation (CR-9) and can alter an otherwise invalid file if someone with write access to the 0700 data directory plants a journal (SEC-F-074) | Low / low (same-user actor, R-08; other users refused by the directory guard) | Proposed: accept, with the two Task 34 cases (valid file plus hot journal recovered; invalid file plus journal outcome recorded) | Accepted by the Sponsor 2026-11-02 (with the documented limit of Task 34a) |
 | R-21 | Browser binaries for `@playwright/test` come from `cdn.playwright.dev`, an origin beyond the npm registry, without a checksum in the lockfile; they run only in the local test environment | Low / medium | Proposed: accept; allow-list the host only for `playwright install` | Accepted by the Sponsor 2026-11-02 (sandbox only) |
 | R-22 | The Node 24.22.2 tarball supplied to the sandbox was verified against SHASUMS256.txt from the same origin (transport integrity only, no GPG check) | Low / medium | Proposed: accept for the sandbox; verify signed SHASUMS on developer machines | Accepted by the Sponsor 2026-11-02 (sandbox only) |
-| R-23 | Container-generated 400 pages (duplicate or malformed Host, bad request line) carry no security headers; static page, no reflected data (SEC-F-112) | Low / low | Recommend accept; SC-10 then reads 'application responses' | Pending Sponsor |
+| R-23 | Container-generated 400 pages (duplicate or malformed Host, bad request line) carry no security headers; static page, no reflected data (SEC-F-112) | Low / low | Recommend accept; SC-10 then reads 'application responses' | Accepted by the Sponsor 2026-11-04; SC-10 reads 'application responses' |
 
 Only the Sponsor changes the "Sponsor approval" column. Entries dated 2026-10-30 record the Sponsor's approval of the Phase 1 recommendations, applied by the orchestrator on the Sponsor's instruction.
 
@@ -287,12 +287,13 @@ Security findings are written as handoffs in `docs/sdd/handoffs/` (Type `AUDIT_R
 | SEC-F-109 | LOW | DUPLICATE_BOOK details object {existing_book} not representable in ErrorBody; type it without Object, Map or JsonNode (SC-08, INV-6) | OPEN, condition on Task 22 | 060 |
 | SEC-F-110 | INFO | ErrorResponseWriter uses getOutputStream(); Task 06 filters must not call getWriter() first | OPEN, note for Task 06 | 060 |
 | SEC-F-111 | INFO | Writer serializes before resetBuffer, so a serialization failure leaves the response untouched; keep | CLOSED | 060 |
-| SEC-F-112 | LOW | Tomcat-level rejections (duplicate or malformed Host, bad request line) answer a bare HTML 400 before the filter, without the 8 security headers; static page, no reflected data | OPEN: residual risk R-23, Pending Sponsor (recommend accept; SC-10 then reads 'application responses'); otherwise fix in a later task | 064 |
+| SEC-F-112 | LOW | Tomcat-level rejections (duplicate or malformed Host, bad request line) answer a bare HTML 400 before the filter, without the 8 security headers; static page, no reflected data | ACCEPTED 2026-11-04 (R-23 accepted by the Sponsor) (recommend accept; SC-10 then reads 'application responses'); otherwise fix in a later task | 064 |
 | SEC-F-113 | LOW | Header checks and body buffering run outside the try block in RequestGateFilter: an unexpected exception fails closed but returns the container's HTML 500, not the JSON envelope | OPEN, condition on Task 17 (wrap the whole body in the INTERNAL_ERROR catch, or add a test) | 064 |
 | SEC-F-114 | INFO | The filter skips the ERROR dispatch (OncePerRequestFilter); headers survive sendError today; the bypass test is deferred | OPEN, keep the Task 17 test | 064 |
 | SEC-F-115 | INFO | No negative control that the error valve is the one used; the probe shows a bare page; continueResponseTiming=onRead accepted | OPEN, optional assertion | 064 |
 
 ## 9. Changelog
+- 0.27 (2026-11-04): Sponsor accepted R-23 (SEC-F-112): container-generated 400 pages carry no security headers; SC-10 reads 'application responses'.
 - 0.26 (2026-11-02): Task 06 review (handoff 064): SC-02 to SC-06, SC-10, SC-11, SC-28, SC-29 evidence; SEC-F-066 closed; SEC-F-112 to SEC-F-115 added; R-23 proposed. Verdict PASS WITH CONDITIONS.
 - 0.25 (2026-11-02): Task 05 review (handoff 060): SC-08, SC-11, SC-29 evidence; SEC-F-108 to SEC-F-111 added. Verdict PASS WITH CONDITIONS.
 - 0.24 (2026-11-02): Task 03b review (handoff 056): SEC-F-099, 100, 103 closed; SEC-F-105 to 107 added (2 LOW, 1 INFO); SC-01, SC-06, SC-39 evidence. Verdict PASS.
