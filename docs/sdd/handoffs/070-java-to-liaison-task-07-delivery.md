@@ -4,5 +4,5 @@
 - Type: TASK_DELIVERY (IN PROGRESS)
 
 ## Resume point
-- Done: step 1 DTOs; step 2 BookService, BookValidationException, IdConfig, BookServiceTest (green).
-- Next: BookController + advice mappings (BookValidationException, MethodArgumentNotValid, HttpMessageNotReadable) + BookControllerTest; application.yml dialect + startup test; wire-format, streaming and read-writes-nothing tests; evidence; status.md and progress.md.
+- Done: DTOs; BookService+test; BookController+advice mappings+BookControllerTest (green). Finding: Jackson 3 writes Instant with zero millis as 2026-02-19T10:00:00Z; fixed with @JsonFormat pattern on BookResponse dates (needs contract test + report).
+- Next: application.yml dialect + startup test; BookApiIntegrationTest (wire format, ordering, streaming, read writes nothing, real statuses); full verify; evidence; status.md and progress.md.
