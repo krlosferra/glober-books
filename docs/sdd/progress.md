@@ -94,3 +94,14 @@
 - Built: `GlobalExceptionHandler` (500 and the four routing exceptions, JSON even for `Accept: text/xml`, one log line without the message), `TomcatErrorReportCustomizer` (error valve with `showReport=false`, `showServerInfo=false`; connector `continueResponseTiming=onRead`), `HeaderPolicy`, `BoundedBodyRequest`, `RequestGateFilter` (highest precedence, `final`, security headers re-applied on `reset` and `sendError`).
 - Notes: Boot 4.1.2 differs from the plan: the encoding switch is `spring.servlet.encoding.enabled=false` (plan: `server.servlet.encoding...`); the web server classes live in `org.springframework.boot.tomcat.servlet`. Tomcat sends `100 Continue` before the application runs by default, so `continueResponseTiming=onRead` is set to meet SC-06. SpotBugs (no exclusion allowed) needed the filter to be `final` and to hold a lambda, not the writer.
 - Details: handoff 062.
+
+## Task 04: Domain and repository
+
+- Date: 2026-11-04
+- Branch: `feature/task-04-domain-repository`
+- Attempt: 1
+- Commits: see `git log main..feature/task-04-domain-repository` (all subjects end with `[Task-4]`)
+- Built: `domain/BookStatus` (wire value, `fromWire` returning `Optional`, nested converter), `domain/Book` (no public setters, nested millisecond UTC instant converter), `dto/BookResponse` (seven members), `repository/BookRepository` (derived ordered queries), `BookStatusTest`, `BookRepositoryTest` (45 cases).
+- Result: Hibernate `validate` passes on the STRICT table with its CHECKs (X-06 spike succeeded, no fallback); the stored DDL text equals the normalised `schema.sql` statement (AP-12.1 comparison stays whole-statement).
+- Notes: STRICT converts a numeric text such as `'3'` to an integer for `rating`, so only non-numeric text is rejected there. The test sets the community dialect by property; the production dialect setting is left to a later task.
+- Details: handoff 066.
