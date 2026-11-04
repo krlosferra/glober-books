@@ -4,5 +4,5 @@
 - Type: TASK_DELIVERY (IN PROGRESS)
 
 ## Resume point
-- Done: step 1 request/list DTOs.
-- Next: BookService + BookServiceTest; BookController + BookControllerTest (+ advice mappings); application.yml dialect + startup test; wire-format contract test and read-writes-nothing test; evidence; status.md and progress.md.
+- Done: step 1 DTOs; step 2 BookService, BookValidationException, IdConfig, BookServiceTest (green).
+- Next: BookController + advice mappings (BookValidationException, MethodArgumentNotValid, HttpMessageNotReadable) + BookControllerTest; application.yml dialect + startup test; wire-format, streaming and read-writes-nothing tests; evidence; status.md and progress.md.
