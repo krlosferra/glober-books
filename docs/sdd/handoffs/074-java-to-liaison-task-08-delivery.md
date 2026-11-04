@@ -1,16 +1,16 @@
-# Handoff 074: Task 08 delivery (PARTIAL: security class done, properties class blocked)
+# Handoff 074: Task 08 delivery (complete)
 - From: java
 - To: liaison
 - Phase: 4   Round: 1
-- Type: TASK_DELIVERY (partial)
+- Type: TASK_DELIVERY
 
 ## Resume point
-- Done: `RawHttpClient` (94c9caa), `TransportSecurityIntegrationTest` (80c6d90, 8 tests green, run alone), progress 0a note (de8b42f).
-- Next: `MandatoryPropertiesIntegrationTest` (one test per mandatory property, Jackson 3 naming and unknown fields, log sanitisation on real log output). BLOCKED, see Finding 1. Then the full `./mvnw clean verify`, the final diff stat and log.
-- Not run yet: full `./mvnw clean verify` (only the new class was run, with `-Djacoco.skip=true`).
+- Done: all steps. Commits: RawHttpClient, TransportSecurityIntegrationTest, progress 0a note, application.yml logging keys, MandatoryPropertiesIntegrationTest, delivery.
+- Next: Liaison audit. Nothing pending on the java side.
+- `cd backend && ./mvnw clean verify`: BUILD SUCCESS. Unit 234 tests, 0 failures. Integration 72 tests, 0 failures, 1 skipped (in the earlier `SqliteStoreIntegrationTest`, not from Task 08). JaCoCo "All coverage checks have been met"; line coverage 94.9% (375 covered, 20 missed, 26 classes).
 
 ## Findings (STOP items)
-1. **Missing key, plan difference.** `application.yml` has no `logging.pattern.console` `%replace` and no pinned log levels, though the constitution (Security Standards, Logging) and Task 08 AC5 require the pattern to strip CR, LF, U+2028, U+2029, U+0085 and ESC. All 19 other mandatory properties are present in `application.yml`. Adding the pattern is a new key, not a "wrong key" correction, so it exceeds the brief's scope for `application.yml`. Needed decision: authorise adding `logging.pattern.console` and the level pins to `application.yml`, then the properties class can be written.
+1. **Task 03b gap, RESOLVED (authorised by the coordinator).** `application.yml` has no `logging.pattern.console` `%replace` and no pinned log levels, though the constitution (Security Standards, Logging) and Task 08 AC5 require the pattern to strip CR, LF, U+2028, U+2029, U+0085 and ESC. All 19 other mandatory properties are present in `application.yml`. Adding the pattern is a new key, not a "wrong key" correction, so it exceeds the brief's scope for `application.yml`. Added to `application.yml`: `logging.level` root, `org.hibernate`, `org.springframework.web`, `org.apache.tomcat` all INFO, and `logging.pattern.console` with `%replace(%m%wEx){'[\r\n\u2028\u2029\u0085\u001B]', '_'}`. No SC-06 value or limit changed. Stack traces become one line.
 2. **Spec E-10, first five rows.** Host `127.0.0.1:<port>, evil.example` (one header with a comma) is answered by the container, not the application: status 400 with `text/html`, no `INVALID_HOST` envelope and only 5 headers. Spec says "400 INVALID_HOST (exactly, from the application, for the first five)". R-23 covers it, so the test asserts status 400 and no disclosure only.
 3. **Criterion 3, "no HTML".** Container 400 bodies (invalid request line, header over 8 KiB, request line over 8 KiB, two Host headers, comma Host) ARE a full HTML page (`<!doctype html>... HTTP Status 400 - Bad Request`, with a style block). No Tomcat, no version, no `Server` header, no report text (asserted). Reported as the deviation required by carried condition 2.
 4. **Criterion 3, `FOO`.** `FOO /api/v1/books` without a content type is answered by the gate with `415 UNSUPPORTED_MEDIA_TYPE` (not in {400, 405, 414, 431, 501}). With `Content-Type: application/json` and `Content-Length: 0` it gives `405 METHOD_NOT_ALLOWED` and the next request is served. Both are tested; the 415 case is named as a deviation.
@@ -87,24 +87,36 @@ EVIDENCE checkpoint log lines: 47, book data in logs: false
 
 Criterion 1 (envelope and no `Server`, `Set-Cookie`, `Location`, `Access-Control-*`) is asserted on 200, 201, 400 Host, 400 malformed body, 403, 404, 405, 413, 415 and 500 (trigger `boom BEFORE INSERT ON books`, dropped in `finally`, body has no detail). Carried condition 1 rows (forged Host, bad Origin, cross-site, same-site, wrong or missing Content-Type on POST and GET `/api/v1/books`) are in the table. Checkpoint logs: 47 lines, no book data (the test's own `EVIDENCE` lines are excluded from the log text).
 
-## Evidence: git (at commit de8b42f)
+## Evidence: `MandatoryPropertiesIntegrationTest` (15 tests, real output)
 ```
- .../TransportSecurityIntegrationTest.java          | 258 +++++++++++++++++++++
- .../globant/globerbooks/support/RawHttpClient.java | 130 +++++++++++
- .../073-orchestrator-to-java-task-08-brief.md      |  24 ++
- docs/sdd/progress.md                               |  14 ++
- docs/sdd/status.md                                 |   5 +-
- 5 files changed, 429 insertions(+), 2 deletions(-)
-krlosferra <carlos.ferra@globant.com>
-docs(sdd): add the 0a note to progress [Task-8]
----
-krlosferra <carlos.ferra@globant.com>
-test(transport): add real-port transport security baseline [Task-8]
----
-krlosferra <carlos.ferra@globant.com>
-test(support): add raw-socket HTTP client [Task-8]
----
-krlosferra <carlos.ferra@globant.com>
-docs(sdd): add the Task 08 brief and update the resume point [Task-8]
----
+2026-11-04T16:13:51.881Z  WARN [main] proof.sanitisation : MSG-A first__FORGED-LINE_two_three_four_five end
+2026-11-04T16:13:51.881Z ERROR [main] proof.sanitisation : MSG-B_java.lang.IllegalStateException: cause one_FORGED-CAUSE_end_	at com.globant.globerbooks.MandatoryPropertiesIntegrationTest.logPatternNeutralizesLineBreaksSeparatorsA
+PROOF 9000-byte header over HTTP => 400
+PROOF GET /error => 404 59 {"error":"Resource not found.","code":"NOT_FOUND","timestamp":"2026-11-04T16:13:51.860Z"} 0  
+PROOF forwarded headers over HTTP => 200
+PROOF logging.level ROOT => INFO
+PROOF logging.level org.apache.tomcat => INFO
+PROOF logging.level org.hibernate => INFO
+PROOF logging.level org.springframework.web => INFO
+PROOF logging.pattern.console exception => 2026-11-04T16:13:51.881Z ERROR [main] proof.sanitisation : MSG-B_java.lang.IllegalStateException: cause one_FORGED-CAUSE_end_	at com.globant.globerbooks.Mandato
+PROOF logging.pattern.console message => 2026-11-04T16:13:51.881Z  WARN [main] proof.sanitisation : MSG-A first__FORGED-LINE_two_three_four_five end
+PROOF server.address => /127.0.0.1
+PROOF server.error.whitelabel.enabled and ErrorMvcAutoConfiguration excluded => basicErrorController present=false
+PROOF server.forward-headers-strategy => NONE
+PROOF server.max-http-request-header-size => 8192B
+PROOF server.tomcat.accesslog.enabled => false
+PROOF server.tomcat.connection-timeout => PT5S
+PROOF spring.datasource.hikari.connection-timeout => 5000
+PROOF spring.datasource.hikari.maximum-pool-size => 1
+PROOF spring.jackson.deserialization.fail-on-unknown-properties => true
+PROOF spring.jackson.property-naming-strategy => {"date_added":"x"}
+PROOF spring.jpa.hibernate.ddl-auto => validate
+PROOF spring.jpa.open-in-view => interceptor bean present=false
+PROOF spring.jpa.show-sql => JpaProperties=false, hibernate.show_sql=null
+PROOF spring.mvc.hiddenmethod / formcontent / spring.servlet.multipart => hidden=false form=false multipart=false
+PROOF spring.mvc.log-request-details => false
+PROOF spring.sql.init.mode => books table created from schema.sql in a new file, count=1
+PROOF spring.web.resources.static-locations => classpath:/static/
+PROOF unknown field over HTTP => 400 67 {"error":"The request is malformed.","code":"MALFORMED_REQUEST","timestamp":"2026-11-04T16:13:51.197Z"} 0  
 ```
+
