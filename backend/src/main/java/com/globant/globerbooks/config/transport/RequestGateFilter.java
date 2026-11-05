@@ -36,7 +36,8 @@ public final class RequestGateFilter extends OncePerRequestFilter {
     private static final String BOOKS_PREFIX = RouteTable.BOOKS + "/";
     private static final int ID_SEGMENT = 3;
 
-    private final ErrorResponseWriter writer;
+    private final Rejecter rejecter;
+    private final DetailRejecter detailRejecter;
     private final RouteTable routes;
 
     /**
@@ -46,7 +47,8 @@ public final class RequestGateFilter extends OncePerRequestFilter {
      * @param routes the route and method table
      */
     public RequestGateFilter(ErrorResponseWriter writer, RouteTable routes) {
-        this.writer = writer;
+        this.rejecter = writer::write;
+        this.detailRejecter = writer::write;
         this.routes = routes;
     }
 
@@ -166,10 +168,10 @@ public final class RequestGateFilter extends OncePerRequestFilter {
         }
         try {
             if (code == ErrorCode.INVALID_STATUS) {
-                writer.write(response, code, List.of(new ErrorBody.FieldProblem("status",
+                detailRejecter.write(response, code, List.of(new ErrorBody.FieldProblem("status",
                         "must be one of: unread, reading, completed")));
             } else {
-                writer.write(response, code);
+                rejecter.write(response, code);
             }
         } catch (IllegalStateException unusable) {
             LOG.error("Error response could not be written: {}", unusable.getClass().getName());
@@ -183,6 +185,19 @@ public final class RequestGateFilter extends OncePerRequestFilter {
 
     private static List<String> values(HttpServletRequest request, String name) {
         return Collections.list(request.getHeaders(name));
+    }
+
+    /** Writes the envelope of an error code to a response. */
+    @FunctionalInterface
+    private interface Rejecter {
+        void write(HttpServletResponse response, ErrorCode code) throws IOException;
+    }
+
+    /** Writes the envelope of an error code with field problems. */
+    @FunctionalInterface
+    private interface DetailRejecter {
+        void write(HttpServletResponse response, ErrorCode code, List<ErrorBody.FieldProblem> details)
+                throws IOException;
     }
 
     /** Response that sets the security headers again after {@code reset} and before {@code sendError}. */
