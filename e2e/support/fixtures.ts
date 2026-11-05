@@ -4,11 +4,6 @@ import { Library } from './library';
 const VIOLATION_MARK = '__securitypolicyviolation__';
 const BASE_ORIGIN = 'http://127.0.0.1:18080';
 
-// SEC-F-130: Chromium logs this warning because the Permissions-Policy header names 'bluetooth',
-// which it does not recognize. The Sponsor's decision on the constitution header list is pending.
-// Remove this filter when the header value is corrected. Nothing else is filtered.
-const SEC_F_130_WARNING = "Error with Permissions-Policy header: Unrecognized feature: 'bluetooth'.";
-
 const GUARDED_CONSOLE = /Content Security Policy|Trusted Type|Permissions-Policy/i;
 
 const CSP = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; "
@@ -26,7 +21,7 @@ const EXACT_HEADERS: Record<string, string> = {
 };
 
 const PERMISSION_FEATURES = ['camera', 'microphone', 'geolocation', 'payment', 'usb', 'serial',
-  'bluetooth', 'clipboard-read', 'display-capture', 'fullscreen'];
+  'clipboard-read', 'display-capture', 'fullscreen'];
 
 const CONTENT_TYPE_BY_RESOURCE: Record<string, RegExp> = {
   document: /^text\/html(;|$)/i,
@@ -65,7 +60,7 @@ function watch(page: Page) {
     const text = message.text();
     if (text.startsWith(VIOLATION_MARK)) violations.push(text.slice(VIOLATION_MARK.length));
     else if ((message.type() === 'error' || message.type() === 'warning')
-      && GUARDED_CONSOLE.test(text) && text.trim() !== SEC_F_130_WARNING) consoleProblems.push(text);
+      && GUARDED_CONSOLE.test(text)) consoleProblems.push(text);
   });
   page.on('pageerror', (error) => pageErrors.push(error.message));
   page.on('request', (request) => {
