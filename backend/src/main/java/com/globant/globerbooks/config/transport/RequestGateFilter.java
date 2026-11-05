@@ -7,11 +7,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -23,8 +21,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * The first filter of the chain (AP-2 stages 1 to 6): sets the security headers, then checks Host,
  * Origin, Sec-Fetch-Site, Content-Type, the 16 KiB body cap, the route and method from the raw
  * target (with {@code Allow} on a 405) and {@code Accept} on API paths, and ends the request with
- * the error envelope on the first failure. It never reads a parameter, and a failure of the rest of
- * the chain becomes {@code INTERNAL_ERROR}.
+ * the error envelope on the first failure. It never reads a parameter, and a failure of any step or of
+ * the rest of the chain becomes {@code INTERNAL_ERROR}.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -36,6 +34,7 @@ public final class RequestGateFilter extends OncePerRequestFilter {
     private static final String BOOKS_PREFIX = RouteTable.BOOKS + "/";
     private static final int ID_SEGMENT = 3;
 
+    private final ErrorResponseWriter writer;
     private final Rejecter rejecter;
     private final DetailRejecter detailRejecter;
     private final RouteTable routes;
@@ -47,6 +46,7 @@ public final class RequestGateFilter extends OncePerRequestFilter {
      * @param routes the route and method table
      */
     public RequestGateFilter(ErrorResponseWriter writer, RouteTable routes) {
+        this.writer = writer;
         this.rejecter = writer::write;
         this.detailRejecter = writer::write;
         this.routes = routes;
@@ -55,7 +55,18 @@ public final class RequestGateFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        HttpServletResponse guarded = new HeaderResponse(response);
+        EnvelopeResponseWrapper guarded = new EnvelopeResponseWrapper(response, writer);
+        try {
+            gate(request, guarded, chain);
+        } catch (IOException | ServletException | RuntimeException | Error failure) {
+            LOG.error("Unexpected error: {} at {}", failure.getClass().getName(), topFrame(failure));
+            reject(guarded, ErrorCode.INTERNAL_ERROR);
+        }
+    }
+
+    /** The whole gate (SEC-F-113): header checks, body buffering, route and request rules, then the chain. */
+    private void gate(HttpServletRequest request, HttpServletResponse guarded, FilterChain chain)
+            throws ServletException, IOException {
         ErrorCode refusal = checkHeaders(request);
         HttpServletRequest forwarded = request;
         if (refusal == null) {
@@ -81,7 +92,7 @@ public final class RequestGateFilter extends OncePerRequestFilter {
             reject(guarded, refusal);
             return;
         }
-        proceed(forwarded, guarded, chain);
+        chain.doFilter(forwarded, guarded);
     }
 
     private ErrorCode checkHeaders(HttpServletRequest request) {
@@ -149,16 +160,6 @@ public final class RequestGateFilter extends OncePerRequestFilter {
         return hasBody ? BoundedBodyRequest.read(request) : request;
     }
 
-    private void proceed(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
-        try {
-            chain.doFilter(request, response);
-        } catch (IOException | ServletException | RuntimeException | Error failure) {
-            LOG.error("Unexpected error: {} at {}", failure.getClass().getName(), topFrame(failure));
-            reject(response, ErrorCode.INTERNAL_ERROR);
-        }
-    }
-
     private void reject(HttpServletResponse response, ErrorCode code) throws IOException {
         if (response.isCommitted()) {
             return;
@@ -198,38 +199,5 @@ public final class RequestGateFilter extends OncePerRequestFilter {
     private interface DetailRejecter {
         void write(HttpServletResponse response, ErrorCode code, List<ErrorBody.FieldProblem> details)
                 throws IOException;
-    }
-
-    /** Response that sets the security headers again after {@code reset} and before {@code sendError}. */
-    private static final class HeaderResponse extends HttpServletResponseWrapper {
-
-        HeaderResponse(HttpServletResponse response) {
-            super(response);
-            apply();
-        }
-
-        private void apply() {
-            for (Map.Entry<String, String> header : HeaderPolicy.SECURITY_HEADERS.entrySet()) {
-                super.setHeader(header.getKey(), header.getValue());
-            }
-        }
-
-        @Override
-        public void reset() {
-            super.reset();
-            apply();
-        }
-
-        @Override
-        public void sendError(int status) throws IOException {
-            apply();
-            super.sendError(status);
-        }
-
-        @Override
-        public void sendError(int status, String message) throws IOException {
-            apply();
-            super.sendError(status, message);
-        }
     }
 }
