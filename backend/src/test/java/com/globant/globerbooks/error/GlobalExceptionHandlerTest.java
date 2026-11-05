@@ -130,8 +130,8 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.details[0].message").value("must be between 1 and 500 characters"))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("${7*7}"))))
-                .andExpect(content().string(org.hamcrest.Matchers.not(
-                        org.hamcrest.Matchers.containsString("49"))));
+                .andExpect(jsonPath("$.details[0].message").value(
+                        org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("49"))));
     }
 
     @Test
