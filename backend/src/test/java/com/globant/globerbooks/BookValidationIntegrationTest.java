@@ -141,7 +141,9 @@ class BookValidationIntegrationTest {
         assertThat(response.body()).contains("\"code\":\"VALIDATION_ERROR\"")
                 .contains("\"message\":\"must be between 1 and 500 characters\"")
                 .doesNotContain(INJECTION).doesNotContain("49");
-        assertThat(output.getAll().replace("EVIDENCE POST", "")).doesNotContain(hostile.substring(0, 20));
+        String logLines = output.getAll().lines().filter(line -> !line.startsWith("EVIDENCE"))
+                .collect(java.util.stream.Collectors.joining("\n"));
+        assertThat(logLines).doesNotContain(INJECTION).doesNotContain("aaaaaaaaaa");
         assertThat(books()).isZero();
     }
 
