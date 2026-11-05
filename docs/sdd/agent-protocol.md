@@ -9,7 +9,7 @@ How the GloberBooks agents work together. Both agent definitions (`.claude/agent
 | **Sponsor / HITL** | The human | Final approval at every phase gate; the Constitution; business risk, ethics, compliance; all ASK FIRST items | Write implementation code |
 | **Product Manager (PM agent)** | `sdd-product-manager` | Business analysis, requirements, `spec.md`, Decision Log, backlog (`tasks.md` organization, priority, sequencing), traceability, change control | Decide technology or architecture; approve its own work; write code |
 | **Spec Liaison** | `sdd-spec-liaison` | SDD doctrine and governance: reviews every artifact against the course, the Constitution and the spec; Clarify Loop; task audits; Test Gate; drift forensics; briefs for the coding agent | Decide business questions; author the spec; write code |
-| **Security Reviewer** | `sdd-security-reviewer` | Application security: threat model, `security.md`, security verdict and **veto** at every phase gate, read-only security checks, supply-chain and agent-risk review | Writing application code; editing spec or constitution; accepting risk (only the Sponsor can) |
+| **Security Reviewer** | `sdd-security-reviewer` | Application security: threat model, `security.md`, security verdict and **veto** at every phase gate, per-task verdicts for `Security: per task` tasks, one review per increment for the rest and the right to upgrade any task to per task, read-only security checks, supply-chain and agent-risk review | Writing application code; editing spec or constitution; accepting risk (only the Sponsor can) |
 | **Java Architect** | `sdd-java-architect` | Backend implementation of ONE approved task at a time, with unit, slice, integration and contract tests | Anything outside the task; frontend; changing the spec |
 | **Frontend Developer** | `sdd-frontend-developer` | UI implementation of ONE approved task at a time against the API contract | Anything outside the task; backend; changing the contract |
 | **Orchestrator** | The main Claude session | Invoking the agents in the right order (in parallel when allowed), relaying handoff files, routing feedback, stopping at gates, repository hygiene | Overriding a verdict, skipping a gate, deciding business questions |
@@ -64,7 +64,7 @@ Liaison and Security review in parallel. Repeat until the Liaison verdict is APP
 ```
 
 Rules:
-- No artifact moves to the next phase without **Liaison verdict APPROVED**, **Security verdict PASS** (or `PASS WITH CONDITIONS` with every condition closed) and **Sponsor approval**. A Security `FAIL` (CRITICAL or HIGH finding) is a veto: only the Sponsor can accept the residual risk, in writing, in the risk register of `security.md`.
+- No artifact moves to the next phase without **Liaison verdict APPROVED**, **Security verdict PASS** (or `PASS WITH CONDITIONS` with every condition closed) and **Sponsor approval**. A Security `FAIL` (CRITICAL or HIGH finding) is a veto: only the Sponsor can accept the residual risk, in writing, in the risk register of `security.md`. Task-level Security review follows the cadence in the constitution (Security Standards).
 - The PM never edits its own artifact to "get around" a finding: it fixes the cause or records an explicit decision.
 - The Liaison never edits `spec.md` or `tasks.md`; it proposes text in the review report.
 - Decisions are written to the spec's Decision Log (DEC-NNN) by the PM only after the Sponsor, or an earlier Sponsor-approved rule, has confirmed them.
