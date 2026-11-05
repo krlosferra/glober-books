@@ -38,7 +38,8 @@ class AcceptPolicyTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"text/xml", "text/*", "application/xml", "image/png", "application/jsonx",
-        "application/json;q=0", "*/*;q=0", "application/*;q=0.0", "application/json;q=0.000", "application/json;q=0.", "*/*;q=0, text/xml",
+        "application/json;q=0", "*/*;q=0", "application/*;q=0.0", "application/json;q=0.000",
+        "application/json;q=0.", "*/*;q=0, text/xml",
         "application/json;q=0, application/*;q=0"})
     void refusesWhenNoRemainingRangeAllowsJson(String value) {
         assertThat(ok(value)).isFalse();
