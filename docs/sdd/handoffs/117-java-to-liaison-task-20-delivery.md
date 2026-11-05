@@ -6,6 +6,11 @@
 - Done: production code, tests, `./mvnw clean verify` green, progress.md entry, this delivery.
 - Next: nothing for the implementer; the orchestrator pushes and routes to the Liaison and Security. The row in status.md is left to the orchestrator (no Task 20 row exists on the board).
 
+## Follow-up round (handoffs 118, 119)
+- F-1 / SEC-F-156 done: the "49" assertions now look at \`details[].message\` only (BookValidationIntegrationTest via the message values, GlobalExceptionHandlerTest via jsonPath); \`doesNotContain("\${7*7}")\` stays on the whole body. BookTextTest checks a fixed message, so it was left.
+- C-1 / SEC-F-155 done: BookValidationIntegrationTest.validatorBeanReturnsAnExpressionTemplateUnchanged injects the full-context Validator and checks that messages "\${1+1}" and "{min} #{1+1}" come back unchanged (tomcat-embed-el is on the classpath; pom.xml untouched).
+- Re-run \`./mvnw clean verify\`: BUILD SUCCESS, unit 611 / 0 failures, integration 155 / 0 failures / 1 skipped (pre-existing).
+
 ## Files
 Created: `config/BookText.java`, `config/ValidatorConfig.java`, tests `config/BookTextTest`, `BookValidationIntegrationTest`.
 Edited: `dto/CreateBookRequest`, `error/GlobalExceptionHandler`, `service/BookService`, `service/BookValidationException`, tests `GlobalExceptionHandlerTest`, `BookServiceTest`, `BookControllerTest`, `BookApiIntegrationTest`, `docs/sdd/progress.md`.
