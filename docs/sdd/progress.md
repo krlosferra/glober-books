@@ -149,6 +149,9 @@
 - Findings: F-1 Tomcat answers its own HTML 400 for a raw `[` or `]` in the query (E-26 row 5 expects `MALFORMED_REQUEST`); F-2 drip clients on the request line and headers hold a connection past 20 s (accepted limit candidate, SEC-F-073), and after the body deadline Tomcat keeps swallowing the drip. Both go to the Sponsor (SC-06 values are ASK FIRST).
 - Id endpoint rows (E-19, E-24 row 1, E-27 rows 1 and 2, T-14) are proved at gate level with a mocked route table and complete on a real port in Task 31.
 
+## Task 17: Container error wrapper (IN_REVIEW)
+- Delivery handoff 109. `EnvelopeResponseWrapper` turns any `sendError` inside the application into the envelope with the security headers; the whole body of `RequestGateFilter` is inside the catch for `INTERNAL_ERROR` (SEC-F-113). `GET /error` is 404 NOT_FOUND in the envelope. SEC-F-128: Tomcat answers `/%2e%2e/`, `/..;/`, `%2f`, `%00` and `/WEB-INF/web.xml` itself with a minimal HTML page without the security headers; covered by R-13 and R-23 (constitution 1.5), Task 49 raw-socket rows remain.
+
 ## Task 12: Page shell with minimal list and add
 
 - Date: 2026-11-05

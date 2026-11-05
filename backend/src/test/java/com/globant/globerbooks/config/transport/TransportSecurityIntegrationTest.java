@@ -2,6 +2,7 @@ package com.globant.globerbooks.config.transport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.globant.globerbooks.support.ErrorProbeConfig;
 import com.globant.globerbooks.support.RawHttpClient;
 import com.globant.globerbooks.support.RawHttpClient.Answer;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -29,6 +31,7 @@ import org.springframework.test.context.DynamicPropertySource;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(OutputCaptureExtension.class)
+@Import(ErrorProbeConfig.class)
 class TransportSecurityIntegrationTest {
 
     private static final String BOOKS = "/api/v1/books";
@@ -254,5 +257,33 @@ class TransportSecurityIntegrationTest {
                 (first, second) -> first + second + "\n");
         assertThat(logs).doesNotContain("Zanzibar").doesNotContain("Quentin").doesNotContain("Hidden Author");
         System.out.println("EVIDENCE checkpoint log lines: " + logs.lines().count() + ", book data in logs: false");
+    }
+
+    @Test
+    void sendErrorInsideTheApplicationLeavesAsTheEnvelopeWithTheHeaders() throws IOException {
+        Answer forced = expect("sendError(500, message) inside the application",
+                raw.request("GET", BOOKS, null, "X-Probe-Send-Error: 500"), 500, "INTERNAL_ERROR");
+        Answer unknown = expect("sendError(418) inside the application",
+                raw.request("GET", BOOKS, null, "X-Probe-Send-Error: 418"), 500, "INTERNAL_ERROR");
+        Answer reset = expect("reset then sendError(404) inside the application",
+                raw.request("GET", BOOKS, null, "X-Probe-Send-Error: 404", "X-Probe-Reset: 1"), 404, "NOT_FOUND");
+        for (Answer answer : List.of(forced, unknown, reset)) {
+            assertEnvelope(answer);
+            assertThat(answer.header("Content-Type")).isEqualToIgnoringCase("application/json;charset=UTF-8");
+            assertThat(answer.raw()).doesNotContain("secret").doesNotContain("<html")
+                    .doesNotContainIgnoringCase("tomcat");
+        }
+    }
+
+    @Test
+    void errorPathAnswersNotFoundInTheEnvelopeWithTheHeaders() throws IOException {
+        for (String method : new String[] {"GET", "POST"}) {
+            Answer answer = method.equals("GET") ? raw.request("GET", "/error", null)
+                    : raw.request("POST", "/error", "{}".getBytes(StandardCharsets.UTF_8), JSON,
+                            "Content-Length: 2");
+            expect(method + " /error", answer, 404, "NOT_FOUND");
+            assertEnvelope(answer);
+            assertThat(answer.header("Content-Type")).isEqualToIgnoringCase("application/json;charset=UTF-8");
+        }
     }
 }
