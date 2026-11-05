@@ -4,6 +4,7 @@ on:
     types: [opened, synchronize, reopened, edited]
 permissions:
   contents: read
+  pull-requests: write
 jobs:
   hygiene:
     runs-on: ubuntu-latest
@@ -13,11 +14,24 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Remove the platform footer from the description
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: bash .github/scripts/strip-pr-footer.sh
       - name: Attribution and secrets check
         env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_BODY: ${{ github.event.pull_request.body }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
-        run: bash .github/scripts/hygiene.sh
+        run: |
+          # The description is read again after the footer step, so the check sees the current text.
+          PR_BODY="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.body // ""')"
+          export PR_BODY
+          bash .github/scripts/hygiene.sh
