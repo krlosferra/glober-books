@@ -144,6 +144,11 @@
 - `RouteTableTest` reflects the controllers' mappings and the catalog and fails when a mapping is added (seeded and reverted, recorded in the delivery). Id endpoints are not routes until Task 31, so their rows answer 404 for now.
 - Test change: the gate integration test used probe controllers that are not in the table; it now uses the real `/api/v1/books` with a mocked service.
 
+## Task 16: Query, id and empty-body rules; transport limits (IN_REVIEW)
+- Branch `feature/task-16-query-id-limits`; delivery handoff 105. `QueryPolicy` (query grammar, `status` value, id rule as a pure function), gate stage 9 (id, query, no-body) in `RequestGateFilter`, total 10 s body read deadline in `BoundedBodyRequest`, `ErrorResponseWriter` details overload for `INVALID_STATUS`.
+- Findings: F-1 Tomcat answers its own HTML 400 for a raw `[` or `]` in the query (E-26 row 5 expects `MALFORMED_REQUEST`); F-2 drip clients on the request line and headers hold a connection past 20 s (accepted limit candidate, SEC-F-073), and after the body deadline Tomcat keeps swallowing the drip. Both go to the Sponsor (SC-06 values are ASK FIRST).
+- Id endpoint rows (E-19, E-24 row 1, E-27 rows 1 and 2, T-14) are proved at gate level with a mocked route table and complete on a real port in Task 31.
+
 ## Task 12: Page shell with minimal list and add
 
 - Date: 2026-11-05

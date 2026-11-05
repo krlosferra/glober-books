@@ -1,5 +1,6 @@
 package com.globant.globerbooks.config.transport;
 
+import com.globant.globerbooks.error.ErrorBody;
 import com.globant.globerbooks.error.ErrorCode;
 import com.globant.globerbooks.error.ErrorResponseWriter;
 import jakarta.servlet.FilterChain;
@@ -32,8 +33,11 @@ public final class RequestGateFilter extends OncePerRequestFilter {
     private static final Logger LOG = LoggerFactory.getLogger(RequestGateFilter.class);
 
     private static final String API_PREFIX = "/api/v1/";
+    private static final String BOOKS_PREFIX = RouteTable.BOOKS + "/";
+    private static final int ID_SEGMENT = 3;
 
     private final Rejecter rejecter;
+    private final DetailRejecter detailRejecter;
     private final RouteTable routes;
 
     /**
@@ -44,6 +48,7 @@ public final class RequestGateFilter extends OncePerRequestFilter {
      */
     public RequestGateFilter(ErrorResponseWriter writer, RouteTable routes) {
         this.rejecter = writer::write;
+        this.detailRejecter = writer::write;
         this.routes = routes;
     }
 
@@ -61,10 +66,16 @@ public final class RequestGateFilter extends OncePerRequestFilter {
                 forwarded = bufferedIfBody(request);
             } catch (BoundedBodyRequest.TooLargeException tooLarge) {
                 refusal = ErrorCode.PAYLOAD_TOO_LARGE;
+            } catch (BoundedBodyRequest.TooSlowException tooSlow) {
+                refusal = ErrorCode.MALFORMED_REQUEST;
+                guarded.setHeader("Connection", "close");
             }
         }
         if (refusal == null) {
             refusal = routeRefusal(request, guarded);
+        }
+        if (refusal == null) {
+            refusal = requestRules(request, forwarded);
         }
         if (refusal != null) {
             reject(guarded, refusal);
@@ -107,6 +118,28 @@ public final class RequestGateFilter extends OncePerRequestFilter {
         return null;
     }
 
+    /** Stage 9 (AP-2): id as received, query grammar and status value, then the no-body rule. */
+    private ErrorCode requestRules(HttpServletRequest request, HttpServletRequest forwarded) {
+        RequestTarget target = RequestTarget.of(request.getRequestURI());
+        List<String> segments = target.segments();
+        if (target.path().startsWith(BOOKS_PREFIX) && segments.size() > ID_SEGMENT
+                && !QueryPolicy.idWellFormed(segments.get(ID_SEGMENT))) {
+            return ErrorCode.MALFORMED_REQUEST;
+        }
+        boolean list = "GET".equals(request.getMethod()) && RouteTable.BOOKS.equals(target.path());
+        QueryPolicy.Verdict verdict = QueryPolicy.check(request.getQueryString(), list);
+        switch (verdict.outcome()) {
+            case MALFORMED:
+                return ErrorCode.MALFORMED_REQUEST;
+            case INVALID_STATUS:
+                return ErrorCode.INVALID_STATUS;
+            default:
+                verdict.status().ifPresent(value -> request.setAttribute(QueryPolicy.STATUS_ATTRIBUTE, value));
+        }
+        boolean noBodyMethod = "GET".equals(request.getMethod()) || "DELETE".equals(request.getMethod());
+        return noBodyMethod && forwarded.getContentLengthLong() > 0 ? ErrorCode.MALFORMED_REQUEST : null;
+    }
+
     private ErrorCode declaredBodyRefusal(HttpServletRequest request) {
         return request.getContentLengthLong() > BoundedBodyRequest.LIMIT ? ErrorCode.PAYLOAD_TOO_LARGE : null;
     }
@@ -134,7 +167,12 @@ public final class RequestGateFilter extends OncePerRequestFilter {
             response.setHeader("Connection", "close");
         }
         try {
-            rejecter.write(response, code);
+            if (code == ErrorCode.INVALID_STATUS) {
+                detailRejecter.write(response, code, List.of(new ErrorBody.FieldProblem("status",
+                        "must be one of: unread, reading, completed")));
+            } else {
+                rejecter.write(response, code);
+            }
         } catch (IllegalStateException unusable) {
             LOG.error("Error response could not be written: {}", unusable.getClass().getName());
         }
@@ -153,6 +191,13 @@ public final class RequestGateFilter extends OncePerRequestFilter {
     @FunctionalInterface
     private interface Rejecter {
         void write(HttpServletResponse response, ErrorCode code) throws IOException;
+    }
+
+    /** Writes the envelope of an error code with field problems. */
+    @FunctionalInterface
+    private interface DetailRejecter {
+        void write(HttpServletResponse response, ErrorCode code, List<ErrorBody.FieldProblem> details)
+                throws IOException;
     }
 
     /** Response that sets the security headers again after {@code reset} and before {@code sendError}. */
