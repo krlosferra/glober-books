@@ -44,4 +44,35 @@ Fixture-directory start failure: `IllegalStateException: static content: unsuppo
 `cd backend && ./mvnw clean verify`: BUILD SUCCESS; unit 234 tests, integration 120 tests (1 skipped, pre-existing in SqliteStoreIntegrationTest), 0 failures; "All coverage checks have been met". Line coverage of new classes (JaCoCo csv): StaticAssetCatalog 29/32 (unreached lines: the IOException branch), StaticAssetCatalog.Asset 6/6, StaticContentController 10/10, MalformedRequestException 2/2; `StaticContentConfig` excluded as `*Config`.
 
 ## Git
-GIT_PLACEHOLDER
+`git diff --stat main..HEAD` (before this last amend-free commit of the delivery text itself the stat is the same files plus this file):
+```
+ .../globerbooks/config/StaticContentConfig.java    |  20 ++
+ .../config/transport/StaticAssetCatalog.java       | 133 ++++++++++++
+ .../controller/StaticContentController.java        |  52 +++++
+ .../globerbooks/error/GlobalExceptionHandler.java  |  10 +
+ .../error/MalformedRequestException.java           |  12 ++
+ backend/src/main/resources/application.yml         |   1 +
+ .../sqlite/StartupPolicyIntegrationTest.java       |   2 +-
+ .../transport/StaticContentIntegrationTest.java    | 237 +++++++++++++++++++++
+ .../077-orchestrator-to-java-task-09-brief.md      |  24 +++
+ .../078-java-to-liaison-task-09-delivery.md        |  47 ++++
+ docs/sdd/progress.md                               |   7 +
+ docs/sdd/status.md                                 |   3 +-
+ 12 files changed, 546 insertions(+), 2 deletions(-)
+```
+`git log main..HEAD --format='%an <%ae>%n%B---'`:
+```
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): add the Task 09 delivery and mark it in review [Task-9]
+---
+krlosferra <carlos.ferra@globant.com>
+test(static): add StaticContentIntegrationTest [Task-9]
+---
+krlosferra <carlos.ferra@globant.com>
+feat(static): add static asset catalog, controller and wiring [Task-9]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): add the Task 09 brief and update the resume point [Task-9]
+---
+```
+
