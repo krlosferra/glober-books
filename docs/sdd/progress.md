@@ -124,6 +124,7 @@
 - Warning: `v0.1` is a checkpoint for the Sponsor, **not for real data**. It has no page, no README, no container error wrapper and thin validation. Its database file (`backend/data/globerbooks.db`) is **deleted before Increment 1** (SEC-F-077).
 - The database file is exclusively locked while the application runs: no other tool (no `sqlite3`, no viewer) can open it. Stop the application first.
 - Try 0a (loopback only; the application listens on `127.0.0.1:8080`):
+  0. Prepare: `mkdir -p backend/data` (the data directory must exist; the application does not create it yet, Task 34a does).
   1. Start: `cd backend && ./mvnw spring-boot:run` (run from `backend/`; port 8080 must be free) (or `./mvnw package` then `java -jar target/globerbooks.jar`). Wait for the line `Started GloberBooksApplication`.
   2. Add: `curl -i -X POST http://127.0.0.1:8080/api/v1/books -H 'Content-Type: application/json' -d '{"title":"Dune","author":"Frank Herbert"}'` gives `201` and a JSON book with `id`, `status` `unread`, `rating` `null`.
   3. List: `curl -i http://127.0.0.1:8080/api/v1/books` gives `200` and `{"books":[...],"total":1}` with the book added.
