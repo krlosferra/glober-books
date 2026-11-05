@@ -138,3 +138,11 @@
 - Built: `config/transport/StaticAssetCatalog` (fixed at start, constructor location, fixed start-failure reason), `controller/StaticContentController`, `config/StaticContentConfig` (passes `classpath:/static/` only), `error/MalformedRequestException` with an advice mapping, `spring.web.resources.add-mappings: false`, `StaticContentIntegrationTest`.
 - Gaps reported (not fixed, Task 15 or container wrapper): `HEAD` and `OPTIONS` on a static path give 200 (spec 5.8: 405 with `Allow: GET`); the 405 carries no `Allow`; `DELETE`, `PUT`, `PATCH` without `Content-Type` give 415 before the method check; Tomcat answers 400 HTML (no security headers) for `/%2e%2e/...` and `/..;/` and 404 HTML for `/WEB-INF/...`.
 - Details: handoff 078.
+
+## Task 12: Page shell with minimal list and add
+
+- Date: 2026-11-05
+- Branch: `feature/task-12-page-shell-minimal`
+- Attempt: 1
+- Result: page, stylesheet and five modules; 43 frontend tests pass; criterion 5 evidenced by a scripted browser run (the tool server was not available); details and gaps in handoff 082.
+

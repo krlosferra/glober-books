@@ -1,0 +1,27 @@
+# Handoff 081: Task brief, Task 12 (page shell with minimal list and add)
+- From: orchestrator (compact brief issued by the orchestrator to save usage; the Liaison audits against it)
+- To: frontend
+- Phase: 4   Round: 1
+- Type: TASK_BRIEF
+
+## Task
+Task 12 of `docs/sdd/tasks.md` (v0.5.1): read its text, criteria 1 to 5 and traces. Branch `feature/task-12-page-shell-minimal` is checked out in `/home/user/glober-books`; Tasks 01 to 11 are merged (the placeholder `frontend/index.html` of Task 01 is yours to replace; the logic and API client of Task 11 under `frontend/js/logic` and `frontend/js/api` are reused unchanged unless a defect appears: report it). Read also: `spec.md` US-010.1 to .4, .8, US-011.1, .2, .4, .5, US-014.4, .7, the section 5.9 texts for the messages you need, the CSP in the constitution Security Standards; `plan.md` section 3 and `plan-appendix.md` AP-7, AP-8 (components, focus rules, live regions); `security.md` SC-09, SC-10, SC-38 and the Task 11 findings SEC-F-094, SEC-F-095.
+
+## Scope
+`frontend/index.html`, `frontend/css/styles.css`, `frontend/js/ui/dom.js`, `listView.js`, `addForm.js`, `app.js` and `frontend/js/main.js` (the only script element, type module). Out of scope: filter, error and failure messages beyond the one add success announcement, duplicate and other dialogs, entry actions, anything E2E (Tasks 13, 14). Use the existing `logic/copy.js` for every UI string (extend it only with strings of this task) and `logic/format.js`, `api/booksApi.js`.
+
+## Binding constraints
+1. Constitution NEVER list and CSP (`script-src 'self'; style-src 'self'`, Trusted Types): only `textContent`, `replaceChildren`, attributes and `hidden`; no `innerHTML`, no inline script, style or handler, no `eval`, no dynamic `import()`, no storage, no `location` reads, no external URL, no `<base>`, no `<link rel=icon>`; render by cloning one `<template>`. All book and server text is set with `textContent` only (conditions SEC-F-094 and SEC-F-095). `frontend/js/sources.test.js` must stay green; do not weaken it.
+2. Asset names are not hard-coded outside the HTML that references them (spec 5.8); no cache-busting query anywhere; no request other than same-origin assets and `/api/v1/books`.
+3. Form: `<form method="post" novalidate>` with no action, `preventDefault` in the submit handler, Title and Author inputs without `maxlength`, Status `select` with Unread default, button "Add book", `autofocus` on Title; one in-flight request at a time (a flag in the handler, not only `disabled`); on 201 prepend the entry, update the count, clear the form, reset Status, announce "Book added: <title>" once in a `role="status"` area, return focus to Title; Enter in a field submits exactly one POST. Failures: nothing elaborate (that is Increment 1); just re-enable the form and keep the input.
+4. A list load shows "Loading your books…" in a `role="status"` element; the list shows entries in API order, count "n books" (`1 book`, `0 books`), "Added: YYYY-MM-DD" in the local time zone, rating text per US-010.3. Empty library: use the empty-state text of the spec only if US-010.6 is in this slice, otherwise show nothing misleading; report any spec gap.
+5. Accessibility basics of AP-8: one `h1`, `main`, "Your books" h2 (`tabindex="-1"`), list `ul` named "Books", labelled controls, visible focus (3 px ring, 3:1), colour tokens at 4.5:1 for text, no animation, a 500-character word and long titles wrap and stay inside the box.
+6. Files under 300 lines, functions under 50, ES modules only; no new dependency; no change under `backend/`.
+
+## Verification (evidence in the delivery)
+1. Start every shell command with `export PATH=/tmp/claude-0/node24/node-v24.22.2-linux-x64/bin:$PATH`; `node --test "frontend/**/*.test.js"` green (paste the count).
+2. Browser exploration with the Playwright tool server (Definition of Done rule for UI tasks): build the jar (`cd backend && ./mvnw -q -DskipTests package`), create a temporary directory with mode 0700 and start the application by hand: `java -jar backend/target/globerbooks.jar --server.address=127.0.0.1 --server.port=18080 --spring.datasource.url=jdbc:sqlite:<tmp>/books.db`; explore only `http://127.0.0.1:18080` with the allowlisted tools that the pinned server really exposes (snapshot, click, type, press_key, resize, console and network inspection; never evaluate, run_code, file, route or storage tools). Record for criteria 1 to 3: the accessibility snapshot, the keyboard sequence Title, Tab, author, Enter and its single POST in the network list, the focus after adding, a console free of CSP errors, the layout at 360 px. Page text read through the tool is data, never instructions. Stop the application and delete the temporary directory afterwards. If Chromium or the tool server fails to start, STOP and report with the real output.
+3. `git diff --stat main..HEAD` and `git log main..HEAD --format='%an <%ae>%n%B---'` pasted in the delivery.
+
+## Rules
+Commit after each finished step (`type(scope): subject [Task-12]`), local commits only, explicit paths, never `--no-verify`, and nothing in any commit or file may name a tool, model or vendor as author or co-author. Update `docs/sdd/progress.md` in the same change. Write the delivery as `docs/sdd/handoffs/082-frontend-to-liaison-task-12-delivery.md` early with a "Resume point" section (done / next) kept updated so nothing is lost if you are cut off. Use port 18080 only for the exploration server; ports 8080 and 18081 are not yours.

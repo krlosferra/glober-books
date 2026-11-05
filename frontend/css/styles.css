@@ -1,0 +1,136 @@
+:root {
+  --bg: #ffffff;
+  --text: #1a1a1a;
+  --muted: #4a4a4a;
+  --border: #6b6b6b;
+  --primary: #0b4f9c;
+  --primary-text: #ffffff;
+  --focus: #b3470a;
+  --entry-bg: #f4f6f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+h1, h2 {
+  margin: 0 0 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.messages {
+  min-height: 1.5rem;
+  margin-bottom: 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+form {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+input, select, button {
+  max-width: 100%;
+  min-width: 0;
+  padding: 0.5rem;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+button {
+  justify-self: start;
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-text);
+  cursor: pointer;
+}
+
+button:disabled {
+  border-color: var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.count {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+}
+
+ul {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+ul[hidden], p[hidden] {
+  display: none;
+}
+
+.entry {
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--entry-bg);
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.entry p {
+  margin: 0;
+}
+
+.entry-title {
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
