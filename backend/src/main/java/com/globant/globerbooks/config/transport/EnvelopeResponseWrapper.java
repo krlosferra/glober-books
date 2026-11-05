@@ -15,17 +15,17 @@ import java.util.Map;
  */
 public final class EnvelopeResponseWrapper extends HttpServletResponseWrapper {
 
-    private final ErrorResponseWriter writer;
+    private final Rejecter rejecter;
 
     /**
      * Wraps a response and sets the security headers on it.
      *
      * @param response the container response
-     * @param writer the writer of the envelope
+     * @param delegate writes the envelope of a code (the {@link ErrorResponseWriter})
      */
-    public EnvelopeResponseWrapper(HttpServletResponse response, ErrorResponseWriter writer) {
+    public EnvelopeResponseWrapper(HttpServletResponse response, Rejecter delegate) {
         super(response);
-        this.writer = writer;
+        this.rejecter = delegate::write;
         applyHeaders();
     }
 
@@ -71,12 +71,25 @@ public final class EnvelopeResponseWrapper extends HttpServletResponseWrapper {
         }
         super.resetBuffer();
         applyHeaders();
-        writer.write((HttpServletResponse) getResponse(), codeFor(status));
+        rejecter.write((HttpServletResponse) getResponse(), codeFor(status));
     }
 
     private void applyHeaders() {
         for (Map.Entry<String, String> header : HeaderPolicy.SECURITY_HEADERS.entrySet()) {
             super.setHeader(header.getKey(), header.getValue());
         }
+    }
+
+    /** Writes the envelope of an error code to a response. */
+    @FunctionalInterface
+    public interface Rejecter {
+        /**
+         * Writes the envelope.
+         *
+         * @param response the response
+         * @param code the error code
+         * @throws IOException when the response cannot be written
+         */
+        void write(HttpServletResponse response, ErrorCode code) throws IOException;
     }
 }

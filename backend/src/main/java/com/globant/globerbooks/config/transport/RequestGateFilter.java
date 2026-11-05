@@ -34,8 +34,7 @@ public final class RequestGateFilter extends OncePerRequestFilter {
     private static final String BOOKS_PREFIX = RouteTable.BOOKS + "/";
     private static final int ID_SEGMENT = 3;
 
-    private final ErrorResponseWriter writer;
-    private final Rejecter rejecter;
+    private final EnvelopeResponseWrapper.Rejecter rejecter;
     private final DetailRejecter detailRejecter;
     private final RouteTable routes;
 
@@ -46,7 +45,6 @@ public final class RequestGateFilter extends OncePerRequestFilter {
      * @param routes the route and method table
      */
     public RequestGateFilter(ErrorResponseWriter writer, RouteTable routes) {
-        this.writer = writer;
         this.rejecter = writer::write;
         this.detailRejecter = writer::write;
         this.routes = routes;
@@ -55,7 +53,7 @@ public final class RequestGateFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        EnvelopeResponseWrapper guarded = new EnvelopeResponseWrapper(response, writer);
+        EnvelopeResponseWrapper guarded = new EnvelopeResponseWrapper(response, rejecter);
         try {
             gate(request, guarded, chain);
         } catch (IOException | ServletException | RuntimeException | Error failure) {
@@ -186,12 +184,6 @@ public final class RequestGateFilter extends OncePerRequestFilter {
 
     private static List<String> values(HttpServletRequest request, String name) {
         return Collections.list(request.getHeaders(name));
-    }
-
-    /** Writes the envelope of an error code to a response. */
-    @FunctionalInterface
-    private interface Rejecter {
-        void write(HttpServletResponse response, ErrorCode code) throws IOException;
     }
 
     /** Writes the envelope of an error code with field problems. */
