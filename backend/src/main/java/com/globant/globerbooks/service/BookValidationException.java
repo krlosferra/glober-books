@@ -44,4 +44,21 @@ public class BookValidationException extends RuntimeException {
     public List<ErrorBody.FieldProblem> problems() {
         return problems;
     }
+
+    /**
+     * Returns the fixed detail message of a failed text check (spec Section 5.0 list). The text
+     * never contains user input.
+     *
+     * @param problem the first failing check
+     * @param max the limit in code points, used only for the length message
+     * @return the message
+     */
+    public static String messageFor(TextPolicy.Problem problem, int max) {
+        return switch (problem) {
+            case REQUIRED -> "is required";
+            case EMPTY -> "must not be empty";
+            case TOO_LONG -> "must be between 1 and " + max + " characters";
+            case FORBIDDEN_CHARACTERS -> "contains characters that are not allowed";
+        };
+    }
 }

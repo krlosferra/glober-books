@@ -4,9 +4,12 @@ import com.globant.globerbooks.config.transport.RequestTarget;
 import com.globant.globerbooks.config.transport.RouteTable;
 import com.globant.globerbooks.service.BookValidationException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -32,9 +35,10 @@ public class GlobalExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final MediaType JSON_UTF8 = MediaType.parseMediaType(ErrorResponseWriter.CONTENT_TYPE);
 
-    private static final Map<String, String> FIELD_MESSAGES = Map.of(
-            "title", "must be between 1 and 500 characters",
-            "author", "must be between 1 and 200 characters");
+    private static final List<String> FIELD_ORDER = List.of("title", "author", "status");
+    private static final Set<String> FIXED_MESSAGES = Set.of("is required", "must not be empty",
+            "must be between 1 and 500 characters", "must be between 1 and 200 characters",
+            "contains characters that are not allowed", "must be one of: unread, reading, completed");
 
     private final ErrorBodyFactory factory;
     private final RouteTable routes;
@@ -62,22 +66,33 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maps a failed Bean Validation check of the body to {@code 400 VALIDATION_ERROR}. Messages
-     * are fixed per field and never echo the rejected value.
+     * Maps a failed Bean Validation check of the body: one entry per failing field ordered title,
+     * author, status; {@code INVALID_STATUS} when only {@code status} fails (BR-012 step 6), else
+     * {@code VALIDATION_ERROR}. Only messages from the fixed list pass; none echoes the value.
      *
      * @param failure the binding failure
      * @return the envelope with {@code details}
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorBody> handleInvalidBody(MethodArgumentNotValidException failure) {
-        List<ErrorBody.FieldProblem> problems = failure.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField())
-                .distinct()
-                .sorted()
-                .map(field -> new ErrorBody.FieldProblem(field, FIELD_MESSAGES.getOrDefault(field,
-                        "is invalid")))
+        Map<String, String> byField = new HashMap<>();
+        failure.getBindingResult().getFieldErrors().forEach(error -> byField.putIfAbsent(error.getField(),
+                fixedMessage(error.getDefaultMessage())));
+        List<ErrorBody.FieldProblem> problems = byField.keySet().stream()
+                .sorted(Comparator.comparingInt(GlobalExceptionHandler::position).thenComparing(field -> field))
+                .map(field -> new ErrorBody.FieldProblem(field, byField.get(field)))
                 .toList();
-        return respond(ErrorCode.VALIDATION_ERROR, problems);
+        boolean onlyStatus = problems.size() == 1 && "status".equals(problems.get(0).field());
+        return respond(onlyStatus ? ErrorCode.INVALID_STATUS : ErrorCode.VALIDATION_ERROR, problems);
+    }
+
+    private static int position(String field) {
+        int index = FIELD_ORDER.indexOf(field);
+        return index < 0 ? FIELD_ORDER.size() : index;
+    }
+
+    private static String fixedMessage(String message) {
+        return message != null && FIXED_MESSAGES.contains(message) ? message : "is invalid";
     }
 
     /**
