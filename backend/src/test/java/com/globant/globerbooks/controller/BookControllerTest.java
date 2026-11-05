@@ -106,7 +106,7 @@ class BookControllerTest {
                 .andExpect(content().contentType(JSON_UTF8))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.details[0].field").value("title"))
-                .andExpect(jsonPath("$.details[0].message").value("must be between 1 and 500 characters"))
+                .andExpect(jsonPath("$.details[0].message").value("must not be empty"))
                 .andExpect(jsonPath("$.timestamp").value("2026-02-19T10:00:00.000Z"));
 
         verify(service, never()).create(any());
@@ -116,8 +116,11 @@ class BookControllerTest {
     void addRejectsMissingTitleAndAuthorWithBothFields() throws Exception {
         add("{}").andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-                .andExpect(jsonPath("$.details[0].field").value("author"))
-                .andExpect(jsonPath("$.details[1].field").value("title"));
+                .andExpect(jsonPath("$.details[0].field").value("title"))
+                .andExpect(jsonPath("$.details[0].message").value("is required"))
+                .andExpect(jsonPath("$.details[1].field").value("author"))
+                .andExpect(jsonPath("$.details[1].message").value("is required"))
+                .andExpect(jsonPath("$.details.length()").value(2));
     }
 
     @Test

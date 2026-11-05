@@ -52,6 +52,88 @@ class GlobalExceptionHandlerTest {
         }
     }
 
+    /** Controller that validates the real request record, as the book endpoint does. */
+    @RestController
+    @RequestMapping("/probe/books")
+    static class Validating {
+        @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+        String add(@jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+                com.globant.globerbooks.dto.CreateBookRequest request) {
+            return "ok";
+        }
+    }
+
+    private org.springframework.test.web.servlet.ResultActions postBook(String body) throws Exception {
+        org.springframework.validation.beanvalidation.LocalValidatorFactoryBean validator =
+                com.globant.globerbooks.config.ValidatorConfig.defaultValidator();
+        validator.afterPropertiesSet();
+        MockMvc books = MockMvcBuilders.standaloneSetup(new Validating()).setValidator(validator)
+                .setControllerAdvice(new GlobalExceptionHandler(factory, routes)).build();
+        return books.perform(post("/probe/books").contentType(MediaType.APPLICATION_JSON).content(body));
+    }
+
+    @Test
+    void emptyObjectGivesValidationErrorWithTitleThenAuthor() throws Exception {
+        postBook("{}").andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.details.length()").value(2))
+                .andExpect(jsonPath("$.details[0].field").value("title"))
+                .andExpect(jsonPath("$.details[0].message").value("is required"))
+                .andExpect(jsonPath("$.details[1].field").value("author"))
+                .andExpect(jsonPath("$.details[1].message").value("is required"));
+    }
+
+    @Test
+    void onlyStatusFailingGivesInvalidStatus() throws Exception {
+        postBook("{\"title\":\"a\",\"author\":\"b\",\"status\":\"Done\"}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_STATUS"))
+                .andExpect(jsonPath("$.details.length()").value(1))
+                .andExpect(jsonPath("$.details[0].field").value("status"))
+                .andExpect(jsonPath("$.details[0].message").value("must be one of: unread, reading, completed"));
+    }
+
+    @Test
+    void statusWithAnotherFailingFieldGivesValidationErrorOrderedTitleThenStatus() throws Exception {
+        postBook("{\"status\":\"Done\",\"author\":\"a\",\"title\":\"\"}")
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.details.length()").value(2))
+                .andExpect(jsonPath("$.details[0].field").value("title"))
+                .andExpect(jsonPath("$.details[0].message").value("must not be empty"))
+                .andExpect(jsonPath("$.details[1].field").value("status"));
+    }
+
+    @Test
+    void titleAuthorAndStatusFailuresAreOrderedTitleAuthorStatus() throws Exception {
+        postBook("{\"status\":\"Done\",\"author\":\"\",\"title\":null}")
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.details[0].field").value("title"))
+                .andExpect(jsonPath("$.details[1].field").value("author"))
+                .andExpect(jsonPath("$.details[2].field").value("status"));
+    }
+
+    @Test
+    void explicitNullStatusGivesInvalidStatusAndAbsentStatusIsAccepted() throws Exception {
+        postBook("{\"title\":\"a\",\"author\":\"b\",\"status\":null}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_STATUS"))
+                .andExpect(jsonPath("$.details[0].field").value("status"));
+        postBook("{\"title\":\"a\",\"author\":\"b\"}").andExpect(status().isOk());
+    }
+
+    @Test
+    void hostileTitleOf501CharactersIsRejectedWithoutEchoingIt() throws Exception {
+        String hostile = "${7*7}" + "a".repeat(495);
+
+        postBook("{\"title\":\"" + hostile + "\",\"author\":\"b\"}")
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.details[0].message").value("must be between 1 and 500 characters"))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("${7*7}"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("49"))));
+    }
+
     @Test
     void unexpectedExceptionGives500InternalErrorWithoutDetail() throws Exception {
         mvc.perform(get("/probe/boom"))

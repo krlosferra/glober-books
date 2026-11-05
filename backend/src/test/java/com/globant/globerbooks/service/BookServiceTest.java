@@ -79,12 +79,12 @@ class BookServiceTest {
 
     @Test
     void rejectsEmptyBlankAndNullTitleWithField() {
-        for (String title : new String[] {"", "   ", null}) {
-            BookValidationException failure = failureOf(new CreateBookRequest(title, "B", null, null));
+        String[][] cases = {{"", "must not be empty"}, {"   ", "must not be empty"}, {null, "is required"}};
+        for (String[] each : cases) {
+            BookValidationException failure = failureOf(new CreateBookRequest(each[0], "B", null, null));
 
             assertThat(failure.code()).isEqualTo(ErrorCode.VALIDATION_ERROR);
-            assertThat(failure.problems()).containsExactly(
-                    new FieldProblem("title", "must be between 1 and 500 characters"));
+            assertThat(failure.problems()).containsExactly(new FieldProblem("title", each[1]));
         }
     }
 
@@ -114,6 +114,35 @@ class BookServiceTest {
 
         assertThat(failure.code()).isEqualTo(ErrorCode.VALIDATION_ERROR);
         assertThat(failure.problems()).extracting(FieldProblem::field).containsExactly("title", "status");
+    }
+
+    @Test
+    void storesTheNormalizedTextTrimmedAndInNfc() {
+        String decomposed = " \u2003Cafe\u0301 ";
+        ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
+
+        addSaved(new CreateBookRequest(decomposed, "\u00A0Au\u00A0", null, null));
+
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getTitle()).isEqualTo("Caf\u00E9");
+        assertThat(captor.getValue().getAuthor()).isEqualTo("Au");
+    }
+
+    @Test
+    void repeatsTheCharacterRuleAndNamesTheFieldWithoutTheText() {
+        BookValidationException failure = failureOf(new CreateBookRequest("T", "A\u200Bb", null, null));
+
+        assertThat(failure.code()).isEqualTo(ErrorCode.VALIDATION_ERROR);
+        assertThat(failure.problems()).containsExactly(
+                new FieldProblem("author", "contains characters that are not allowed"));
+        assertThat(failure.getMessage()).isEqualTo("VALIDATION_ERROR");
+    }
+
+    @Test
+    void treatsTheEmptyStatusOfAnExplicitNullAsInvalidStatus() {
+        BookValidationException failure = failureOf(new CreateBookRequest("T", "A", "", null));
+
+        assertThat(failure.code()).isEqualTo(ErrorCode.INVALID_STATUS);
     }
 
     @Test

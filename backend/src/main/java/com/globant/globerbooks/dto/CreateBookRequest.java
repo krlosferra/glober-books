@@ -1,10 +1,11 @@
 package com.globant.globerbooks.dto;
 
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import com.globant.globerbooks.config.BookText;
 import com.globant.globerbooks.service.TextPolicy;
 import jakarta.validation.constraints.Pattern;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.deser.jdk.StringDeserializer;
 
 /**
  * Request body of {@code POST /api/v1/books} (spec 5.2). Components are declared in the order of
@@ -20,8 +21,25 @@ import jakarta.validation.constraints.Pattern;
 public record CreateBookRequest(
         @BookText(max = TextPolicy.TITLE_MAX) String title,
         @BookText(max = TextPolicy.AUTHOR_MAX) String author,
-        @JsonSetter(nulls = Nulls.AS_EMPTY)
+        @JsonDeserialize(using = CreateBookRequest.StatusDeserializer.class)
         @Pattern(regexp = "unread|reading|completed", message = "must be one of: unread, reading, completed")
         String status,
         Boolean allowDuplicate) {
+
+    /**
+     * Reads {@code status} as text. A missing member stays null (the default {@code unread}); an
+     * explicit JSON null becomes the empty text, which is not a status (BR-001, DEC-016).
+     */
+    public static class StatusDeserializer extends StringDeserializer {
+
+        @Override
+        public Object getNullValue(DeserializationContext context) {
+            return "";
+        }
+
+        @Override
+        public Object getAbsentValue(DeserializationContext context) {
+            return null;
+        }
+    }
 }
