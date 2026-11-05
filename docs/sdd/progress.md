@@ -146,3 +146,10 @@
 - Attempt: 1
 - Result: page, stylesheet and five modules; 43 frontend tests pass; criterion 5 evidenced by a scripted browser run (the tool server was not available); details and gaps in handoff 082.
 
+
+## Task 13: E2E harness (config, launcher, isolation)
+
+- Date: 2026-11-05
+- Branch: `chore/task-13-e2e-harness`
+- Attempt: 1
+- Result: Playwright configuration, launcher, global setup and placeholder test; the placeholder is green; Playwright 1.64.1 starts the web server before the global setup (Q-F7); the busy-port check and the hostile-environment run are evidenced in handoff 089.
