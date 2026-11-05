@@ -202,3 +202,7 @@ Pins that remain unverified: `@playwright/mcp` 0.0.83 was started and its tool l
 ## Task 18+19: Text policy and Unicode fixture check (IN_REVIEW)
 
 - Branch: `feature/task-18-19-text-policy`; delivery handoff 113. `TextPolicy` implements BR-006 items 1 to 6d as a single linear pass over code points (no regular expression on the text; trim by Unicode White_Space); `UnicodeFixtureCheckTest` proves JDK 21.0.12, Unicode 15.0 and the spec's categories and NFC results; rule tests call `UnicodeFixtures.requirePinnedData()` in `@BeforeAll`. Wiring into Bean Validation stays with Task 20.
+
+## Task 20: Validation wiring and field-error mapping (IN_REVIEW)
+
+- Branch: `feature/task-20-validation` (the task header names `feature/task-20-validation-wiring`; the checked-out name was kept); delivery handoff 117. `BookText` (constraint plus validator calling `TextPolicy.check`), `ValidatorConfig` (validator factory with a literal message interpolator, no expression language), `CreateBookRequest` (title, author, status order; status pattern; explicit JSON null read as the empty text so it is `INVALID_STATUS`, absent stays `unread`), advice ordering title, author, status with `INVALID_STATUS` only when status alone fails; the service repeats `TextPolicy.check`, stores `TextPolicy.normalize` and throws the same exception type. Thin checks of Task 07 removed.
