@@ -139,6 +139,11 @@
 - Gaps reported (not fixed, Task 15 or container wrapper): `HEAD` and `OPTIONS` on a static path give 200 (spec 5.8: 405 with `Allow: GET`); the 405 carries no `Allow`; `DELETE`, `PUT`, `PATCH` without `Content-Type` give 415 before the method check; Tomcat answers 400 HTML (no security headers) for `/%2e%2e/...` and `/..;/` and 404 HTML for `/WEB-INF/...`.
 - Details: handoff 078.
 
+## Task 15: Route table, methods and Accept (IN_REVIEW)
+- Branch `feature/task-15-routing-accept`; delivery handoff 097. `RequestTarget`, `RouteTable` and `AcceptPolicy` added; `RequestGateFilter` decides route and method (404, 405 with `Allow`), then `Accept` on `/api/v1/` paths. The advice takes `Allow` from `RouteTable` too. HEAD and OPTIONS on static paths now answer 405 (SEC-F-127 closed).
+- `RouteTableTest` reflects the controllers' mappings and the catalog and fails when a mapping is added (seeded and reverted, recorded in the delivery). Id endpoints are not routes until Task 31, so their rows answer 404 for now.
+- Test change: the gate integration test used probe controllers that are not in the table; it now uses the real `/api/v1/books` with a mocked service.
+
 ## Task 12: Page shell with minimal list and add
 
 - Date: 2026-11-05
