@@ -2,6 +2,7 @@ package com.globant.globerbooks.service;
 
 import java.text.Normalizer;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -20,6 +21,8 @@ public final class TextPolicy {
     private static final Pattern WHITE_SPACE = Pattern.compile("\\p{IsWhite_Space}");
     private static final int ZERO_WIDTH_NON_JOINER = 0x200C;
     private static final int ZERO_WIDTH_JOINER = 0x200D;
+    private static final int MAX_RUN = 8;
+    private static final Set<Integer> BLANK_RENDERING = Set.of(0x115F, 0x1160, 0x3164, 0xFFA0, 0x2800);
     private static final int FIRST_TAG = 0xE0000;
     private static final int LAST_TAG = 0xE007F;
 
@@ -93,8 +96,80 @@ public final class TextPolicy {
         return WHITE_SPACE.matcher(new String(Character.toChars(point))).matches();
     }
 
+    /** One linear pass over the code points; no backtracking and no regular expression. */
     private static boolean charactersAllowed(String text) {
-        return text.codePoints().noneMatch(TextPolicy::isForbidden);
+        int[] points = text.codePoints().toArray();
+        boolean visible = false;
+        int runLength = 0;
+        int selectors = 0;
+        for (int index = 0; index < points.length; index++) {
+            int point = points[index];
+            if (isForbidden(point) || (index == 0 && isMark(point))) {
+                return false;
+            }
+            if (isJoiner(point) && !joinerPlacementAllowed(points, index)) {
+                return false;
+            }
+            visible = visible || isVisible(point);
+            if (isRunMember(point)) {
+                runLength++;
+                selectors += isVariationSelector(point) ? 1 : 0;
+                if (runLength > MAX_RUN || selectors > 1) {
+                    return false;
+                }
+            } else {
+                runLength = 0;
+                selectors = 0;
+            }
+        }
+        return visible;
+    }
+
+    private static boolean joinerPlacementAllowed(int[] points, int index) {
+        if (index == 0 || index == points.length - 1) {
+            return false;
+        }
+        return !isJoinerOrSpace(points[index - 1]) && !isJoinerOrSpace(points[index + 1]);
+    }
+
+    private static boolean isJoinerOrSpace(int point) {
+        return isJoiner(point) || Character.getType(point) == Character.SPACE_SEPARATOR;
+    }
+
+    private static boolean isJoiner(int point) {
+        return point == ZERO_WIDTH_NON_JOINER || point == ZERO_WIDTH_JOINER;
+    }
+
+    private static boolean isMark(int point) {
+        return switch (Character.getType(point)) {
+            case Character.NON_SPACING_MARK, Character.COMBINING_SPACING_MARK,
+                    Character.ENCLOSING_MARK -> true;
+            default -> false;
+        };
+    }
+
+    private static boolean isRunMember(int point) {
+        return isMark(point) || isJoiner(point);
+    }
+
+    private static boolean isVariationSelector(int point) {
+        return (point >= 0xFE00 && point <= 0xFE0F) || (point >= 0xE0100 && point <= 0xE01EF);
+    }
+
+    private static boolean isVisible(int point) {
+        if (BLANK_RENDERING.contains(point)) {
+            return false;
+        }
+        return switch (Character.getType(point)) {
+            case Character.UPPERCASE_LETTER, Character.LOWERCASE_LETTER, Character.TITLECASE_LETTER,
+                    Character.MODIFIER_LETTER, Character.OTHER_LETTER, Character.DECIMAL_DIGIT_NUMBER,
+                    Character.LETTER_NUMBER, Character.OTHER_NUMBER, Character.CONNECTOR_PUNCTUATION,
+                    Character.DASH_PUNCTUATION, Character.START_PUNCTUATION, Character.END_PUNCTUATION,
+                    Character.INITIAL_QUOTE_PUNCTUATION, Character.FINAL_QUOTE_PUNCTUATION,
+                    Character.OTHER_PUNCTUATION, Character.MATH_SYMBOL, Character.CURRENCY_SYMBOL,
+                    Character.MODIFIER_SYMBOL, Character.OTHER_SYMBOL -> true;
+            default -> false;
+        };
     }
 
     private static boolean isForbidden(int point) {
