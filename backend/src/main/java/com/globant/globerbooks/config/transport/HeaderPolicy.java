@@ -19,7 +19,7 @@ public final class HeaderPolicy {
             + "form-action 'self'; require-trusted-types-for 'script'";
 
     private static final String PERMISSIONS = "camera=(), microphone=(), geolocation=(), payment=(), "
-            + "usb=(), serial=(), bluetooth=(), clipboard-read=(), display-capture=(), fullscreen=()";
+            + "usb=(), serial=(), clipboard-read=(), display-capture=(), fullscreen=()";
 
     /** Headers set on every response. */
     public static final Map<String, String> SECURITY_HEADERS = Map.of(

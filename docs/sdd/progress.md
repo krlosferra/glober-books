@@ -171,7 +171,7 @@
   2. Logic tests: `node --test "frontend/**/*.test.js"`
   3. E2E setup once: `cd e2e && npm ci --ignore-scripts` and `npx playwright install chromium`; smoke: `npx playwright test --grep @smoke` (it starts the application itself on 18080 with a temporary database)
   4. By hand: `mkdir -p backend/data`, then `cd backend && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m` (or `cd backend && java -Xmx512m -jar target/globerbooks.jar`); open `http://127.0.0.1:8080/`, add a book with the keyboard, reload and see it; stop with `Ctrl+C`; delete `backend/data/globerbooks.db` when finished.
-- SEC-F-130: the guard tolerates exactly one console message, `Error with Permissions-Policy header: Unrecognized feature: 'bluetooth'.`, until the Sponsor decides the header list; the filter is marked in `fixtures.ts`.
+- SEC-F-130: the `Permissions-Policy` header value was corrected (constitution 1.4, `bluetooth=()` removed) and the console-message filter was removed from `fixtures.ts`; the guard now tolerates no Permissions-Policy console message.
 - Finding for the Liaison: the database path is `./data/globerbooks.db` (relative), so the jar must be started from `backend/`; the literal command of Task 14 criterion 3 (`java -Xmx512m -jar backend/target/globerbooks.jar` from the root) fails with "unable to open database file". The README documents `cd backend && java -Xmx512m -jar target/globerbooks.jar`.
 - Details: handoff 093.
 

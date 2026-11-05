@@ -121,6 +121,7 @@ class HeaderPolicyTest {
                 .doesNotContain("upgrade-insecure-requests");
         assertThat(HeaderPolicy.SECURITY_HEADERS.get("Permissions-Policy"))
                 .contains("camera=()", "microphone=()", "geolocation=()", "payment=()", "usb=()", "serial=()",
-                        "bluetooth=()", "clipboard-read=()", "display-capture=()", "fullscreen=()");
+                        "clipboard-read=()", "display-capture=()", "fullscreen=()")
+                .doesNotContain("bluetooth");
     }
 }
