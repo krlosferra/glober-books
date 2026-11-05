@@ -84,6 +84,16 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Maps a transport-rule violation (for example a query on a static path) to {@code 400 MALFORMED_REQUEST}.
+     *
+     * @return the envelope
+     */
+    @ExceptionHandler(MalformedRequestException.class)
+    public ResponseEntity<ErrorBody> handleMalformed() {
+        return respond(ErrorCode.MALFORMED_REQUEST);
+    }
+
+    /**
      * Maps an unknown path to {@code 404 NOT_FOUND}.
      *
      * @return the envelope

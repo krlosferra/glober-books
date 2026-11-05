@@ -32,6 +32,7 @@ spring:
       enabled: false
   web:
     resources:
+      add-mappings: false
       static-locations: classpath:/static/
 
 server:
