@@ -198,3 +198,7 @@
 | Playwright install on the pinned Node | Task 10 (handoff 038) install; Task 13 (handoff 089) and Task 14 smoke run, 3 of 3 | Proved |
 
 Pins that remain unverified: `@playwright/mcp` 0.0.83 was started and its tool list read (Task 10, handoff 038: 17 of the 24 allowlisted tools exposed) but no page exploration ran through it (not exposed to the Task 12 and Task 14 runs); Eclipse Temurin (the JDK pin was verified on OpenJDK 21.0.12.1 only). Pins verified here for the first time on a clean copy: Maven 3.9.16 and wrapper 3.3.4 (full `verify`), `@playwright/test` 1.64.1 (`npm ci`, smoke run).
+
+## Task 18+19: Text policy and Unicode fixture check (IN_REVIEW)
+
+- Branch: `feature/task-18-19-text-policy`; delivery handoff 113. `TextPolicy` implements BR-006 items 1 to 6d as a single linear pass over code points (no regular expression on the text; trim by Unicode White_Space); `UnicodeFixtureCheckTest` proves JDK 21.0.12, Unicode 15.0 and the spec's categories and NFC results; rule tests call `UnicodeFixtures.requirePinnedData()` in `@BeforeAll`. Wiring into Bean Validation stays with Task 20.
