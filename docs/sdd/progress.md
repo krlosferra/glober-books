@@ -116,3 +116,17 @@
 - Result: `./mvnw verify` green; real-port POST and GET round trip, wire format with 24-character dates, a list writes nothing (database hash unchanged).
 - Notes: Jackson 3 writes an `Instant` with zero milliseconds without the fraction, so `BookResponse` dates carry a `@JsonFormat` pattern. The service method is named `create` because SpotBugs treats a class with an `add*` method as mutable (EI_EXPOSE_REP2 in the controller).
 - Details: handoff 070.
+
+## Task 08: 0a note, commands to try the API skeleton (v0.1)
+
+- Date: 2026-11-04
+- Branch: `chore/task-08-real-port-baseline`
+- Warning: `v0.1` is a checkpoint for the Sponsor, **not for real data**. It has no page, no README, no container error wrapper and thin validation. Its database file (`backend/data/globerbooks.db`) is **deleted before Increment 1** (SEC-F-077).
+- The database file is exclusively locked while the application runs: no other tool (no `sqlite3`, no viewer) can open it. Stop the application first.
+- Try 0a (loopback only; the application listens on `127.0.0.1:8080`):
+  1. Start: `cd backend && ./mvnw spring-boot:run` (run from `backend/`; port 8080 must be free) (or `./mvnw package` then `java -jar target/globerbooks.jar`). Wait for the line `Started GloberBooksApplication`.
+  2. Add: `curl -i -X POST http://127.0.0.1:8080/api/v1/books -H 'Content-Type: application/json' -d '{"title":"Dune","author":"Frank Herbert"}'` gives `201` and a JSON book with `id`, `status` `unread`, `rating` `null`.
+  3. List: `curl -i http://127.0.0.1:8080/api/v1/books` gives `200` and `{"books":[...],"total":1}` with the book added.
+  4. Stop: press `Ctrl+C` in the terminal that runs the application.
+  5. Clean up: delete `backend/data/globerbooks.db` when finished.
+- Details: handoff 074.
