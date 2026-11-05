@@ -34,10 +34,11 @@ Then start the application in one of two ways (the memory bound is confirmed or 
 ```
 cd backend && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m
 ```
-or, after the build, from the repository root:
+or, after the build, the jar (`backend/target/globerbooks.jar`):
 ```
-java -Xmx512m -jar backend/target/globerbooks.jar
+cd backend && java -Xmx512m -jar target/globerbooks.jar
 ```
+Run both from `backend/`: the database path `./data/globerbooks.db` is relative to the working directory, so from any other directory the start fails with "unable to open database file".
 Open the page at `http://127.0.0.1:8080/`. The application listens on the loopback address only. Stop it with `Ctrl+C`.
 
 The database file is locked exclusively while the application runs: no other tool (no `sqlite3`, no viewer) can open it. Stop the application first.
