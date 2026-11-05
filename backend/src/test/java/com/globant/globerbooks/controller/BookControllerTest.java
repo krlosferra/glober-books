@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.globant.globerbooks.config.transport.RouteTable;
+import com.globant.globerbooks.config.transport.StaticAssetCatalog;
 import com.globant.globerbooks.dto.BookListResponse;
 import com.globant.globerbooks.dto.BookResponse;
 import com.globant.globerbooks.dto.CreateBookRequest;
@@ -41,7 +43,7 @@ import org.springframework.test.web.servlet.MockMvc;
 /** Slice tests of the book endpoints: binding, status codes, error mapping (spec 5.1, 5.2). */
 @WebMvcTest(BookController.class)
 @Import({GlobalExceptionHandler.class, ErrorBodyFactory.class, ErrorResponseWriter.class,
-    BookControllerTest.FixedClock.class})
+    RouteTable.class, BookControllerTest.FixedClock.class})
 class BookControllerTest {
 
     private static final String JSON_UTF8 = "application/json;charset=UTF-8";
@@ -53,6 +55,11 @@ class BookControllerTest {
     /** Fixed clock for the error timestamp. */
     @TestConfiguration
     static class FixedClock {
+        @Bean
+        StaticAssetCatalog catalog() {
+            return new StaticAssetCatalog("classpath:/static/");
+        }
+
         @Bean
         Clock clock() {
             return Clock.fixed(Instant.parse("2026-02-19T10:00:00.000Z"), ZoneOffset.UTC);

@@ -1,5 +1,7 @@
 package com.globant.globerbooks.error;
 
+import com.globant.globerbooks.config.transport.RouteTable;
+import com.globant.globerbooks.config.transport.StaticAssetCatalog;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -25,8 +27,9 @@ class GlobalExceptionHandlerTest {
 
     private final ErrorBodyFactory factory = new ErrorBodyFactory(
             Clock.fixed(Instant.parse("2026-02-19T10:00:00.123Z"), ZoneOffset.UTC));
+    private final RouteTable routes = new RouteTable(new StaticAssetCatalog("classpath:/static/"));
     private final MockMvc mvc = MockMvcBuilders.standaloneSetup(new Probe())
-            .setControllerAdvice(new GlobalExceptionHandler(factory))
+            .setControllerAdvice(new GlobalExceptionHandler(factory, routes))
             .build();
 
     /** Controller that fails on demand. */
@@ -74,6 +77,28 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(JSON_UTF8))
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"));
+    }
+
+    /** Controller on a defined path that lacks a method, so the framework raises its own 405. */
+    @RestController
+    @RequestMapping("/api/v1/books")
+    static class GetOnly {
+        @GetMapping
+        String list() {
+            return "x";
+        }
+    }
+
+    @Test
+    void frameworkMethodNotSupportedCarriesTheAllowOfTheRouteTable() throws Exception {
+        MockMvc books = MockMvcBuilders.standaloneSetup(new GetOnly())
+                .setControllerAdvice(new GlobalExceptionHandler(factory, routes)).build();
+
+        books.perform(post("/api/v1/books").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("Allow", "GET, POST"))
+                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"));
     }
 
     @Test

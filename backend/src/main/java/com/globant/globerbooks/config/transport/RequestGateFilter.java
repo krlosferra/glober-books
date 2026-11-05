@@ -19,9 +19,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * The first filter of the chain (AP-2 stages 1 to 5): sets the security headers, then checks Host,
- * Origin, Sec-Fetch-Site, Content-Type and the 16 KiB body cap, and ends the request with the
- * error envelope on the first failure. It never reads a parameter, and a failure of the rest of
+ * The first filter of the chain (AP-2 stages 1 to 6): sets the security headers, then checks Host,
+ * Origin, Sec-Fetch-Site, Content-Type, the 16 KiB body cap, the route and method from the raw
+ * target (with {@code Allow} on a 405) and {@code Accept} on API paths, and ends the request with
+ * the error envelope on the first failure. It never reads a parameter, and a failure of the rest of
  * the chain becomes {@code INTERNAL_ERROR}.
  */
 @Component
@@ -30,15 +31,20 @@ public final class RequestGateFilter extends OncePerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestGateFilter.class);
 
+    private static final String API_PREFIX = "/api/v1/";
+
     private final Rejecter rejecter;
+    private final RouteTable routes;
 
     /**
      * Creates the filter.
      *
      * @param writer the error writer
+     * @param routes the route and method table
      */
-    public RequestGateFilter(ErrorResponseWriter writer) {
+    public RequestGateFilter(ErrorResponseWriter writer, RouteTable routes) {
         this.rejecter = writer::write;
+        this.routes = routes;
     }
 
     @Override
@@ -56,6 +62,9 @@ public final class RequestGateFilter extends OncePerRequestFilter {
             } catch (BoundedBodyRequest.TooLargeException tooLarge) {
                 refusal = ErrorCode.PAYLOAD_TOO_LARGE;
             }
+        }
+        if (refusal == null) {
+            refusal = routeRefusal(request, guarded);
         }
         if (refusal != null) {
             reject(guarded, refusal);
@@ -76,6 +85,24 @@ public final class RequestGateFilter extends OncePerRequestFilter {
         if (HeaderPolicy.requiresContentType(request.getMethod())
                 && !HeaderPolicy.contentTypeAllowed(values(request, "Content-Type"))) {
             return ErrorCode.UNSUPPORTED_MEDIA_TYPE;
+        }
+        return null;
+    }
+
+    private ErrorCode routeRefusal(HttpServletRequest request, HttpServletResponse response) {
+        RequestTarget target = RequestTarget.of(request.getRequestURI());
+        RouteTable.Decision decision = routes.decide(target, request.getMethod());
+        switch (decision.outcome()) {
+            case NOT_FOUND:
+                return ErrorCode.NOT_FOUND;
+            case METHOD_NOT_ALLOWED:
+                response.setHeader("Allow", decision.allow());
+                return ErrorCode.METHOD_NOT_ALLOWED;
+            default:
+                break;
+        }
+        if (target.path().startsWith(API_PREFIX) && !AcceptPolicy.acceptable(values(request, "Accept"))) {
+            return ErrorCode.NOT_ACCEPTABLE;
         }
         return null;
     }
