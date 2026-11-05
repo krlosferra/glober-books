@@ -64,6 +64,9 @@ public final class RequestGateFilter extends OncePerRequestFilter {
                 forwarded = bufferedIfBody(request);
             } catch (BoundedBodyRequest.TooLargeException tooLarge) {
                 refusal = ErrorCode.PAYLOAD_TOO_LARGE;
+            } catch (BoundedBodyRequest.TooSlowException tooSlow) {
+                refusal = ErrorCode.MALFORMED_REQUEST;
+                guarded.setHeader("Connection", "close");
             }
         }
         if (refusal == null) {
