@@ -46,3 +46,12 @@ Created: `frontend/css/styles.css`, `frontend/js/main.js`, `frontend/js/ui/dom.j
  10 files changed, 399 insertions(+), 4 deletions(-)
 ```
 Commits (author krlosferra, no trailers): page start and entry script; add form with one request at a time; list view and page text strings; page shell and stylesheet (all `[Task-12]`). The full `git log main..HEAD --format` output is reproduced by the orchestrator after the final commit of this file.
+
+## Browser exploration, criterion 5 (added by the orchestrator)
+The Playwright tool server was not exposed to the implementer's run, so criterion 5 was met by a scripted browser run instead: a throwaway Node script outside the repository (scratchpad), using the pinned `playwright` 1.64.1 of `e2e/` with Chromium, against the production jar on `127.0.0.1:18080` with a temporary 0700 data directory. The application was stopped and the directory deleted afterwards. This is a deviation from the Definition of Done rule (tool server exploration): the Liaison rules on it. Real output:
+- Load: title `GloberBooks`, `lang` `en`, one `h1` `GloberBooks`, one `main`, h2 `Add a book` and `Your books`, focus on `title`, Status default `unread`.
+- Accessibility snapshot: main > heading "GloberBooks" [1], status "Messages", heading "Add a book", textbox "Title", textbox "Author", combobox "Status" (Unread selected, Reading, Completed), button "Add book", region "Your books" with heading, paragraph "0 books" and an empty status. The list named "Books" is hidden while empty (count 0).
+- Keyboard: Title `<img src=x onerror=alert(1)> Dune`, Tab, author `Frank Herbert`, Enter: requests after Enter `["POST /api/v1/books"]` (exactly one); focus after add: `title`; form cleared (true, true); entry text `<img src=x onerror=alert(1)> Dune / Frank Herbert / Unread / Added: 2026-11-05`; status regions `Book added: <img src=x onerror=alert(1)> Dune`; count `1 book`; injected `img` elements 0; CSP violations `[]`.
+- Console: one warning only, `Error with Permissions-Policy header: Unrecognized feature: 'bluetooth'` (an HTTP header of the backend, not a CSP violation: reported to Security as a finding on the header value).
+- Layout: no horizontal scroll at 360 px.
+- Not covered by this run: the list at 320 px, entries with a rating, a failed load.
