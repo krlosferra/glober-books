@@ -153,3 +153,35 @@
 - Branch: `chore/task-13-e2e-harness`
 - Attempt: 1
 - Result: Playwright configuration, launcher, global setup and placeholder test; the placeholder is green; Playwright 1.64.1 starts the web server before the global setup (Q-F7); the busy-port check and the hostile-environment run are evidenced in handoff 089.
+
+## Task 14: 0b note, smoke tests, guard fixture and README (closes Increment 0b, v0.2)
+
+- Date: 2026-11-05
+- Branch: `chore/task-14-smoke-guard-readme`
+- Attempt: 1
+- Built: `e2e/support/fixtures.ts` (auto `guard`: `securitypolicyviolation` events, CSP, Trusted Types and Permissions-Policy console messages, page errors, requests to another origin, `Content-Type` and the constitution security headers of every same-origin asset), `e2e/support/builders.ts`, `e2e/support/library.ts` (list, create, delete, reset through the public API), `e2e/tests/us-010-library-view.spec.ts` (three `@smoke` tests), `README.md`.
+- Warning: `v0.2` is a checkpoint for the Sponsor, **not for real data**. Its database (`backend/data/globerbooks.db`) is deleted before Increment 1 (SEC-F-077). The database file is exclusively locked while the application runs.
+- Try 0b (from the repository root; JDK 21 and Node 24.22.2 on the `PATH`; ports 8080 and 18080 free):
+  1. Build: `cd backend && ./mvnw verify`
+  2. Logic tests: `node --test "frontend/**/*.test.js"`
+  3. E2E setup once: `cd e2e && npm ci --ignore-scripts` and `npx playwright install chromium`; smoke: `npx playwright test --grep @smoke` (it starts the application itself on 18080 with a temporary database)
+  4. By hand: `mkdir -p backend/data`, then `cd backend && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m` (or `cd backend && java -Xmx512m -jar target/globerbooks.jar`); open `http://127.0.0.1:8080/`, add a book with the keyboard, reload and see it; stop with `Ctrl+C`; delete `backend/data/globerbooks.db` when finished.
+- SEC-F-130: the guard tolerates exactly one console message, `Error with Permissions-Policy header: Unrecognized feature: 'bluetooth'.`, until the Sponsor decides the header list; the filter is marked in `fixtures.ts`.
+- Finding for the Liaison: the database path is `./data/globerbooks.db` (relative), so the jar must be started from `backend/`; the literal command of Task 14 criterion 3 (`java -Xmx512m -jar backend/target/globerbooks.jar` from the root) fails with "unable to open database file". The README documents `cd backend && java -Xmx512m -jar target/globerbooks.jar`.
+- Details: handoff 093.
+
+### Task 1 proof table (constitution, "Task 1 proofs")
+
+| Proof | Evidence | Status |
+|---|---|---|
+| Failsafe and Surefire split, merged JaCoCo data, coverage check in `verify` | Task 01 (handoff 034); `verify` green in the Task 14 clean copy (Tests run 120, check met) | Proved |
+| `-Xlint:all -Werror` | Task 01 (handoff 034), seeded raw-type warning failed the build | Proved |
+| Checkstyle 14.3.0 with `maven-checkstyle-plugin` 3.6.0 | Task 02 (handoff 040) | Proved, pins verified |
+| Maven wrapper 3.9.16 with `distributionSha256Sum` and `--strict-checksums` | Task 01 (handoff 034): wrong `distributionSha256Sum` fails; `backend/.mvn/maven.config` holds `--strict-checksums`; wrapper 3.3.4 is the only-script form (no `wrapperSha256Sum`) | Proved |
+| Every mandatory property effective | `MandatoryPropertiesIntegrationTest` (Task 08, handoff 074; Task 03b, handoff 054), 15 tests green in the Task 14 verify | Proved |
+| Dependency tree against the ban list | Task 01 `RuntimeClasspathBanTest` and Task 02 (handoffs 034, 040); `config/dependency-tree.txt` compared by `diff` | Proved (F-4: no gate enforces the committed tree; open, routed in Task 02) |
+| Real-port security test class (SC-30): Host, CSRF, header, body-cap, error-path | `TransportSecurityIntegrationTest` (Task 08, handoff 074), 8 tests green in the Task 14 verify | Proved for Increment 0a; later tasks add rows |
+| `node --test` on the pinned Node | Task 11 (handoff 048), 43 tests; Task 14 clean copy 43 of 43 | Proved |
+| Playwright install on the pinned Node | Task 10 (handoff 038) install; Task 13 (handoff 089) and Task 14 smoke run, 3 of 3 | Proved |
+
+Pins that remain unverified: `@playwright/mcp` 0.0.83 was started and its tool list read (Task 10, handoff 038: 17 of the 24 allowlisted tools exposed) but no page exploration ran through it (not exposed to the Task 12 and Task 14 runs); Eclipse Temurin (the JDK pin was verified on OpenJDK 21.0.12.1 only). Pins verified here for the first time on a clean copy: Maven 3.9.16 and wrapper 3.3.4 (full `verify`), `@playwright/test` 1.64.1 (`npm ci`, smoke run).
