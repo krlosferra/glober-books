@@ -1,7 +1,7 @@
 # Security Requirements, Threat Model and Risk Register
 
 - Owner: Security reviewer (`sdd-security-reviewer`)
-- Version: 0.37 (Task 16 review, handoff 107; see changelog)
+- Version: 0.38 (R-24 and F-1 accepted; see changelog)
 - Last updated: 2026-11-02
 - Status: Phase 1 Security verdict: PASS WITH CONDITIONS (round 3, see `handoffs/006-security-to-sponsor-phase1-review-round3.md`; conditions: SEC-F-038, SEC-F-039, plus the Sponsor platform steps in section 10); round 2 was PASS WITH CONDITIONS (handoff 005); round 1 was FAIL (handoff 003)
 
@@ -156,7 +156,7 @@ Copy `.githooks/` into a scratch repository with a scratch bare remote; set a hu
 | R-21 | Browser binaries for `@playwright/test` come from `cdn.playwright.dev`, an origin beyond the npm registry, without a checksum in the lockfile; they run only in the local test environment | Low / medium | Proposed: accept; allow-list the host only for `playwright install` | Accepted by the Sponsor 2026-11-02 (sandbox only) |
 | R-22 | The Node 24.22.2 tarball supplied to the sandbox was verified against SHASUMS256.txt from the same origin (transport integrity only, no GPG check) | Low / medium | Proposed: accept for the sandbox; verify signed SHASUMS on developer machines | Accepted by the Sponsor 2026-11-02 (sandbox only) |
 | R-23 | Container-generated 400 pages (duplicate or malformed Host, bad request line) carry no security headers; static page, no reflected data (SEC-F-112) | Low / low | Recommend accept; SC-10 then reads 'application responses' | Accepted by the Sponsor 2026-11-04; SC-10 reads 'application responses' Task 16 (SEC-F-150): raw `[` and `]` in the query are also answered by Tomcat's HTML 400 (E-26 row 5); same family, no reflected data. |
-| R-24 | Slow-sending clients (one byte every 2 s on the request line, headers or body) keep a worker thread beyond the 5 s connector timeout, because the timer restarts on every byte; the 10 s body deadline of Task 16 closes only the body variant and Tomcat then swallows the rest by bytes, not time (SEC-F-073, SEC-F-147). The pool has 8 threads, so 8 such connections can stop the service until they close. The server listens on loopback only, so the attacker must run code on the machine | Medium / low | Recommend accept for Tasks 16 to 48; re-check in Tasks 49 and 50 (connector minimum data rate, upload timeout, small `maxSwallowSize`); the change is a connector setting, ASK FIRST | Pending Sponsor |
+| R-24 | Slow-sending clients (one byte every 2 s on the request line, headers or body) keep a worker thread beyond the 5 s connector timeout, because the timer restarts on every byte; the 10 s body deadline of Task 16 closes only the body variant and Tomcat then swallows the rest by bytes, not time (SEC-F-073, SEC-F-147). The pool has 8 threads, so 8 such connections can stop the service until they close. The server listens on loopback only, so the attacker must run code on the machine | Medium / low | Recommend accept for Tasks 16 to 48; re-check in Tasks 49 and 50 (connector minimum data rate, upload timeout, small `maxSwallowSize`); the change is a connector setting, ASK FIRST | Accepted by the Sponsor 2026-11-05 for Tasks 16 to 48; re-check in Tasks 49 and 50 |
 
 Only the Sponsor changes the "Sponsor approval" column. Entries dated 2026-10-30 record the Sponsor's approval of the Phase 1 recommendations, applied by the orchestrator on the Sponsor's instruction.
 
@@ -323,12 +323,13 @@ Security findings are written as handoffs in `docs/sdd/handoffs/` (Type `AUDIT_R
 | SEC-F-144 | INFO | Accept parsing is linear with bounded patterns; no ReDoS; the header size is bounded by Tomcat | NOTED | 099 |
 | SEC-F-145 | INFO | Dropping bluetooth=() removes the explicit Web Bluetooth deny; Chromium ignored it, Firefox and Safari have no Web Bluetooth; compensating CSP and Trusted Types | ACCEPTED by the Sponsor decision of 2026-11-05 (constitution 1.4); re-check on Playwright upgrades | 103 |
 | SEC-F-146 | INFO | The SC-10 evidence text lacked constitution 1.4 | CLOSED 2026-11-05 | 103 |
-| SEC-F-147 | MEDIUM | Drip clients hold worker threads: the 10 s deadline is checked only after a read returns (real cut 10 to 15 s), Tomcat swallows by bytes not time, request line and header drips have no cap | OPEN: residual risk R-24 (Pending Sponsor); re-check in Tasks 49 and 50 | 107 |
+| SEC-F-147 | MEDIUM | Drip clients hold worker threads: the 10 s deadline is checked only after a read returns (real cut 10 to 15 s), Tomcat swallows by bytes not time, request line and header drips have no cap | OPEN: residual risk R-24 accepted by the Sponsor 2026-11-05; re-check in Tasks 49 and 50 | 107 |
 | SEC-F-148 | LOW | The no-body rule reads up to the 16 KiB cap before judging route, id and query, not at most one byte; bounded by SC-06 | OPEN: the Liaison confirms the bounded read or a later change | 107 |
 | SEC-F-149 | INFO | Raw characters 0x80-0xFF in the query are written as bytes and may form valid UTF-8; harmless: only the exact `status` name and three ASCII values pass | NOTED | 107 |
-| SEC-F-150 | INFO | Tomcat's HTML 400 for raw `[` `]` in the query (E-26 row 5); R-23 family | ACCEPTED as a container-rejected row (pending the Sponsor ruling of the pull request); `relaxedQueryChars` stays | 107 |
+| SEC-F-150 | INFO | Tomcat's HTML 400 for raw `[` `]` in the query (E-26 row 5); R-23 family | ACCEPTED by the Sponsor 2026-11-05 as a container-rejected row; `relaxedQueryChars` stays | 107 |
 
 ## 9. Changelog
+- 0.38 (2026-11-05): the Sponsor accepted R-24 (drip clients, Tasks 16 to 48) and the F-1 ruling (SEC-F-150).
 - 0.37 (2026-11-05): Task 16 review (handoff 107): SEC-F-147 to SEC-F-150 added; R-24 proposed (Pending Sponsor). Verdict PASS WITH CONDITIONS.
 - 0.36 (2026-11-05): header fix review (handoff 103): SEC-F-130 and SEC-F-139 closed; SEC-F-138 seeded-control part closed; SEC-F-145 and SEC-F-146 added. Verdict PASS.
 - 0.35 (2026-11-05): Task 15 review (handoff 099): SC-18 and SC-40 verified; SEC-F-127 closed; SEC-F-142 to SEC-F-144 added. Verdict PASS WITH CONDITIONS.
