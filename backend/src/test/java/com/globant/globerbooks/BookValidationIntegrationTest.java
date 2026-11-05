@@ -41,6 +41,9 @@ class BookValidationIntegrationTest {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private jakarta.validation.Validator validator;
+
     private final HttpClient client = HttpClient.newHttpClient();
 
     @DynamicPropertySource
@@ -140,11 +143,32 @@ class BookValidationIntegrationTest {
         assertThat(response.statusCode()).isEqualTo(400);
         assertThat(response.body()).contains("\"code\":\"VALIDATION_ERROR\"")
                 .contains("\"message\":\"must be between 1 and 500 characters\"")
-                .doesNotContain(INJECTION).doesNotContain("49");
+                .doesNotContain(INJECTION);
+        java.util.regex.Matcher messages = java.util.regex.Pattern.compile("\"message\":\"([^\"]*)\"")
+                .matcher(response.body());
+        int found = 0;
+        while (messages.find()) {
+            found++;
+            assertThat(messages.group(1)).doesNotContain("49");
+        }
+        assertThat(found).isEqualTo(1);
         String logLines = output.getAll().lines().filter(line -> !line.startsWith("EVIDENCE"))
                 .collect(java.util.stream.Collectors.joining("\n"));
         assertThat(logLines).doesNotContain(INJECTION).doesNotContain("aaaaaaaaaa");
         assertThat(books()).isZero();
+    }
+
+    /** Probe whose constraint messages look like expressions. */
+    record Probe(@jakarta.validation.constraints.NotNull(message = "${1+1}") String first,
+            @jakarta.validation.constraints.NotNull(message = "{min} #{1+1}") String second) {
+    }
+
+    @Test
+    void validatorBeanReturnsAnExpressionTemplateUnchanged() {
+        java.util.List<String> messages = validator.validate(new Probe(null, null)).stream()
+                .map(jakarta.validation.ConstraintViolation::getMessage).sorted().toList();
+
+        assertThat(messages).containsExactly("${1+1}", "{min} #{1+1}");
     }
 
     @Test
