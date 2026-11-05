@@ -2,7 +2,54 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Placeholder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GloberBooks</title>
+<link rel="stylesheet" href="/css/styles.css">
+<script type="module" src="/js/main.js"></script>
 </head>
-<body></body>
+<body>
+<main>
+  <h1>GloberBooks</h1>
+  <div id="messages" role="status" aria-label="Messages" class="messages"></div>
+
+  <form id="add-form" method="post" novalidate>
+    <h2 class="visually-hidden">Add a book</h2>
+    <div class="field">
+      <label for="title">Title</label>
+      <input id="title" name="title" type="text" autocomplete="off" autofocus>
+    </div>
+    <div class="field">
+      <label for="author">Author</label>
+      <input id="author" name="author" type="text" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="unread" selected>Unread</option>
+        <option value="reading">Reading</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+    <button type="submit" id="add-button">Add book</button>
+  </form>
+
+  <section aria-labelledby="books-heading">
+    <h2 id="books-heading" tabindex="-1">Your books</h2>
+    <p id="count" class="count" hidden></p>
+    <p id="loading" role="status"></p>
+    <ul id="book-list" aria-label="Books" hidden></ul>
+  </section>
+</main>
+
+<template id="entry-template">
+  <li class="entry">
+    <p class="entry-title"></p>
+    <p class="entry-author"></p>
+    <p class="entry-status"></p>
+    <p class="entry-added"></p>
+    <p class="entry-completed" hidden></p>
+    <p class="entry-rating" hidden></p>
+  </li>
+</template>
+</body>
 </html>
