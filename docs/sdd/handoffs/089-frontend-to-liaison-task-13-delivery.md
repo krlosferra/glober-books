@@ -41,3 +41,33 @@ Variables exported: `SPRING_DATASOURCE_URL=jdbc:sqlite:<decoy.db>`, `SPRING_APPL
 - SIGTERM to the launcher: exit 143, java gone, `/tmp/globerbooks-e2e-*` removed, no listener left on 18080.
 - Playwright `--grep @isolation` under the hostile variables: `1 passed (7.2s)`.
 - Not done: the run does not read the decoy through the application, as AP-9.2 says.
+
+## Git evidence
+```
+ .../088-orchestrator-to-frontend-task-13-brief.md  | 26 +++++++
+ .../089-frontend-to-liaison-task-13-delivery.md    | 43 ++++++++++++
+ docs/sdd/progress.md                               |  7 ++
+ docs/sdd/status.md                                 |  3 +-
+ e2e/global-setup.ts                                | 13 ++++
+ e2e/playwright.config.ts                           | 44 ++++++++++++
+ e2e/support/start-server.mjs                       | 80 ++++++++++++++++++++++
+ e2e/tests/harness.spec.ts                          | 12 ++++
+ 8 files changed, 227 insertions(+), 1 deletion(-)
+
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): Task 13 delivery evidence and progress entry [Task-13]
+---
+krlosferra <carlos.ferra@globant.com>
+fix(e2e): fail fast on a busy port and run @isolation on request [Task-13]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): add partial Task 13 delivery with resume point [Task-13]
+---
+krlosferra <carlos.ferra@globant.com>
+chore(e2e): add Playwright config, launcher, global setup and placeholder test [Task-13]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(sdd): add the Task 13 brief and update the resume point [Task-13]
+---
+```
+(this delivery commit follows the listed ones)
