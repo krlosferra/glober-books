@@ -1,7 +1,7 @@
 # Security Requirements, Threat Model and Risk Register
 
 - Owner: Security reviewer (`sdd-security-reviewer`)
-- Version: 0.38 (R-24 and F-1 accepted; see changelog)
+- Version: 0.39 (constitution 1.5 delegation; see changelog)
 - Last updated: 2026-11-02
 - Status: Phase 1 Security verdict: PASS WITH CONDITIONS (round 3, see `handoffs/006-security-to-sponsor-phase1-review-round3.md`; conditions: SEC-F-038, SEC-F-039, plus the Sponsor platform steps in section 10); round 2 was PASS WITH CONDITIONS (handoff 005); round 1 was FAIL (handoff 003)
 
@@ -129,6 +129,8 @@ Statuses: `NOT_STARTED`, `IN_PROGRESS`, `VERIFIED`, `FAILED`, `ACCEPTED` (risk a
 Copy `.githooks/` into a scratch repository with a scratch bare remote; set a human identity; run: normal message; `Co-Authored-By` trailer; `#`-prefixed attribution line (with `-m` and with `-F`); `Co authored by`; double-space "Generated  with"; other tool names; zero-width and homoglyph variants; the path `.claude/`; Git's editor template; AI identity push; AI branch name; annotated tag message; force push over a remote sha unknown locally; `-c core.hooksPath=/dev/null`; hook without the executable bit; empty identity. Expected results are in handoff 003, section 7. A hook change is accepted only with this run attached.
 
 ## 6. Risk register
+
+Acceptance rules (constitution 1.5): the Sponsor accepts every risk of severity MEDIUM or above. The Security reviewer may accept a LOW or INFO risk by adding a row that ends with "Accepted by Security under constitution 1.5"; at most 5 per phase, never on a verified control, secrets, persistence of user data or the loopback binding; the Sponsor reviews them in one batch at each phase gate and may revoke any. Container-first responses are covered by R-13 under the conditions in the constitution (Error Handling Standards).
 
 | ID | Risk | Likelihood / impact | Decision | Sponsor approval |
 |---|---|---|---|---|
@@ -329,6 +331,7 @@ Security findings are written as handoffs in `docs/sdd/handoffs/` (Type `AUDIT_R
 | SEC-F-150 | INFO | Tomcat's HTML 400 for raw `[` `]` in the query (E-26 row 5); R-23 family | ACCEPTED by the Sponsor 2026-11-05 as a container-rejected row; `relaxedQueryChars` stays | 107 |
 
 ## 9. Changelog
+- 0.39 (2026-11-05): constitution 1.5 applied: LOW and INFO delegation with limits, standing rule for container-first responses (R-13); acceptance rules added to section 6.
 - 0.38 (2026-11-05): the Sponsor accepted R-24 (drip clients, Tasks 16 to 48) and the F-1 ruling (SEC-F-150).
 - 0.37 (2026-11-05): Task 16 review (handoff 107): SEC-F-147 to SEC-F-150 added; R-24 proposed (Pending Sponsor). Verdict PASS WITH CONDITIONS.
 - 0.36 (2026-11-05): header fix review (handoff 103): SEC-F-130 and SEC-F-139 closed; SEC-F-138 seeded-control part closed; SEC-F-145 and SEC-F-146 added. Verdict PASS.
