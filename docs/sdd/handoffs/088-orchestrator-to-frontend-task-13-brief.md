@@ -1,0 +1,26 @@
+# Handoff 088: Task brief, Task 13 (E2E harness: configuration, launcher, isolation)
+- From: orchestrator (compact brief issued by the orchestrator to save usage; the Liaison audits against it)
+- To: frontend
+- Phase: 4   Round: 1
+- Type: TASK_BRIEF
+
+## Task
+Task 13 of `docs/sdd/tasks.md` (v0.6.1): read its text, criteria 1 to 5 and traces. Branch `chore/task-13-e2e-harness` is checked out in `/home/user/glober-books`; Tasks 01 to 12 are merged (the page and the API exist; constitution 1.3 holds the SC-33 amendment: the launcher may create the temporary directory). Read also: `constitution.md` Testing section and the E2E isolation (SC-33) bullet; `plan.md` section 4 (E2E start); `plan-appendix.md` AP-9.1, AP-9.2 (launcher rules and the hostile-environment run), AP-9.3; `security.md` SC-33, SEC-F-070, SEC-F-080, SEC-F-130; `frontend-testing.md` section 3; the existing `e2e/package.json` and `.npmrc` (Task 10).
+
+## Scope
+`e2e/playwright.config.ts`, `e2e/global-setup.ts`, `e2e/support/start-server.mjs`, test `e2e/tests/harness.spec.ts` (placeholder: `GET /api/v1/books` returns 200 through the request fixture). TypeScript only through Playwright's own transpilation: no `typescript` package, no `tsconfig`. No new dependency; do not edit `e2e/package.json`, the lockfile or `.npmrc` unless a defect forces it (report it). Out of scope: fixtures, page objects, smoke tests, guard fixture (Task 14), the accessibility checker (later).
+
+## Binding constraints
+1. Config: `baseURL` is the literal `http://127.0.0.1:18080`; `workers: 1`, `retries: 0`, `reuseExistingServer: false`; projects `desktop` (Chromium) and `mobile` (Chromium 360x740, runs only tests tagged `@mobile`); reporters `list` and `html`; the browser path is never hard-coded (Chromium versions 1243 and 1248 coexist in the sandbox; let Playwright resolve it). `webServer.command` runs the launcher; the port is never read from the environment.
+2. Launcher (`start-server.mjs`, plain Node, no dependency): create `mkdtemp` under the real `os.tmpdir()` with a fixed prefix, mode 0700, and check it is a direct child, a real directory and not a symlink; assert the database path is inside it; start `java -jar backend/target/globerbooks.jar` with `--server.address=127.0.0.1 --server.port=18080 --spring.datasource.url=jdbc:sqlite:<dir>/library.db` as command-line arguments, an allowlisted child environment (`PATH`, `HOME`, `JAVA_HOME`, `LANG`, `TZ` only; no `SPRING_*`, no `JAVA_*OPTIONS`, no `SERVER_*`) and the child working directory set to that temporary directory; forward termination signals; never open the database file; after the child exits delete only the path returned by its own `mkdtemp` (re-check real path, direct child, prefix, not a symlink before deleting). The `-Xmx512m` bound of SEC-F-081 applies to the run command of Task 14's README, not to this launcher unless the plan says otherwise: report if the launcher should pass it.
+3. Global setup asserts: host exactly `127.0.0.1`, port exactly 18080, the jar exists; fails on a busy port; never reads host or port from the environment.
+4. Hostile-environment run (`@isolation`, executed by hand, documented in the delivery): set `SPRING_DATASOURCE_URL` to a decoy file, `SPRING_APPLICATION_JSON` with another URL and bind, `JAVA_TOOL_OPTIONS` with `-Dspring.datasource.url=...`, `SERVER_ADDRESS=0.0.0.0` and `SERVER_PORT` to another port; prove the decoy is byte-identical (hash only when no instance holds it), the application serves on `127.0.0.1:18080` only, listens on no other port or interface (check with `ss`), and the data went to the launcher's directory.
+5. Establish by a run, and record, whether Playwright 1.64.1 starts the `webServer` before or after `globalSetup` (Q-F7), and what that means for where the assertions live.
+6. Node: start every shell command with `export PATH=/tmp/claude-0/node24/node-v24.22.2-linux-x64/bin:$PATH`; `cd e2e && npm ci --ignore-scripts` first if `node_modules` is missing. The browser is already installed. Build the jar first: `cd backend && ./mvnw -q -DskipTests package`. Use port 18080 only; stop everything afterwards and delete nothing except directories the launcher itself created.
+7. The Permissions-Policy `bluetooth` console warning (SEC-F-130) does not concern this task.
+
+## Evidence required (real output, in the delivery)
+`cd e2e && npx playwright test` (desktop project, the placeholder) green with the real output; the busy-port failure; the hostile-environment run output (decoy hash before and after, `ss` listing, the data path); the webServer-versus-globalSetup finding; `git diff --stat main..HEAD`; `git log main..HEAD --format='%an <%ae>%n%B---'` (paste both).
+
+## Rules
+STOP and report on any Playwright 1.64.1 behaviour that differs from the plan, any tool failure and any spec gap. Commit after each finished step (`type(scope): subject [Task-13]`), local commits only, explicit paths, never `--no-verify`, nothing naming a tool, model or vendor as author or co-author. Update `docs/sdd/progress.md` in the same change. Write the delivery as `docs/sdd/handoffs/089-frontend-to-liaison-task-13-delivery.md` early with a "Resume point" section (done / next) kept updated so nothing is lost if you are cut off.
