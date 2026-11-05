@@ -102,7 +102,7 @@ class StartupPolicyIntegrationTest {
 
             assertThat(env.getProperty("spring.web.resources.static-locations")).isEqualTo("classpath:/static/");
             assertThat(env.getProperty("globerbooks.static.root")).isNull();
-            assertThat(env.getProperty("spring.web.resources.add-mappings")).isNull();
+            assertThat(env.getProperty("spring.web.resources.add-mappings")).isEqualTo("false");
         }
     }
 

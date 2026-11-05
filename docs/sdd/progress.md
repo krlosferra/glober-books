@@ -131,3 +131,10 @@
   4. Stop: press `Ctrl+C` in the terminal that runs the application.
   5. Clean up: delete `backend/data/globerbooks.db` when finished.
 - Details: handoff 074.
+
+## Task 09: Static content (IN_REVIEW)
+
+- Branch: `feature/task-09-static-content` (local commits, subjects end with `[Task-9]`)
+- Built: `config/transport/StaticAssetCatalog` (fixed at start, constructor location, fixed start-failure reason), `controller/StaticContentController`, `config/StaticContentConfig` (passes `classpath:/static/` only), `error/MalformedRequestException` with an advice mapping, `spring.web.resources.add-mappings: false`, `StaticContentIntegrationTest`.
+- Gaps reported (not fixed, Task 15 or container wrapper): `HEAD` and `OPTIONS` on a static path give 200 (spec 5.8: 405 with `Allow: GET`); the 405 carries no `Allow`; `DELETE`, `PUT`, `PATCH` without `Content-Type` give 415 before the method check; Tomcat answers 400 HTML (no security headers) for `/%2e%2e/...` and `/..;/` and 404 HTML for `/WEB-INF/...`.
+- Details: handoff 078.
