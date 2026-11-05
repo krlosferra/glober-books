@@ -35,3 +35,10 @@ None new for the Sponsor. SEC-F-155 is a build-time hardening choice; I recommen
 
 ## 6. Verdict
 PASS WITH CONDITIONS. C-1 (SEC-F-155 test) and C-2 (SEC-F-156 flaky assertion), both LOW, closed before merge; both are test-only changes. No application-code change is required. Next step: Java applies C-1 and C-2, I re-verify by reading the diff, then the Sponsor gate. Under constitution 1.5 the LOW items may be delegated to the Liaison if the orchestrator prefers.
+
+## 7. Re-verification (2026-11-05)
+Method: read `git diff ec30c51..HEAD` (commits 63d6aa6, 609b900, 0bac2f6). Changed files: two test classes (`BookValidationIntegrationTest`, `GlobalExceptionHandlerTest`) and a note in handoff 117. No `pom.xml` and no production code changed.
+- C-2 / SEC-F-156: CLOSED. The "49" check now runs per `"message"` value (and via `jsonPath("$.details[0].message")`), so the `timestamp` is not inspected. `doesNotContain("${7*7}")` remains on the whole body, and the test asserts exactly one message was found.
+- C-1 / SEC-F-155: CLOSED. `validatorBeanReturnsAnExpressionTemplateUnchanged` autowires the full-context `jakarta.validation.Validator` and validates a probe whose messages are `${1+1}` and `{min} #{1+1}`; it requires them back verbatim (an evaluating interpolator would return `2`). This proves templates are not evaluated by the wired bean.
+- Not re-run: I did not execute the build; the 611/155 counts are the delivery's claim. Residual: `tomcat-embed-el` stays on the classpath (exclusion remains an optional ASK FIRST hardening).
+- Verdict: PASS. Next step: Sponsor gate.
