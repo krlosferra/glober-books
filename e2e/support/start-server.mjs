@@ -3,6 +3,7 @@
 // and never opens the database file.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
+import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,7 +31,22 @@ function allowlistedEnv() {
   return env;
 }
 
-function main() {
+/** Resolves true when anything accepts a TCP connection on the fixed address. */
+function portIsBusy() {
+  return new Promise((resolve) => {
+    const socket = net.connect({ host: HOST, port: Number(PORT) });
+    socket.setTimeout(2000, () => { socket.destroy(); resolve(true); });
+    socket.on('connect', () => { socket.destroy(); resolve(true); });
+    socket.on('error', () => resolve(false));
+  });
+}
+
+async function main() {
+  if (await portIsBusy()) {
+    console.error(`port ${PORT} on ${HOST} is already in use; refusing to start`);
+    process.exit(1);
+  }
+  if (process.argv.includes('--check-port')) process.exit(0);
   if (!fs.existsSync(jar)) throw new Error(`jar not found: ${jar}`);
   const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), PREFIX));
   fs.chmodSync(dir, 0o700);
@@ -61,4 +77,4 @@ function main() {
   });
 }
 
-main();
+main().catch((e) => { console.error(e.message); process.exit(1); });

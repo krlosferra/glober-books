@@ -1,4 +1,15 @@
+import { execFileSync } from 'node:child_process';
 import { defineConfig, devices } from '@playwright/test';
+
+// Playwright probes the readiness URL before it starts the launcher and waits on a listener that
+// never answers, so a busy port is checked here first, in the runner process only (SC-33).
+if (process.env.TEST_WORKER_INDEX === undefined) {
+  try {
+    execFileSync(process.execPath, ['support/start-server.mjs', '--check-port'], { cwd: __dirname, stdio: 'pipe' });
+  } catch {
+    throw new Error('port 18080 on 127.0.0.1 is already in use; stop that process first');
+  }
+}
 
 export default defineConfig({
   testDir: './tests',
@@ -20,7 +31,8 @@ export default defineConfig({
     timeout: 90_000,
     gracefulShutdown: { signal: 'SIGTERM', timeout: 10_000 },
   },
-  grepInvert: /@isolation/,
+  // The hostile-environment test runs only on request: `npx playwright test --grep @isolation`.
+  grepInvert: process.argv.includes('@isolation') ? undefined : /@isolation/,
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
     {
