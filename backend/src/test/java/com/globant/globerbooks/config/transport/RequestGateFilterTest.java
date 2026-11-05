@@ -32,7 +32,8 @@ class RequestGateFilterTest {
     private static final String JSON = "application/json";
 
     private final RequestGateFilter filter = new RequestGateFilter(new ErrorResponseWriter(
-            new ErrorBodyFactory(Clock.fixed(Instant.parse("2026-02-19T10:00:00.123Z"), ZoneOffset.UTC))));
+            new ErrorBodyFactory(Clock.fixed(Instant.parse("2026-02-19T10:00:00.123Z"), ZoneOffset.UTC))),
+            new RouteTable(new StaticAssetCatalog("classpath:/static/")));
     private final MockHttpServletResponse response = new MockHttpServletResponse();
     private final AtomicBoolean reached = new AtomicBoolean();
     private final AtomicReference<HttpServletRequest> seen = new AtomicReference<>();

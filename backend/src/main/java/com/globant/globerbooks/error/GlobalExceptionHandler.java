@@ -1,8 +1,12 @@
 package com.globant.globerbooks.error;
 
+import com.globant.globerbooks.config.transport.RequestTarget;
+import com.globant.globerbooks.config.transport.RouteTable;
 import com.globant.globerbooks.service.BookValidationException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -33,14 +37,17 @@ public class GlobalExceptionHandler {
             "author", "must be between 1 and 200 characters");
 
     private final ErrorBodyFactory factory;
+    private final RouteTable routes;
 
     /**
      * Creates the advice.
      *
      * @param factory the body factory
+     * @param routes the route table, the one place that computes {@code Allow}
      */
-    public GlobalExceptionHandler(ErrorBodyFactory factory) {
+    public GlobalExceptionHandler(ErrorBodyFactory factory, RouteTable routes) {
         this.factory = factory;
+        this.routes = routes;
     }
 
     /**
@@ -104,13 +111,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maps a wrong method to {@code 405 METHOD_NOT_ALLOWED}.
+     * Maps a wrong method to {@code 405 METHOD_NOT_ALLOWED} with the {@code Allow} of the route table.
      *
+     * @param request the request, whose raw path selects the {@code Allow} value
      * @return the envelope
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorBody> handleMethod() {
-        return respond(ErrorCode.METHOD_NOT_ALLOWED);
+    public ResponseEntity<ErrorBody> handleMethod(HttpServletRequest request) {
+        ResponseEntity<ErrorBody> answer = respond(ErrorCode.METHOD_NOT_ALLOWED);
+        Optional<String> allow = routes.allowFor(RequestTarget.of(request.getRequestURI()));
+        if (allow.isEmpty()) {
+            return answer;
+        }
+        return ResponseEntity.status(answer.getStatusCode()).headers(answer.getHeaders())
+                .header("Allow", allow.get()).body(answer.getBody());
     }
 
     /**

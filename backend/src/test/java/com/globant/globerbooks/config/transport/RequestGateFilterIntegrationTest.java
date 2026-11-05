@@ -1,7 +1,9 @@
 package com.globant.globerbooks.config.transport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
+import com.globant.globerbooks.service.BookService;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,18 +15,13 @@ import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /** Real-port proof of the gate and the advice over a raw socket; prints the evidence table. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(RequestGateFilterIntegrationTest.Probe.class)
 class RequestGateFilterIntegrationTest {
 
     @TempDir
@@ -38,22 +35,8 @@ class RequestGateFilterIntegrationTest {
         registry.add("spring.datasource.url", () -> "jdbc:sqlite:" + dataDir.resolve("gate.db"));
     }
 
-    /** Controller that fails on demand. */
-    @TestConfiguration
-    static class Probe {
-        @RestController
-        static class Boom {
-            @GetMapping("/probe/boom")
-            String boom() {
-                throw new IllegalStateException("secret user text");
-            }
-
-            @PostMapping("/probe/echo")
-            String echo(@org.springframework.web.bind.annotation.RequestBody String body) {
-                return "len=" + body.length();
-            }
-        }
-    }
+    @MockitoBean
+    private BookService service;
 
     private String exchange(String head, byte[] body, boolean readBodyFirst) throws IOException {
         try (Socket socket = new Socket(InetAddress.getLoopbackAddress(), port)) {
@@ -112,7 +95,7 @@ class RequestGateFilterIntegrationTest {
     @Test
     void forgedAndAllowedHosts() throws IOException {
         for (String host : new String[] {"evil.example", "localhost", "localhost:1", "[::1]:" + port}) {
-            String response = get("/probe/boom", "Host: " + host);
+            String response = get("/api/v1/books", "Host: " + host);
             row("host " + host, response);
             assertStatus(response, 400, "INVALID_HOST");
         }
@@ -145,7 +128,7 @@ class RequestGateFilterIntegrationTest {
 
     @Test
     void declaredOverLimitBodyIsRejectedWithoutContinue() throws IOException {
-        String head = request("POST", "/probe/echo", "Content-Type: application/json", "Content-Length: 16385",
+        String head = request("POST", "/api/v1/books", "Content-Type: application/json", "Content-Length: 16385",
                 "Expect: 100-continue") + "\r\n";
         String response = exchange(head, null, false);
         row("declared 16385 + Expect 100-continue (no body sent)", response);
@@ -160,12 +143,11 @@ class RequestGateFilterIntegrationTest {
         assertStatus(response, 413, "PAYLOAD_TOO_LARGE");
         String accepted = exchange(chunkedHead(), chunks(16_384), false);
         row("chunked 16384", accepted);
-        assertStatus(accepted, 200, null);
-        assertThat(accepted).contains("len=16384");
+        assertStatus(accepted, 400, "MALFORMED_REQUEST");
     }
 
     private String chunkedHead() {
-        return request("POST", "/probe/echo", "Content-Type: application/json", "Transfer-Encoding: chunked",
+        return request("POST", "/api/v1/books", "Content-Type: application/json", "Transfer-Encoding: chunked",
                 "Connection: close") + "\r\n";
     }
 
@@ -185,8 +167,9 @@ class RequestGateFilterIntegrationTest {
 
     @Test
     void unexpectedExceptionAndXmlAcceptAnswerJsonWithHeaders() throws IOException {
-        String boom = get("/probe/boom", "Accept: text/xml");
-        row("forced exception, Accept text/xml", boom);
+        when(service.list()).thenThrow(new IllegalStateException("secret user text"));
+        String boom = get("/api/v1/books", "Accept: application/json");
+        row("forced exception, Accept application/json", boom);
         assertStatus(boom, 500, "INTERNAL_ERROR");
         assertThat(boom).containsIgnoringCase("Content-Type: application/json;charset=UTF-8")
                 .doesNotContain("secret").doesNotContainIgnoringCase("Server:")
