@@ -39,7 +39,7 @@ Phase 6  Contrast       Sponsor
 
 ### Phase 3 detail (plan and tasks)
 1. Orchestrator gives the Java Architect the spec and constitution and asks for the **backend plan**; gives the Frontend Developer the spec and asks for the **frontend plan section** (structure, modules, test approach, tooling proposals flagged ASK FIRST). Both proposals go to `plan.md` (via one handoff each; the orchestrator merges them into a single document on a `spec/` branch).
-2. Liaison reviews the plan (Mode D). PM then builds `tasks.md`: vertical slices, each task tagged `backend`, `frontend` or `integration`, with dependencies and the API contract clauses it relies on.
+2. Liaison reviews the plan (Mode D). PM then builds `tasks.md`: vertical slices, each task tagged `backend`, `frontend` or `integration`, with dependencies and the API contract clauses it relies on. Each task header carries `Security: per task` or `Security: increment` (PM).
 3. Liaison reviews the backlog; Sponsor approves.
 
 ### Phase 4 detail (per task)
@@ -47,7 +47,7 @@ Phase 6  Contrast       Sponsor
 2. **Brief:** Liaison writes a TASK_BRIEF per task (Mode E).
 3. **Implement:** Java Architect and/or Frontend Developer work **in parallel** when the tasks are independent (see section 4). Each works on its own branch and delivers a TASK_DELIVERY.
 4. **Verify independently:** orchestrator checks out the branch and runs the build and tests (`./mvnw verify` for backend; `npx playwright test` from `e2e/` for frontend, per `docs/sdd/frontend-testing.md`) and compares real output with the report.
-5. **Audit:** Liaison runs the semantic audit (Mode F) and Test Gate review (Mode G) and returns ACCEPT or REJECT with evidence. **In parallel, the Security Reviewer audits the task** (mandatory for any task that touches input, output, configuration, dependencies, headers or the frontend; the orchestrator asks it to confirm when a task does not) and returns PASS, PASS WITH CONDITIONS or FAIL.
+5. **Audit:** Liaison runs the semantic audit (Mode F) and Test Gate review (Mode G) and returns ACCEPT or REJECT with evidence. **In parallel, the Security Reviewer audits the task when its header says `Security: per task`** (mandatory for any task that touches input, output, configuration, dependencies, headers, the frontend or a `security.md` control; tasks marked `Security: increment` are covered by one Security review of the increment diff before the Sponsor tries it; the Security Reviewer may upgrade any task to per task; the orchestrator asks it to confirm when a task does not) and returns PASS, PASS WITH CONDITIONS or FAIL.
 6. **Business acceptance:** PM verifies the acceptance criteria and invariants from the spec's point of view.
 7. **Gate:** Sponsor approves; orchestrator updates `progress.md` in the task's branch, opens the pull request (the Sponsor's approval is the request) listing the protected-path changes at the top of its description, and squash-merges it after the required `hygiene` check and the Sponsor's review, following git-workflow section 4, then sets the row to `DONE` with the merge commit and updates the Spec coverage table (the PM confirms `IMPLEMENTED` / `VERIFIED`). A `DONE` item is never re-dispatched; changes to it require an approved change request (PM sets `REOPENED`).
 8. **Integration checkpoint:** after foundation tasks and after the first end-to-end feature (and after each slice that joins backend and frontend), run the integration checks in the exercise and record the logs.
@@ -90,7 +90,7 @@ The default response to any spec/code disagreement is to **fix the spec first**,
 - [ ] Commits follow the convention; no AI attribution anywhere (`git log --format=%B` and author fields reviewed)
 - [ ] Build and tests re-run by the orchestrator; output matches the report
 - [ ] Only the task's files changed (`git diff --stat main...HEAD`); a heuristic grep of the new handoffs for `curl`, `wget`, `base64`, `http`, "ignore previous" and "system prompt" found nothing unexplained; the diff was read for AI attribution in file content (the CI check covers messages, identities and names only)
-- [ ] Liaison ACCEPT, Security verdict PASS and PM acceptance recorded; `progress.md` updated
+- [ ] Liaison ACCEPT and PM acceptance recorded; Security verdict PASS recorded for `Security: per task` tasks (increment tasks: covered by the increment review); `progress.md` updated
 
 **Before merging**
 - [ ] Sponsor approval; squash message follows the convention; branch up to date with `main`; full build green after the merge

@@ -1,17 +1,17 @@
 # GloberBooks Task Backlog
 
 - Owner: PM (`sdd-product-manager`)
-- Version: 0.5.1
-- Last updated: 2026-11-02
+- Version: 0.6.1
+- Last updated: 2026-11-05
 - Status: Draft (Phase 3, round 3 of 3, final edits). Round 1 findings (handoffs 025, 026) were resolved in 0.4 and the round 2 findings (handoffs 031, 032) in 0.5; the answers by finding number are in handoff 027 (sections 2 and "Round 3"). Definitions only: task state lives in `status.md`.
 - Inputs: `delivery-strategy.md` v1.0, `spec.md` v0.4.3 (draft change requests CR-1 to CR-9 on top of the approved 0.4.1), `constitution.md` 1.1, `security.md`, `plan.md` and `plan-appendix.md` 0.2, handoff 022 (lean backend plan, tasks B01 to B27) and handoff 021 (frontend plan, candidates F0.1 to F4.3).
 - Sponsor decisions applied. 2026-10-30: spec frozen except change requests; Increment 4 is P1 hardening; Increment 0 is a thin walking skeleton; SQLite uses the default rollback journal with exclusive locking (no WAL) and the schema of the plan; static content by our own controller; `TRACE` answered by the container with a pre-application `405`. 2026-11-02: the full P0 scope is accepted against the indicative 6 to 8 h (the figure accepted was about 32 h of task time; section 1 shows the figure after the splits of round 2 and asks the Sponsor to confirm it); Increment 0 is split into 0a (Tasks 01 to 08) and 0b (Tasks 09 to 14), with tag `v0.1` after Task 08 and `v0.2` after Task 14; Tasks 49 and 50 run before the release tag; the accessibility checker runs in tests only and the application CSP is never relaxed; change requests CR-1 to CR-9 go to review.
 
 ## 0. How to read this backlog
 
-**Numbering.** Tasks are numbered 01 to 53 in build order; a task that was split in round 2 carries a letter (03a, 03b, 23a, 23b, 34a, 34b) so that no other number changes. Branch `<type>/task-NN-<slug>`, commit `type(scope): subject [Task-N]` (`git-workflow.md`; `test/` branches contain tests only, anything that ships configuration, a README or documents uses `chore/`, `feature/` or `docs/`; the `progress.md` note every task updates is exempt on every branch). The architects' ids are kept as "Source: Bnn" and "Source: Fn.n". The constitution's "Task 1" is Increment 0 as a whole (Tasks 01 to 14); section 8 maps each Task 1 proof to its task.
+**Numbering.** Tasks are numbered 01 to 53 in build order; a task that was split in round 2 carries a letter (03a, 03b, 23a, 23b, 34a, 34b) so that no other number changes. Since 0.6 (Sponsor decision of 2026-11-05, option B of section 9) four pairs are merged and titled with both numbers: Task 18+19, Task 39+40, Task 41+42 and Task 49+50. Both numbers stay visible, every reference to a merged number points to the merged task, and the branch carries both numbers (for example `feature/task-18-19-text-policy`). A merged task waives the 45-minute limit (its estimate is the sum and it is flagged "long task"), but not the files rule. **A merged task that overruns is split back into its two original tasks at the point of the overrun; nothing is extended.** Branch `<type>/task-NN-<slug>`, commit `type(scope): subject [Task-N]` (`git-workflow.md`; `test/` branches contain tests only, anything that ships configuration, a README or documents uses `chore/`, `feature/` or `docs/`; the `progress.md` note every task updates is exempt on every branch). The architects' ids are kept as "Source: Bnn" and "Source: Fn.n". The constitution's "Task 1" is Increment 0 as a whole (Tasks 01 to 14); section 8 maps each Task 1 proof to its task.
 
-**Release scope.** The exercise release is Increments 0 to 3 plus Tasks 49 and 50 (Sponsor decision of 2026-11-02). Within the release, Task 48 (documentation) is built after Tasks 49 and 50 even though it is numbered earlier; Tasks 51 to 53 follow the tag, time permitting.
+**Release scope.** The exercise release is Increments 0 to 3 plus Task 49+50 (Sponsor decision of 2026-11-02). Within the release, Task 48 (documentation) is built after Task 49+50 even though it is numbered earlier; Tasks 51 to 53 follow the tag, time permitting.
 
 **Files rule (accepted from 022, question L-1).** A task lists at most 4 production and resource entries it creates or edits; its own tests are listed separately ("Tests:") and belong to the task. An entry is one file or a group of closely coupled files in one folder; the build files and the generated Maven wrapper count as one entry. PM remark: the rule hides test volume, so the 45-minute estimate is the binding limit; a task that overruns it is split, never extended. In every task the first failed spike or the first unplanned fixture problem stops the task for a split. The same rule applies to the frontend.
 
@@ -21,7 +21,7 @@
 
 **Definition of Ready.** Spec clause approved; text marked CR-n counts only after the Sponsor approves the change request, and the Phase 3 gate approves CR-1 to CR-9 and DEC-034 before Task 11 is briefed (Task 11 cites CR-4); acceptance criteria testable; dependencies DONE; Liaison task brief written. Task 13 additionally needs the Sponsor's amendment of the SC-33 sentence (handoff 025, F-10).
 
-**Definition of Done** (constitution plus this backlog): `cd backend && ./mvnw verify` green (backend); `cd e2e && npx playwright test` and `node --test "frontend/**/*.test.js"` green (frontend); real output attached; coverage at least 80% (backend); every acceptance criterion mapped to a test; no new dependency, schema change or file outside the scope; `progress.md` and affected documents updated in the same branch; `hygiene` green; Liaison ACCEPT, Security PASS (or PASS WITH CONDITIONS with every condition closed), PM acceptance, Sponsor approval. **Rule for UI tasks whose behaviour is tested by a later task** (marked "Tested by Task N"): such a task is accepted on (a) its logic tests, (b) Playwright MCP exploration evidence per `frontend-testing.md` section 5 for the criteria that the real page can provoke against the backend tasks it lists as dependencies (the MCP profile allows no route, evaluate or storage tools), and (c) the named later test task. Criteria that only a stubbed response can provoke (a failed list load, `LIBRARY_FULL`, a network failure, `INVALID_RATING`, and similar) are evidenced by the logic tests and by the stub tests of the later test task, not by exploration. The spec-coverage rows the task implements are not `VERIFIED` until that later task is DONE.
+**Definition of Done** (constitution plus this backlog): `cd backend && ./mvnw verify` green (backend); `cd e2e && npx playwright test` and `node --test "frontend/**/*.test.js"` green (frontend); real output attached; coverage at least 80% (backend); every acceptance criterion mapped to a test; no new dependency, schema change or file outside the scope; `progress.md` and affected documents updated in the same branch; `hygiene` green; Liaison ACCEPT, Security PASS (or PASS WITH CONDITIONS with every condition closed) where Security review applies (next paragraph), PM acceptance, Sponsor approval. **Review-load rule** (Sponsor-approved 2026-11-05, option A; the constitution amendment is in progress): the Liaison audits every task; the Security reviewer reviews every task that touches input, output, configuration, dependencies, headers or the frontend; every other task is covered by one Security review per increment. The PM marks each task in its header "Security: per task" or "Security: increment". Pure internal logic with no input, output, configuration, dependency, header or frontend effect is "increment"; tests-only tasks that exercise controls are "per task". The marks of Tasks 01 to 12 (done) are not set. **Rule for UI tasks whose behaviour is tested by a later task** (marked "Tested by Task N"): such a task is accepted on (a) its logic tests, (b) Playwright MCP exploration evidence per `frontend-testing.md` section 5 for the criteria that the real page can provoke against the backend tasks it lists as dependencies (the MCP profile allows no route, evaluate or storage tools), and (c) the named later test task. Criteria that only a stubbed response can provoke (a failed list load, `LIBRARY_FULL`, a network failure, `INVALID_RATING`, and similar) are evidenced by the logic tests and by the stub tests of the later test task, not by exploration. The spec-coverage rows the task implements are not `VERIFIED` until that later task is DONE.
 
 **Increment gate.** Before the Sponsor tries an increment: the P0 rows listed for it, `./mvnw verify`, `node --test "frontend/**/*.test.js"`, `npx playwright test` (smoke first, once Task 14 exists), `hygiene`, and the `progress.md` note with the exact commands the Sponsor uses (Task 08 and Task 14 name them).
 
@@ -30,23 +30,25 @@
 | Increment | Tasks | Backend | Frontend | Effort (sum of estimates) | Elapsed, two agents in parallel, no review waits |
 |---|---|---|---|---|---|
 | 0 Walking skeleton | 15 (01 to 14, 03a/03b) | 10 | 5 | 625 min, about 10.4 h | about 7.8 h |
-| 1 Core library | 16 (15 to 29, 23a/23b) | 10 | 6 | 660 min, 11 h | about 7.6 h |
-| 2 Progress, rating, durability | 12 (30 to 40, 34a/34b) | 6 | 6 | 460 min, about 7.7 h | about 4.8 h |
-| 3 Interface quality and release gate | 8 (41 to 48) | 2 | 6 | 310 min, about 5.2 h | about 4 h |
-| Increments 0 to 3 | 51 | 28 | 23 | 2,055 min, about 34.3 h | about 24 h |
-| Release gate tasks 49 and 50 | 2 | 2 | 0 | 90 min, 1.5 h | about 1.5 h |
-| **Exercise release** | **53** | **30** | **23** | **2,145 min, about 35.75 h** | **about 25.5 h** |
+| 1 Core library | 15 (15 to 29 with 18+19 merged, 23a/23b) | 9 | 6 | 660 min, 11 h | about 7.6 h |
+| 2 Progress, rating, durability | 11 (30 to 40 with 39+40 merged, 34a/34b) | 6 | 5 | 460 min, about 7.7 h | about 4.8 h |
+| 3 Interface quality and release gate | 7 (41 to 48 with 41+42 merged) | 1 | 6 | 310 min, about 5.2 h | about 4 h |
+| Increments 0 to 3 | 48 | 26 | 22 | 2,055 min, about 34.3 h | about 24 h |
+| Release gate Task 49+50 | 1 | 1 | 0 | 90 min, 1.5 h (long task) | about 1.5 h |
+| **Exercise release** | **49** | **27** | **22** | **2,145 min, about 35.75 h** | **about 25.5 h** |
 | After the tag: Tasks 51 to 53 | 3 | 1 | 2 | 120 min, 2 h | about 1.5 h |
-| All | 56 | 31 | 25 | 2,265 min, about 37.75 h | |
+| All | 52 | 28 | 24 | 2,265 min, about 37.75 h | |
 
-Backend work in the release is 1,240 minutes (about 20.7 h: 1,150 minutes, 19.2 h, for Increments 0 to 3 plus 90 minutes, 1.5 h, for Tasks 49 and 50); frontend is 905 minutes (15.1 h). With the architect's rework allowance of about 25% the backend is about 26 h and the whole release about 45 h of task time. These are the figures the Sponsor is asked to confirm; the sums of the per-task estimates are the only source.
+Merged tasks (0.6, estimate is the sum, all flagged long tasks): Task 18+19 = 90 min, Task 39+40 = 70 min, Task 41+42 = 75 min, Task 49+50 = 90 min. Effort does not shrink; the number of review cycles does (four fewer).
+
+Backend work in the release is 1,240 minutes (about 20.7 h: 1,150 minutes, 19.2 h, for Increments 0 to 3 plus 90 minutes, 1.5 h, for Task 49+50); frontend is 905 minutes (15.1 h). With the architect's rework allowance of about 25% the backend is about 26 h and the whole release about 45 h of task time. These are the figures the Sponsor is asked to confirm; the sums of the per-task estimates are the only source.
 
 Findings the Sponsor must see:
-1. **Budget.** On 2026-11-02 the Sponsor accepted the full P0 scope against the indicative 6 to 8 h, with about 32 h of task time for Increments 0 to 3 and about 21 h of backend work in view. After round 2 the release figures are 35.75 h (release scope) and 20.7 h (backend), because three tasks were split on the Liaison's and Security's findings (03, 23, 34), Task 31 and Task 42 gained work, and Tasks 49 and 50 joined the release. The increase is about 12% on the task time of the release scope. The PM asks the Sponsor to confirm the new figure; planning cannot reduce it, only scope can.
+1. **Budget.** On 2026-11-02 the Sponsor accepted the full P0 scope against the indicative 6 to 8 h, with about 32 h of task time for Increments 0 to 3 and about 21 h of backend work in view. After round 2 the release figures are 35.75 h (release scope) and 20.7 h (backend), because three tasks were split on the Liaison's and Security's findings (03, 23, 34), Task 31 and Task 42 gained work, and Tasks 49 and 50 joined the release (since 0.6 merged into Task 49+50). The increase is about 12% on the task time of the release scope. The PM asks the Sponsor to confirm the new figure; planning cannot reduce it, only scope can.
 2. **Increment 0 has 15 tasks** (not about 8): 10 backend tasks and 5 frontend tasks, split into 0a (Tasks 01 to 08, eight backend tasks, API skeleton) and 0b (Tasks 09 to 14). The split follows the Sponsor's decision; 03b exists because the Security finding on fail-closed start (SEC-F-067) moved the start policy into Increment 0.
-3. **Tags** (Sponsor decision): `v0.1` after Task 08 (0a), `v0.2` after Task 14 (0b); the release tag follows Task 48 and Tasks 49 and 50. Later tags are named at each increment plan.
-4. **Total 56 tasks, not about 40.** Section 9 gives six low-risk merges (50 tasks at 60 to 90 minutes each).
-5. **PM deviation from 022 (accepted by the Liaison and Security):** the release sweep is Task 42 in Increment 3; the long runs stay after the tag (Task 51).
+3. **Tags** (Sponsor decision): `v0.1` after Task 08 (0a), `v0.2` after Task 14 (0b); the release tag follows Task 48 and Task 49+50. Later tags are named at each increment plan.
+4. **Total 52 tasks after the merges of 0.6** (56 before): the Sponsor applied option B of section 9 on 2026-11-05 to four pairs (18+19, 39+40, 41+42, 49+50); section 9 explains why 15+16 and 30+31 were not merged.
+5. **PM deviation from 022 (accepted by the Liaison and Security):** the release sweep is Task 42 (now part of Task 41+42) in Increment 3; the long runs stay after the tag (Task 51).
 
 ## 2. Increment 0: walking skeleton (Tasks 01 to 14), split into 0a and 0b
 
@@ -206,7 +208,7 @@ Gate rows (P0): E-04, E-07 to E-14, E-16 (0b), E-21, E-23, E-09 (declared and ch
 - Traces: US-010.1 to .4, .8, US-011.1, .2, .5, US-014.4, .7.
 
 ### Task 13: E2E harness (config, launcher, isolation)
-- Source: F0.2 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 10, 08; Sponsor amendment of the SC-33 sentence (Definition of Ready) | Branch: `chore/task-13-e2e-harness`
+- Source: F0.2 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 10, 08; Sponsor amendment of the SC-33 sentence (Definition of Ready) | Security: per task | Branch: `chore/task-13-e2e-harness`
 - Description: Add the Playwright configuration, the launcher that starts the jar on a temporary database directory and the global setup asserting the isolation rules, with a placeholder test.
 - Production: (1) `e2e/playwright.config.ts`; (2) `e2e/global-setup.ts`; (3) `e2e/support/start-server.mjs`. Tests: `e2e/tests/harness.spec.ts` (placeholder: `GET /api/v1/books` is `200`).
 - Acceptance criteria:
@@ -218,13 +220,13 @@ Gate rows (P0): E-04, E-07 to E-14, E-16 (0b), E-21, E-23, E-09 (declared and ch
 - Traces: SC-33, SC-39, SC-23, plan frontend F4.2.
 
 ### Task 14: Smoke tests, guard fixture and README (closes 0b)
-- Source: F0.6 (+ README of Increment 0) | Layer: frontend | Tier: P0 | Estimate: 45 (dense) | Depends on: 12, 13, 09 | Branch: `chore/task-14-smoke-guard-readme`
+- Source: F0.6 (+ README of Increment 0) | Layer: frontend | Tier: P0 | Estimate: 45 (dense) | Depends on: 12, 13, 09 | Security: per task | Branch: `chore/task-14-smoke-guard-readme`
 - Description: Add the guard fixture and the three Increment 0 smoke tests, explore the page once with the browser tool and write the run instructions, proving them on a clean clone.
 - Production: (1) `e2e/support/fixtures.ts`; (2) `e2e/support/builders.ts` and `library.ts`; (3) `README.md`; (4) `docs/sdd/progress.md` (the 0b note and the Task 1 proof table). Tests: `e2e/tests/us-010-library-view.spec.ts` (smoke).
 - Acceptance criteria:
   1. `npx playwright test --grep @smoke` is green in under 30 s: page loads with title and one `h1` (US-010.1); a keyboard-only add shows the entry and count and the time is recorded (US-011.2, M-1); `<script>alert(1)</script>` is inert text (US-014.6, T-12).
   2. The guard fails a test on a `securitypolicyviolation`, a Trusted Types console error, a request to another origin or a page error (US-014.6, .7, SC-10) and checks `Content-Type` and the constitution headers of every asset (E-16).
-  3. README commands for build, run (`cd backend && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m` and, for the jar, `java -Xmx512m -jar backend/target/globerbooks.jar`, with the memory bound confirmed or changed by Task 41; page at `http://127.0.0.1:8080/`; SEC-F-081), E2E setup, smoke and logic tests, the note that the database is locked while running, and the note that `v0.1` and `v0.2` are checkpoints not for real data whose database is deleted before Increment 1, work on a clean clone with only the pinned JDK and Node (executed, output attached; SEC-F-077).
+  3. README commands for build, run (`cd backend && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m` and, for the jar, `java -Xmx512m -jar backend/target/globerbooks.jar`, with the memory bound confirmed or changed by Task 41+42; page at `http://127.0.0.1:8080/`; SEC-F-081), E2E setup, smoke and logic tests, the note that the database is locked while running, and the note that `v0.1` and `v0.2` are checkpoints not for real data whose database is deleted before Increment 1, work on a clean clone with only the pinned JDK and Node (executed, output attached; SEC-F-077).
   4. `./mvnw verify`, `node --test "frontend/**/*.test.js"`, the smoke run and `hygiene` are green; `progress.md` gets the exact commands to try 0b and the Task 1 proof table with evidence and the pins that remain unverified, if any.
 - Traces: US-010.1, US-011.2, US-014.6, US-014.7, M-1, SC-10, SC-23, Task 1 proofs.
 
@@ -233,7 +235,7 @@ Gate rows (P0): E-04, E-07 to E-14, E-16 (0b), E-21, E-23, E-09 (declared and ch
 Goal: the reader manages a list: full validation, filter, duplicates, capacity, dialogs. Gate rows (P0): all P0 families of section 7.1 whose tasks are in this increment, in particular E-22 live, E-33, T-31, C-01, C-02, C-06, C-07, C-09, C-10, C-11 (a) and (b), US-010.1 to .8, .10 and US-011.1 to .10.
 
 ### Task 15: Route table, methods and Accept
-- Source: B10 | Layer: backend | Tier: P0 | Estimate: 45 | Depends on: 09 | Branch: `feature/task-15-routing-accept`
+- Source: B10 | Layer: backend | Tier: P0 | Estimate: 45 | Depends on: 09 | Security: per task | Branch: `feature/task-15-routing-accept`
 - Description: Decide route and method from the raw request target, answer `404` and `405` with the exact `Allow`, and apply the `Accept` grammar on API paths. The route table holds the routes that exist at this point.
 - Production: (1) `config/transport/RequestTarget.java`; (2) `config/transport/RouteTable.java`; (3) `config/transport/AcceptPolicy.java`; (4) `config/transport/RequestGateFilter.java` (edit). Tests: `RouteTableTest`, `AcceptPolicyTest`.
 - Acceptance criteria:
@@ -244,7 +246,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: 5.0 routing, methods, Accept, BR-012 step 2.
 
 ### Task 16: Query, id and empty-body rules; transport limits
-- Source: B11 | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 15 | Branch: `feature/task-16-query-id-limits`
+- Source: B11 | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 15 | Security: per task | Branch: `feature/task-16-query-id-limits`
 - Description: Add the query grammar and the `status` value check of the list, the id check judged as received, the no-body rule for GET and DELETE, the early rejection of large declared bodies and the live slow-request tests.
 - Production: (1) `config/transport/QueryPolicy.java`; (2) `config/transport/RequestGateFilter.java` (edit); (3) `config/transport/BoundedBodyRequest.java` (edit). Tests: `QueryPolicyTest`, `TransportLimitsIntegrationTest`.
 - Acceptance criteria:
@@ -256,7 +258,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: BR-011, BR-012 steps 3 to 5, US-002.6, E-18, E-19, E-22, E-26, E-31, E-32, E-33, E-38, T-20, T-39.
 
 ### Task 17: Container error wrapper
-- Source: B12 | Layer: backend | Tier: P0 | Estimate: 30 | Depends on: 06, 08, 09 | Branch: `feature/task-17-error-wrapper`
+- Source: B12 | Layer: backend | Tier: P0 | Estimate: 30 | Depends on: 06, 08, 09 | Security: per task | Branch: `feature/task-17-error-wrapper`
 - Description: Turn any `sendError` inside the application into the envelope with the security headers (the start policy moved to Task 03b and the Tomcat error-report settings to Task 06).
 - Production: (1) `config/transport/EnvelopeResponseWrapper.java`. Tests: `EnvelopeResponseWrapperTest`, a case in `TransportSecurityIntegrationTest`.
 - Acceptance criteria:
@@ -265,30 +267,23 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
   3. A test shows that an error dispatch cannot bypass the headers of the gate (Security review, item 1).
 - Traces: SC-02, SC-11, SC-29, INV-6.
 
-### Task 18: Text policy, part 1, and the Unicode fixture check
-- Source: B13 | Layer: backend | Tier: P0 | Estimate: 45 | Depends on: 01 | Branch: `feature/task-18-text-policy-1`
-- Description: Prove the Unicode data on the pinned JDK, build the code-point fixtures and implement items 1 to 6 of BR-006.
-- Production: (1) `service/TextPolicy.java`. Tests: `TextPolicyTest`, `UnicodeFixtureCheckTest`, `support/UnicodeFixtures`.
-- Acceptance criteria:
+### Task 18+19: Text policy (parts 1 and 2) and the Unicode fixture check
+- Merged 2026-11-05 (Sponsor, option B of section 9) from Task 18 (Source: B13) and Task 19 (Source: B14) | Layer: backend | Tier: P0 | Security: per task | Estimate: 90 (45 + 45, long task; the 45-minute limit is waived, the files rule is not; if it overruns it is split back into 18 and 19) | Depends on: 01 | Branch: `feature/task-18-19-text-policy`
+- Description: Prove the Unicode data on the pinned JDK, build the code-point fixtures and implement all of BR-006: items 1 to 6 (criteria 1 to 4) and items 6b to 6d (criteria 5 to 8). Build order inside the task: criteria 1 to 4 first, then 5 to 8.
+- Production: (1) `service/TextPolicy.java`. Tests: `TextPolicyTest`, `UnicodeFixtureCheckTest`, `TextPolicyMarksTest`, `support/UnicodeFixtures`.
+- Acceptance criteria (1 to 4 from Task 18, 5 to 8 from Task 19):
   1. The fixture check asserts JDK at least 21.0.12, Unicode 15.0 (U+1E030 assigned, U+2FFC not), the category of every code point the spec names and the NFC result of the T-24b and T-25 inputs; a mismatch stops the task and goes to the PM.
   2. Trimming uses Unicode White_Space; a tab or line feed inside is rejected, at an end trimmed; stored text is NFC (T-02, T-08, US-001.5).
   3. Length in code points after NFC: 500/501 title, 200/201 author, 500 decomposed "é" accepted, 300 times U+1D15E rejected (T-06, T-07, T-11, T-22).
   4. NUL and other Cc, Cf except U+200C and U+200D, Zl, Zp, private use, noncharacters, unassigned (15.0) and tag code points are rejected; U+FFFD between letters is accepted (T-01, T-03, T-09, T-26).
-- Traces: BR-006 items 1 to 6, SC-16.
-
-### Task 19: Text policy, part 2
-- Source: B14 | Layer: backend | Tier: P0 | Estimate: 45 | Depends on: 18 | Branch: `feature/task-19-text-policy-2`
-- Description: Implement items 6b to 6d of BR-006: visible content, mark runs and joiner adjacency.
-- Production: (1) `service/TextPolicy.java` (edit). Tests: `TextPolicyMarksTest`, `UnicodeFixtures` (edit).
-- Acceptance criteria:
-  1. Blank-rendering text and text beginning with a mark are rejected; "ab", U+3164, "cd" is accepted (T-23).
-  2. A run of 9, or with two variation selectors, is rejected; 8, and one selector, accepted (T-24, T-24b).
-  3. Joiner positional rule: the Persian word with U+200C and a family emoji sequence accepted; first, last, next to a joiner or a space rejected (T-10, T-25).
-  4. The 50-repetition input of T-24b finishes without timeout or unbounded regular expression.
-- Traces: BR-006 items 6b to 6d, DEC-029, SC-16.
+  5. Blank-rendering text and text beginning with a mark are rejected; "ab", U+3164, "cd" is accepted (T-23).
+  6. A run of 9, or with two variation selectors, is rejected; 8, and one selector, accepted (T-24, T-24b).
+  7. Joiner positional rule: the Persian word with U+200C and a family emoji sequence accepted; first, last, next to a joiner or a space rejected (T-10, T-25).
+  8. The 50-repetition input of T-24b finishes without timeout or unbounded regular expression.
+- Traces: BR-006 items 1 to 6d, DEC-029, SC-16.
 
 ### Task 20: Validation wiring and field-error mapping
-- Source: B15 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 19, 06, 07 | Branch: `feature/task-20-validation-wiring`
+- Source: B15 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 18+19, 06, 07 | Security: per task | Branch: `feature/task-20-validation-wiring`
 - Description: Wire the text policy into Bean Validation without expression language and choose `VALIDATION_ERROR`, `INVALID_STATUS` or `INVALID_RATING` by BR-012 step 6; the service repeats the checks.
 - Production: (1) `config/BookText.java`; (2) `config/ValidatorConfig.java`; (3) `error/GlobalExceptionHandler.java` (edit); (4) `dto/CreateBookRequest.java` (edit). Tests: `BookTextTest`, `GlobalExceptionHandlerTest` (edit).
 - Acceptance criteria:
@@ -299,7 +294,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: US-001.4 to .6, .10, BR-001, BR-012 step 6.
 
 ### Task 21: Strict body reading and parser limits
-- Source: B16 | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 07 | Branch: `feature/task-21-strict-json`
+- Source: B16 | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 07 | Security: per task | Branch: `feature/task-21-strict-json`
 - Description: Decode the buffered body with a reporting UTF-8 decoder and parse it strictly, mapping every failure to `MALFORMED_REQUEST` within 300 ms under low read constraints.
 - Production: (1) `config/json/JacksonConfig.java`; (2) `config/json/StrictJsonBodyResolver.java`; (3) `config/json/StrictStringDeserializer.java`; (4) `config/WebMvcConfig.java`. Tests: `JacksonStrictnessTest`, `StrictJsonBodyResolverTest`.
 - Acceptance criteria:
@@ -310,7 +305,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: 5.0 strict parsing, BR-012 step 5, SC-31, T-04, T-05, T-16, T-21, T-27 to T-31, T-39.
 
 ### Task 22: Duplicate key and service exceptions
-- Source: B17 | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 18, 04, 05, 06 | Branch: `feature/task-22-duplicate-key`
+- Source: B17 | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 18+19, 04, 05, 06 | Security: per task | Branch: `feature/task-22-duplicate-key`
 - Description: Implement the BR-003 key, the service exceptions with the duplicate body and their mapping by the advice.
 - Production: (1) `service/DuplicateKey.java`; (2) `error/ApiException.java` and `error/DuplicateBookException.java`; (3) `error/DuplicateErrorBody.java`; (4) `error/GlobalExceptionHandler.java` (edit). Tests: `DuplicateKeyTest`, a case in `GlobalExceptionHandlerTest`.
 - Acceptance criteria:
@@ -321,7 +316,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: BR-003, US-004.5, T-40, Appendix A.
 
 ### Task 23a: Add rules (capacity and duplicates)
-- Source: B18 (first part) | Layer: backend | Tier: P0 | Estimate: 45 | Depends on: 20, 21, 22 | Branch: `feature/task-23a-add-rules`
+- Source: B18 (first part) | Layer: backend | Tier: P0 | Estimate: 45 | Depends on: 20, 21, 22 | Security: per task | Branch: `feature/task-23a-add-rules`
 - Description: Implement capacity and duplicate detection inside the one add transaction, the override and the 409 bodies, with a seeded library.
 - Production: (1) `service/BookService.java`; (2) `repository/BookRepository.java` and `BookKeyRow.java`. Tests: `BookServiceTest`, `AddRulesIntegrationTest`, `support/LibrarySeeder`.
 - Acceptance criteria:
@@ -332,7 +327,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: US-001.7, US-004, BR-003, BR-009, INV-5, INV-7, C-01, C-02, T-12, T-40.
 
 ### Task 23b: List filter and the 2-second add bound
-- Source: B18 (second part) | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 23a, 16 | Branch: `feature/task-23b-list-filter-add-bound`
+- Source: B18 (second part) | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 23a, 16 | Security: per task | Branch: `feature/task-23b-list-filter-add-bound`
 - Description: Apply the validated `status` filter to the list in the order of BR-010 and prove the 2-second add bound with 4,999 maximum-size books.
 - Production: (1) `service/BookService.java` (edit); (2) `controller/BookController.java` (edit). Tests: `BookListIntegrationTest`, `AddBoundIntegrationTest`.
 - Acceptance criteria:
@@ -342,7 +337,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: US-002.4, .5, .8, BR-010, C-11 (a, b), M-2.
 
 ### Task 24: Frontend text and failure logic
-- Source: F1.1 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 11 | Branch: `feature/task-24-text-and-failures-logic`
+- Source: F1.1 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 11 | Security: per task | Branch: `feature/task-24-text-and-failures-logic`
 - Description: Add the code-point length check and the table mapping every failure to the action and exact text of Section 5.9.
 - Production: (1) `frontend/js/logic/text.js`; (2) `frontend/js/logic/failures.js`; (3) `frontend/js/logic/copy.js` (edit). Tests: next to each module.
 - Acceptance criteria:
@@ -353,7 +348,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: US-011.3, .6, US-013.1, .3, .5, 5.9.
 
 ### Task 25: List state, filter and list states
-- Source: F1.2 + F1.3 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 24, 12, 23b | Branch: `feature/task-25-list-state-filter`
+- Source: F1.2 + F1.3 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 24, 12, 23b | Security: per task | Branch: `feature/task-25-list-state-filter`
 - Description: Add the pure page-state model and use it for the filter, the loading, empty, filter-empty and failed states, the count and stale-response discarding. Tested by Task 28.
 - Production: (1) `frontend/js/logic/listState.js`; (2) `frontend/js/ui/app.js` and `listView.js` (edit); (3) `frontend/index.html` and `css/styles.css` (edit). Tests: `listState.test.js`.
 - Acceptance criteria:
@@ -365,7 +360,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: US-010.2, .4 to .7, .10, US-011.5, CR-2.
 
 ### Task 26: Add form errors and in-flight guard
-- Source: F1.4 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 24, 25, 23a | Branch: `feature/task-26-add-form-errors`
+- Source: F1.4 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 24, 25, 23a | Security: per task | Branch: `feature/task-26-add-form-errors`
 - Description: Add the client checks, field messages, the single-request guard, the capacity and generic failure messages and the page-level message area. Tested by Task 29.
 - Production: (1) `frontend/js/ui/addForm.js`; (2) `frontend/js/ui/messages.js`; (3) `frontend/index.html` and `css/styles.css` (edit). Tests: logic tests only.
 - Acceptance criteria:
@@ -377,7 +372,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: US-011.3, .4, .6, .9, .10, US-013.2, .4.
 
 ### Task 27: Duplicate dialog
-- Source: F1.5 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 26, 23a | Branch: `feature/task-27-duplicate-dialog`
+- Source: F1.5 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 26, 23a | Security: per task | Branch: `feature/task-27-duplicate-dialog`
 - Description: Add the modal "Possible duplicate" dialog with the existing book, Cancel and Add anyway flows and the focus rules. Tested by Task 29.
 - Production: (1) `frontend/js/ui/dialogs.js`; (2) `frontend/js/ui/addForm.js` (edit); (3) `frontend/index.html` and `css/styles.css` (edit). Tests: none.
 - Acceptance criteria:
@@ -388,7 +383,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: US-011.7, .8, CR-1, US-014.6.
 
 ### Task 28: E2E library view, filter and states
-- Source: F1.6 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 25, 23b, 14 | Branch: `test/task-28-e2e-library-view`
+- Source: F1.6 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 25, 23b, 14 | Security: per task | Branch: `test/task-28-e2e-library-view`
 - Description: Test the list stories against the real backend and with stubbed responses for states the page cannot provoke.
 - Production: none (test support files only: `e2e/support/stubs.ts`, `e2e/support/library.ts` edit). Tests: `e2e/tests/us-010-library-view.spec.ts` (edit).
 - Acceptance criteria:
@@ -399,7 +394,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: US-010, T-12 display.
 
 ### Task 29: E2E add, validation and duplicate flows
-- Source: F1.7 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 27, 23a, 28 | Branch: `test/task-29-e2e-add-and-duplicate`
+- Source: F1.7 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 27, 23a, 28 | Security: per task | Branch: `test/task-29-e2e-add-and-duplicate`
 - Description: Test the add stories end to end, the stubbed validation and capacity paths and the duplicate flow; add the fourth smoke test.
 - Production: none (test support: `e2e/support/pages.ts`). Tests: `us-011-add-book.spec.ts`, `us-011-duplicate.spec.ts`.
 - Acceptance criteria:
@@ -414,7 +409,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T-17 to T-19, T-31 numeric rows, T-32, T-36 to T-38, C-03, C-04, C-12, C-13 (5 iterations), US-009.1 to .3, .5 to .7, US-012.1 to .7, .9.
 
 ### Task 30: Book transitions and value types
-- Source: B19 | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 21 | Branch: `feature/task-30-book-transitions`
+- Source: B19 | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 21 | Security: per task | Branch: `feature/task-30-book-transitions`
 - Description: Add the transitions that keep INV-1 to INV-4 and the rating literal judged from token and text.
 - Production: (1) `domain/Book.java` (edit); (2) `dto/RatingValue.java` and `RatingRequest.java`; (3) `dto/StatusRequest.java`. Tests: `BookTest`, `RatingValueDeserializerTest`.
 - Acceptance criteria:
@@ -424,7 +419,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: BR-002, BR-004, BR-007, BR-008, INV-1 to INV-4.
 
 ### Task 31: Get, delete, status, rating, clear rating
-- Source: B20 | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 23b, 30, 15, 16 | Branch: `feature/task-31-remaining-endpoints`
+- Source: B20 | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 23b, 30, 15, 16 | Security: per task | Branch: `feature/task-31-remaining-endpoints`
 - Description: Implement the five remaining endpoints in the order of BR-012 steps 7 and 8, extend the route table, and test the stories, the invariant sequences and the capacity clauses on the real port.
 - Production: (1) `service/BookService.java` (edit); (2) `controller/BookController.java` (edit); (3) `config/transport/RouteTable.java` (edit). Tests: `BookControllerTest`, `BookStoryIntegrationTest`.
 - Acceptance criteria:
@@ -436,7 +431,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: 5.3 to 5.7, US-003, US-006 to US-008, BR-012, S-01 to S-07, S-11, T-14, T-15, T-19, T-36, T-38, C-03, C-04.
 
 ### Task 32: Concurrency and fault injection
-- Source: B21 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 31, 23a | Branch: `test/task-32-concurrency-faults`
+- Source: B21 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 31, 23a | Security: per task | Branch: `test/task-32-concurrency-faults`
 - Description: Test concurrent adds and updates and a forced failure with a trigger on the test database.
 - Production: none. Tests: `ConcurrencyIntegrationTest`, `support/FaultInjection`.
 - Acceptance criteria:
@@ -447,7 +442,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: BR-013, C-06, C-07, C-09, C-10, S-08, S-09, S-10, E-21.
 
 ### Task 33: Durability across restart and kill
-- Source: B22 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 31 | Branch: `test/task-33-durability`
+- Source: B22 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 31 | Security: per task | Branch: `test/task-33-durability`
 - Description: Start the packaged application as a separate process and prove acknowledged writes survive a normal stop and a forced kill.
 - Production: none. Tests: `support/AppProcess`, `DurabilityIntegrationTest`.
 - Acceptance criteria:
@@ -458,7 +453,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: US-009.1, .2, M-3, C-13.
 
 ### Task 34a: Directory trust and clean start failure
-- Source: B23 (first part) | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 33 | Branch: `feature/task-34a-directory-trust`
+- Source: B23 (first part) | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 33 | Security: per task | Branch: `feature/task-34a-directory-trust`
 - Description: Refuse an untrustworthy data directory or file on POSIX and report every start refusal with a fixed reason and no book data.
 - Production: (1) `config/sqlite/DataDirectoryGuard.java`; (2) `config/sqlite/StartupFailureAnalyzer.java`; (3) `config/sqlite/SqliteDataSourceProvider.java` (edit: file identity remembered). Tests: `DataDirectoryGuardTest`, `StartupRefusalIntegrationTest`.
 - Acceptance criteria:
@@ -468,7 +463,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: US-009.6, SC-13, SC-39, DEC-028.
 
 ### Task 34b: Stored-library validation, hot journal and second instance
-- Source: B23 (second part) | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 34a, 33 | Branch: `feature/task-34b-stored-library-validation`
+- Source: B23 (second part) | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 34a, 33 | Security: per task | Branch: `feature/task-34b-stored-library-validation`
 - Description: Validate an existing database read-only before anything writes to it, in the order set by Security, and prove the hot-journal cases and the second-instance failure.
 - Production: (1) `config/sqlite/StoredLibraryValidator.java`; (2) `config/sqlite/SqliteDataSourceProvider.java` (edit: header check, order of start). Tests: `StoredLibraryValidatorTest`, `StartupRefusalIntegrationTest` (edit), `SecondInstanceIntegrationTest`.
 - Acceptance criteria:
@@ -480,7 +475,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: US-009.3, .5, .7, DEC-028, DEC-032, SC-32, SC-39, C-12.
 
 ### Task 35: Client endpoints for status, rating, clear and delete
-- Source: F2.1 | Layer: frontend | Tier: P0 | Estimate: 25 | Depends on: 11 | Branch: `feature/task-35-client-endpoints`
+- Source: F2.1 | Layer: frontend | Tier: P0 | Estimate: 25 | Depends on: 11 | Security: per task | Branch: `feature/task-35-client-endpoints`
 - Description: Add the client functions for get, set status, set rating, clear rating and delete.
 - Production: (1) `frontend/js/api/booksApi.js` (edit). Tests: `booksApi.test.js` (edit).
 - Acceptance criteria:
@@ -490,8 +485,8 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: 5.3 to 5.7, BR-011.
 
 ### Task 36: Entry view, status control and confirmation
-- Source: F2.2 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 35, 25, 31 | Branch: `feature/task-36-entry-status`
-- Description: Build one entry from the template with a status control and the confirmation dialog, using the server's returned values. Tested by Task 39.
+- Source: F2.2 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 35, 25, 31 | Security: per task | Branch: `feature/task-36-entry-status`
+- Description: Build one entry from the template with a status control and the confirmation dialog, using the server's returned values. Tested by Task 39+40.
 - Production: (1) `frontend/index.html` and `css/styles.css` (edit); (2) `frontend/js/ui/entryView.js`; (3) `frontend/js/ui/entryActions.js`. Tests: none.
 - Acceptance criteria:
   1. A single-choice control named "Status of <title>" with Unread, Reading, Completed; choosing another value sends `PUT .../status`; the entry shows the returned values and its controls are disabled while the request runs (US-012.1, .6).
@@ -501,8 +496,8 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: US-012.1 to .3, .6, .8.
 
 ### Task 37: Rating group and clear rating
-- Source: F2.3 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 36, 31 | Branch: `feature/task-37-rating-group`
-- Description: Add the labelled rating group, the clear button and the failure paths. Tested by Task 39.
+- Source: F2.3 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 36, 31 | Security: per task | Branch: `feature/task-37-rating-group`
+- Description: Add the labelled rating group, the clear button and the failure paths. Tested by Task 39+40.
 - Production: (1) `frontend/js/ui/entryView.js` and `entryActions.js` (edit); (2) `frontend/js/logic/failures.js` (edit); (3) `frontend/css/styles.css` (edit). Tests: `failures.test.js` (edit).
 - Acceptance criteria:
   1. A group "Rating of <title>" offers 1 to 5 by keyboard and shows the current value as text; "Clear rating of <title>" exists only while a rating exists; selecting sends `PUT`, clearing `DELETE` (US-012.4).
@@ -512,8 +507,8 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: US-012.4, .7, US-013.4, 5.9.
 
 ### Task 38: Delete with confirmation
-- Source: F2.4 | Layer: frontend | Tier: P0 | Estimate: 35 | Depends on: 36, 31 | Branch: `feature/task-38-delete-entry`
-- Description: Add the delete button and confirmation dialog with the focus rules. Tested by Task 40.
+- Source: F2.4 | Layer: frontend | Tier: P0 | Estimate: 35 | Depends on: 36, 31 | Security: per task | Branch: `feature/task-38-delete-entry`
+- Description: Add the delete button and confirmation dialog with the focus rules. Tested by Task 39+40.
 - Production: (1) `frontend/js/ui/entryActions.js` (edit); (2) `frontend/js/ui/dialogs.js` (edit); (3) `frontend/index.html` (edit). Tests: none.
 - Acceptance criteria:
   1. "Delete <title>" opens "Delete book" with "Delete <title>? This cannot be undone.", Delete and Cancel; initial focus on Cancel; Escape and Cancel send nothing and focus the Delete button (US-012.5).
@@ -522,57 +517,43 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
   4. No control edits a title or author (US-012.9); MCP exploration evidence is recorded.
 - Traces: US-012.5, .9, US-010.4, .6.
 
-### Task 39: E2E status and rating
-- Source: F2.5 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 37, 31, 14 | Branch: `test/task-39-e2e-status-rating`
-- Description: Test status changes, clearing of rating and date, rating set, replace and clear, and the stale-state failures; add smoke test 5.
-- Production: none. Tests: `us-012-status-rating.spec.ts`.
-- Acceptance criteria:
+### Task 39+40: E2E status, rating and delete
+- Merged 2026-11-05 (Sponsor, option B of section 9) from Task 39 (Source: F2.5) and Task 40 (Source: F2.6) | Layer: frontend | Tier: P0 | Security: per task | Estimate: 70 (40 + 30, long task; the 45-minute limit is waived; if it overruns it is split back into 39 and 40) | Depends on: 37, 38, 31, 14 | Branch: `test/task-39-40-e2e-status-rating-delete`
+- Description: Test status changes, clearing of rating and date, rating set, replace and clear, the stale-state failures, delete and the stale 404; add smoke tests 5 and 6. Build order: criteria 1 to 4 (status and rating) first, then 5 to 8 (delete).
+- Production: none. Tests: `us-012-status-rating.spec.ts`, `us-012-delete.spec.ts`.
+- Acceptance criteria (1 to 4 from Task 39, 5 to 8 from Task 40):
   1. Change to completed, rate, replace, clear (smoke test 5); the rating control only on completed entries (US-012.1, .2, .4).
   2. A rated book moved back shows the confirmation; Continue clears rating and date as returned; Cancel restores without a request (US-012.3, S-02, S-03).
   3. A same-state choice changes nothing (S-04, S-11); the "No longer matches this filter" text shows with a filter (US-012.8).
   4. After the book is changed or deleted through the API behind the page, acting shows "Only completed books can be rated." with the entry reloaded, or "This book no longer exists." (US-012.7, S-01, S-05).
-- Traces: US-012, S-01 to S-05, S-11.
-
-### Task 40: E2E delete
-- Source: F2.6 | Layer: frontend | Tier: P0 | Estimate: 30 | Depends on: 38, 31, 14 | Branch: `test/task-40-e2e-delete`
-- Description: Test delete and the stale 404; add smoke test 6.
-- Production: none. Tests: `us-012-delete.spec.ts`.
-- Acceptance criteria:
-  1. Delete with confirmation removes the entry, updates the count, announces "Book deleted: <title>" and focuses the "Your books" heading (smoke test 6, US-012.5).
-  2. Cancel and Escape send no request and focus the Delete button.
-  3. Deleting a book already deleted through the API shows "This book no longer exists.", removes the entry and reloads the list (US-012.7, S-06).
-  4. Deleting the last book shows the empty message (US-010.6).
-- Traces: US-012.5, .7, US-010.6, S-06.
+  5. Delete with confirmation removes the entry, updates the count, announces "Book deleted: <title>" and focuses the "Your books" heading (smoke test 6, US-012.5).
+  6. Cancel and Escape send no request and focus the Delete button.
+  7. Deleting a book already deleted through the API shows "This book no longer exists.", removes the entry and reloads the list (US-012.7, S-06).
+  8. Deleting the last book shows the empty message (US-010.6).
+- Traces: US-012, US-010.6, S-01 to S-06, S-11.
 
 ## 5. Increment 3: interface quality and release gate (Tasks 41 to 48)
 
-Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-014.1, .2, .4 (without 320), .6 (inert, no violation, stylesheet containment), .7, .8, SC-38, the sweep of Task 42, and every earlier P0 row. After this increment, Tasks 49 and 50 run, then Task 48 (documentation), then the release criteria of `delivery-strategy.md` section 6 are checked and the release tag is set.
+Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-014.1, .2, .4 (without 320), .6 (inert, no violation, stylesheet containment), .7, .8, SC-38, the sweep of Task 41+42, and every earlier P0 row. After this increment, Task 49+50 runs, then Task 48 (documentation), then the release criteria of `delivery-strategy.md` section 6 are checked and the release tag is set.
 
-### Task 41: Capacity and performance at maximum size
-- Source: B24 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 31, 23b | Branch: `chore/task-41-capacity-performance`
-- Description: Prove the response bound, the add loop and the mixed load at maximum size, with a fixed heap, and tune the limits if needed (tuning of SC-06 values is ASK FIRST and returns to Security, SEC-F-078).
-- Production: (1) `application.yml` (edit only if tuning); (2) `README.md` (edit: the confirmed memory bound in both run commands). Tests: `CapacityPerformanceIntegrationTest`.
-- Acceptance criteria:
+### Task 41+42: Capacity and performance at maximum size, and backend release sweep
+- Merged 2026-11-05 (Sponsor, option B of section 9) from Task 41 (Source: B24) and Task 42 (Source: part of B27, moved here by the PM) | Layer: backend | Tier: P0 | Security: per task | Estimate: 75 (40 + 35, long task; the 45-minute limit is waived, the files rule is not; if it overruns it is split back into 41 and 42) | Depends on: 31, 23b, 34b, 10 | Branch: `chore/task-41-42-capacity-and-release-sweep`
+- Description: Prove the response bound, the add loop and the mixed load at maximum size, with a fixed heap, and tune the limits if needed (tuning of SC-06 values is ASK FIRST and returns to Security, SEC-F-078); then, last, run the repository-wide checks needed for the pre-release Security review, for both package managers, and fix or report each finding. Build order: criteria 1 to 4 (capacity), then 5 to 9 (sweep), so that the sweep sees the final tree.
+- Production: (1) `application.yml` (edit only if tuning); (2) `README.md` (edit: the confirmed memory bound in both run commands); (3) `config/spotbugs/exclude.xml` (edit); (4) `config/dependency-tree.txt` (edit if approved). Tests: `CapacityPerformanceIntegrationTest`; sweep runs are recorded in `progress.md`.
+- Acceptance criteria (1 to 4 from Task 41, 5 to 9 from Task 42):
   1. With 5,000 books of maximum size the list is `200`, `total` 5000, body below 16,000,000 bytes; the time is recorded without a gate (C-05).
   2. A loop of 20 add and delete pairs at 4,999 books gives only `201` and `200` and never more than 5,000 books (C-08).
   3. With 4,949 books, 50 concurrent adds with 50 concurrent lists give all `201` and `200`, 4,999 books after, no `500`, no refused connection, a failed request changes nothing and the process serves afterwards (C-11 c).
   4. The C-11 (c) test JVM runs with a fixed `-Xmx` (512 MB proposed, confirmed by this measurement and written into the README run command); eight slow list readers cause no `OutOfMemoryError` and the process serves afterwards; peak heap is recorded; the README gives the jar command with `-Xmx` and the `spring-boot:run` form with `-Dspring-boot.run.jvmArguments=-Xmx...`, both with the confirmed value (SEC-F-081). If the mix cannot pass, the task stops and the Sponsor decides (no weaker test) (SEC-F-071).
-- Traces: C-05, C-08, C-11, SC-06, SC-17, M-2, X-03.
-
-### Task 42: Backend release sweep
-- Source: part of B27, moved here by the PM | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 34b, 41, 10 | Branch: `chore/task-42-backend-release-sweep`
-- Description: Run the repository-wide checks needed for the pre-release Security review, for both package managers, and fix or report each finding.
-- Production: (1) `config/spotbugs/exclude.xml` (edit); (2) `config/dependency-tree.txt` (edit if approved). Tests: none (recorded runs in `progress.md`).
-- Acceptance criteria:
-  1. SpotBugs and Find Security Bugs report nothing unexplained; every exclusion keeps its justification.
-  2. Grep gates are clean in `backend/src/main`: `select *`, outbound HTTP clients, `System.out`, `printStackTrace`, wall-clock calls, `CrossOrigin`, `getSession`, `sendRedirect`, websocket classes, and native queries or JDBC statements outside `config.sqlite` (plan AP-12.3) (SC-07, SC-14, SC-18, SC-27, SC-41).
-  3. `dependency:tree` equals the committed baseline or the difference is approved; coverage is at least 80%.
-  4. In `e2e/`, `npm audit --audit-level=high` is clean and every lockfile `resolved` URL is on the registry (SC-20, SC-36, handoff 026 section 5).
-  5. The README states that the database cannot be opened by another tool while the application runs (check only; written in Task 14) (N-9).
-- Traces: SC-07, SC-14, SC-18, SC-19, SC-20, SC-27, SC-36, SC-41.
+  5. SpotBugs and Find Security Bugs report nothing unexplained; every exclusion keeps its justification.
+  6. Grep gates are clean in `backend/src/main`: `select *`, outbound HTTP clients, `System.out`, `printStackTrace`, wall-clock calls, `CrossOrigin`, `getSession`, `sendRedirect`, websocket classes, and native queries or JDBC statements outside `config.sqlite` (plan AP-12.3) (SC-07, SC-14, SC-18, SC-27, SC-41).
+  7. `dependency:tree` equals the committed baseline or the difference is approved; coverage is at least 80%.
+  8. In `e2e/`, `npm audit --audit-level=high` is clean and every lockfile `resolved` URL is on the registry (SC-20, SC-36, handoff 026 section 5).
+  9. The README states that the database cannot be opened by another tool while the application runs (check only; written in Task 14) (N-9).
+- Traces: C-05, C-08, C-11, SC-06, SC-07, SC-14, SC-17, SC-18, SC-19, SC-20, SC-27, SC-36, SC-41, M-2, X-03.
 
 ### Task 43: Accessibility check (axe) and its pin
-- Source: F3.1 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 40, 39 | Branch: `chore/task-43-accessibility-check`
+- Source: F3.1 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 39+40 | Security: per task | Branch: `chore/task-43-accessibility-check`
 - Description: Verify and pin the accessibility checker, then test the WCAG 2.1 A and AA rules in the data state of US-014.1. The checker runs in test code only; the application's content-security policy is never relaxed (Sponsor decision of 2026-11-02).
 - Production: (1) `e2e/package.json` and `package-lock.json`. Tests: `us-014-accessibility.spec.ts`.
 - Acceptance criteria:
@@ -583,7 +564,7 @@ Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-0
 - Traces: US-014.1, .2, DEC-026, SC-10, SC-21, SC-38.
 
 ### Task 44: Error matrix
-- Source: F3.2 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39, 26, 28 | Branch: `test/task-44-error-matrix`
+- Source: F3.2 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39+40, 26, 28 | Security: per task | Branch: `test/task-44-error-matrix`
 - Description: Test every error code and the non-envelope cases with stubbed responses, the timeout and the live-region update count.
 - Production: none. Tests: `us-013-errors.spec.ts`.
 - Acceptance criteria:
@@ -594,7 +575,7 @@ Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-0
 - Traces: US-013, 5.9, E-21 page text.
 
 ### Task 45: Safe rendering
-- Source: F3.3 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39, 27, 38 | Branch: `test/task-45-safe-rendering`
+- Source: F3.3 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39+40, 27, 38 | Security: per task | Branch: `test/task-45-safe-rendering`
 - Description: Test that hostile and worst-case texts are inert everywhere, including every dialog, and that the page reads and stores nothing it should not.
 - Production: none. Tests: `us-014-safe-rendering.spec.ts`, `frontend/js/sources.test.js` (edit).
 - Acceptance criteria:
@@ -605,7 +586,7 @@ Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-0
 - Traces: US-014.6 to .8, SC-09, SC-38.
 
 ### Task 46: Styles polish
-- Source: F3.4 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 45 | Branch: `feature/task-46-styles-polish`
+- Source: F3.4 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 45 | Security: per task | Branch: `feature/task-46-styles-polish`
 - Description: Finish the stylesheet: colour tokens, visible focus ring, containment rules and reduced motion, with a test that reads the stylesheet.
 - Production: (1) `frontend/css/styles.css`. Tests: `frontend/css/tokens.test.js`.
 - Acceptance criteria:
@@ -616,7 +597,7 @@ Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-0
 - Traces: US-014.2, .3, .5, .6.
 
 ### Task 47: Keyboard and focus rules
-- Source: F3.6 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 40, 27, 38 | Branch: `test/task-47-keyboard-focus`
+- Source: F3.6 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39+40, 27, 38 | Security: per task | Branch: `test/task-47-keyboard-focus`
 - Description: Test keyboard-only operation, the focus return table and the testable reading of focus trapping for every dialog.
 - Production: none. Tests: edits to `us-011-add-book.spec.ts`, `us-012-status-rating.spec.ts`, `us-014-accessibility.spec.ts`.
 - Acceptance criteria:
@@ -626,44 +607,37 @@ Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-0
   4. The focused control has a computed outline that is neither none nor zero width (US-014.2).
 - Traces: US-011.5, .8, US-012.5, US-014.2, M-1.
 
-### Task 48: Release documentation (built after Tasks 49 and 50)
-- Source: F4.2 | Layer: frontend | Tier: P0 | Estimate: 30 | Depends on: 47, 42, 43, 49, 50 | Branch: `docs/task-48-release-docs`
+### Task 48: Release documentation (built after Task 49+50)
+- Source: F4.2 | Layer: frontend | Tier: P0 | Estimate: 30 | Depends on: 47, 41+42, 43, 49+50 | Security: per task | Branch: `docs/task-48-release-docs`
 - Description: Align the testing documents with the delivered code and add the story-to-test table so that the documents match the final code before the release tag.
 - Production: (1) `docs/sdd/frontend-testing.md` (layout and the accessibility row, aligned with the constitution); (2) `README.md` (frontend notes); (3) `docs/sdd/progress.md`. Tests: none.
 - Acceptance criteria:
   1. The layout and accessibility row of `frontend-testing.md` match the delivered tree and the constitution.
-  2. A table maps every P0 criterion of US-010 to US-014 to a test title; Tasks 49 and 50 are shown as done with their results; Tasks 51 to 53 and the other cut-list items are shown as open.
+  2. A table maps every P0 criterion of US-010 to US-014 to a test title; Task 49+50 is shown as done with its results; Tasks 51 to 53 and the other cut-list items are shown as open.
   3. The README frontend commands are executed on a clean clone.
   4. The Liaison confirms that constitution, spec, plan, tasks and the status board describe the final code; the orchestrator updates the board.
 - Traces: M-5, delivery-strategy section 6.
 
 ## 6. Release gate tasks and Increment 4
 
-Tasks 49 and 50 are P1 rows that run before the release tag (Sponsor decision of 2026-11-02; Security requires them, handoff 026 section 5). Tasks 51 to 53 follow the tag, time permitting; P0 rows that touch the never-cut list are already in Increments 1 to 3.
+Task 49+50 (merged from Tasks 49 and 50 in 0.6) is made of P1 rows that run before the release tag (Sponsor decision of 2026-11-02; Security requires them, handoff 026 section 5). Tasks 51 to 53 follow the tag, time permitting; P0 rows that touch the never-cut list are already in Increments 1 to 3.
 
-### Task 49: Raw-socket run (pre-application answers) - before the tag
-- Source: B25 (first part) | Layer: backend | Tier: P1 | Estimate: 45 | Depends on: 16, 17 | Branch: `test/task-49-pre-application-run`
-- Description: Run the container-level cases once on raw sockets and record the result.
-- Production: none. Tests: `PreApplicationIntegrationTest`.
-- Acceptance criteria:
+### Task 49+50: Raw-socket run, grammar corners, hidden-channel repeat and log hygiene - before the tag
+- Merged 2026-11-05 (Sponsor, option B of section 9) from Task 49 (Source: B25 first part) and Task 50 (Source: B25 second part + B26) | Layer: backend | Tier: P1 | Security: per task | Estimate: 90 (45 + 45, long task; the 45-minute limit is waived; if it overruns it is split back into 49 and 50) | Depends on: 16, 17, 18+19 | Branch: `test/task-49-50-raw-socket-and-grammar`
+- Description: Run the container-level cases once on raw sockets and record the result (criteria 1 to 4); test the remaining header grammar rows, repeat the hidden-channel text rules on the real port and test log neutralization (criteria 5 to 7).
+- Production: none. Tests: `PreApplicationIntegrationTest`, `GrammarCornersIntegrationTest`, `TextAndParserIntegrationTest`, `LogHygieneIntegrationTest`.
+- Acceptance criteria (1 to 4 from Task 49, 5 to 7 from Task 50):
   1. No Host (HTTP/1.0 and 1.1), two Host headers, an invalid request line, version `9.9`, duplicate or negative `Content-Length`, both `Content-Length` and `Transfer-Encoding`, lines or headers over 8 KiB: status in {400, 414, 431, 505}, no product, version or echo, the next request is served (E-10 last two, E-20, E-36 first two, E-37).
   2. Both `TRACE` requests answer `405` before the application; `FOO` and `get` answer `405`, 400 or 501 (E-28, DEC-033). The test does not assert the `Allow` list of a container answer (SEC-F-079).
   3. Container rows with an encoded `/` or `\`, `%00`, a literal `\` or a dot segment above the root accept the envelope or a pre-application answer without disclosure (E-15, E-24, E-24b, E-25).
   4. `Upgrade: websocket` and `Upgrade: h2c` give `200`, never `101` (E-31 upgrade rows).
-- Traces: E-10, E-15, E-20, E-24, E-24b, E-25, E-28, E-31, E-36, E-37, SC-18, SC-29.
-
-### Task 50: Grammar corners, hidden-channel repeat and log hygiene - before the tag
-- Source: B25 (second part) + B26 | Layer: backend | Tier: P1 | Estimate: 45 | Depends on: 19, 16 | Branch: `test/task-50-grammar-hidden-logs`
-- Description: Test the remaining header grammar rows, repeat the hidden-channel text rules on the real port and test log neutralization.
-- Production: none. Tests: `GrammarCornersIntegrationTest`, `TextAndParserIntegrationTest`, `LogHygieneIntegrationTest`.
-- Acceptance criteria:
-  1. `Content-Type` rows 2 to 7 of E-34 and all rows of E-35 give the stated statuses; the application rows of E-24b and E-25 give the stated envelopes.
-  2. T-23 to T-26 and T-24b give the stated results on the real port.
-  3. Hostile ids, query values and titles leave one log line per event with no raw CR, LF, U+2028, U+2029, U+0085 or ESC and no title text (T-33, SC-37).
-- Traces: E-24b, E-25, E-34, E-35, T-23 to T-26, T-24b, T-33, SC-37.
+  5. `Content-Type` rows 2 to 7 of E-34 and all rows of E-35 give the stated statuses; the application rows of E-24b and E-25 give the stated envelopes.
+  6. T-23 to T-26 and T-24b give the stated results on the real port.
+  7. Hostile ids, query values and titles leave one log line per event with no raw CR, LF, U+2028, U+2029, U+0085 or ESC and no title text (T-33, SC-37).
+- Traces: E-10, E-15, E-20, E-24, E-24b, E-25, E-28, E-31, E-34, E-35, E-36, E-37, T-23 to T-26, T-24b, T-33, SC-18, SC-29, SC-37.
 
 ### Task 51: Long runs and timing figures - after the tag
-- Source: B27 (long runs) | Layer: backend | Tier: P1 | Estimate: 40 | Depends on: 33, 32, 41 | Branch: `test/task-51-long-runs-and-figures`
+- Source: B27 (long runs) | Layer: backend | Tier: P1 | Estimate: 40 | Depends on: 33, 32, 41+42 | Security: per task | Branch: `test/task-51-long-runs-and-figures`
 - Description: Run the long loops once and record the measured figures of M-2.
 - Production: none (notes in `progress.md`). Tests: edits to `DurabilityIntegrationTest`, `ConcurrencyIntegrationTest`, `CapacityPerformanceIntegrationTest`.
 - Acceptance criteria:
@@ -673,7 +647,7 @@ Tasks 49 and 50 are P1 rows that run before the release tag (Sponsor decision of
 - Traces: C-13, S-08, S-09, M-2, DEC-020.
 
 ### Task 52: Measurements and responsive layout - after the tag
-- Source: F3.5 + F4.1 | Layer: frontend | Tier: P1 | Estimate: 45 | Depends on: 47 | Branch: `chore/task-52-measurements-responsive`
+- Source: F3.5 + F4.1 | Layer: frontend | Tier: P1 | Estimate: 45 | Depends on: 47 | Security: per task | Branch: `chore/task-52-measurements-responsive`
 - Description: Add the cut-list measurements, the mobile project and the layout checks.
 - Production: (1) `e2e/playwright.config.ts` (edit). Tests: `measurements.spec.ts`, `us-014-accessibility.spec.ts` (edit).
 - Acceptance criteria:
@@ -683,7 +657,7 @@ Tasks 49 and 50 are P1 rows that run before the release tag (Sponsor decision of
 - Traces: US-010.9, US-014.4, US-014.6, M-2.
 
 ### Task 53: Final pass - after the tag
-- Source: F4.3 | Layer: frontend | Tier: P1 | Estimate: 35 | Depends on: 52 | Branch: `docs/task-53-final-pass`
+- Source: F4.3 | Layer: frontend | Tier: P1 | Estimate: 35 | Depends on: 52 | Security: per task | Branch: `docs/task-53-final-pass`
 - Description: Explore the finished page at 320 and 360 pixels and close the traceability and cut-list report.
 - Production: (1) `docs/sdd/progress.md`. Tests: none.
 - Acceptance criteria:
@@ -709,23 +683,23 @@ Rule (`delivery-strategy.md` section 4): P0 stops a realistic local attack or pr
 | Static content | E-15 (application rows), E-16, E-30, E-39 | P0 | none | 09 |
 | Strict parsing and value domains | T-04, T-05, T-15 to T-21, T-27 to T-30, T-32, T-34 to T-40 | P0 | none | 16, 20, 21, 30, 31 |
 | Parser limits never 500, under 300 ms | T-31 | P0 | none | 21, 30 |
-| Text policy core and injection payloads | T-01 to T-03, T-06 to T-13, T-22, T-26 | P0 | none | 18, 23a |
-| Hidden-channel text rules | T-23 to T-25, T-24b | P0 at unit level; P1 real-port repeat | none | 19, 50 |
+| Text policy core and injection payloads | T-01 to T-03, T-06 to T-13, T-22, T-26 | P0 | none | 18+19, 23a |
+| Hidden-channel text rules | T-23 to T-25, T-24b | P0 at unit level; P1 real-port repeat | none | 18+19, 49+50 |
 | Capacity and duplicates | C-01, C-02, C-11 (a) and (b) bounds | P0 | none | 23a, 23b |
 | Capacity with other operations | C-03, C-04 | P0 | moved from Task 23 to Task 31 (endpoints exist there) | 31 |
 | Concurrency | C-06, C-07, C-09, C-10 | P0 | none | 32 |
-| Size bound and load | C-05 size, C-08, C-11 (c) assertions, memory bound | P0 | none | 41 |
+| Size bound and load | C-05 size, C-08, C-11 (c) assertions, memory bound | P0 | none | 41+42 |
 | Recorded timing figures | C-05 time, M-2 figures, C-11 durations | P1 | none | 51 |
 | Second instance | C-12 | P0 | none | 34b |
 | Durability | C-13 (5 iterations) | P0; 50 iterations P1 | none | 33, 51 |
 | Invariant sequences | S-01 to S-07, S-10, S-11; S-08 with 20 iterations | P0 | none | 31, 32 |
 | Concurrent status, rating and delete | S-09 with 20 iterations | P0 | **D2**: architect P1 | 32 |
 | Long runs | S-08 and S-09 at 200 iterations | P1 | none | 51 |
-| Grammar corners | E-34 rows 2 to 7, E-35, E-24b, E-25 (application rows) | P1 | none | 50 |
-| Pre-application answers | E-10 (last two), E-15 container rows, E-20, E-25 container rows, E-28, E-31 (Upgrade rows), E-36 (first two), E-37 | P1, but run before the release tag | none | 49 |
-| Log injection | T-33 live run P1; log pattern at configuration level P0 | P1; P0 | none | 08, 50 |
+| Grammar corners | E-34 rows 2 to 7, E-35, E-24b, E-25 (application rows) | P1 | none | 49+50 |
+| Pre-application answers | E-10 (last two), E-15 container rows, E-20, E-25 container rows, E-28, E-31 (Upgrade rows), E-36 (first two), E-37 | P1, but run before the release tag | none | 49+50 |
+| Log injection | T-33 live run P1; log pattern at configuration level P0 | P1; P0 | none | 08, 49+50 |
 | Start-up criteria without an Appendix D row | US-009.1 to .3, .5 to .7 | P0 | none | 03a, 33, 34a, 34b |
-| Release sweep and package audits | SC-07, SC-14, SC-18, SC-20, SC-27, SC-36, SC-41 | P0 | **D3**: architect Increment 4 | 42 |
+| Release sweep and package audits | SC-07, SC-14, SC-18, SC-20, SC-27, SC-36, SC-41 | P0 | **D3**: architect Increment 4 | 41+42 |
 | Accepted limits | Section 6 of `spec.md` | P2 | none | documented |
 
 ### 7.2 UI acceptance criteria
@@ -738,8 +712,8 @@ Rule (`delivery-strategy.md` section 4): P0 stops a realistic local attack or pr
 | US-010.9, 1,000 entries within 1,000 ms | P1 (cut list) | none | 52 |
 | US-010.9, 5,000 entries recorded only | P2 | none | 52 |
 | US-011.1 to .10 | P0 | the proposal wrote ".1 to .11"; there is no US-011.11 (**D4**, typing slip) | 12, 26, 27, 29 |
-| US-012.1 to .7, .9 | P0 | none | 36 to 40 |
-| US-012.8 | P1 | none | 36, 39 |
+| US-012.1 to .7, .9 | P0 | none | 36 to 38, 39+40 |
+| US-012.8 | P1 | none | 36, 39+40 |
 | US-013.1 to .6 | P0 | none | 24, 26, 44 |
 | US-014.1 | P0 (the checker runs in tests only) | none | 43 |
 | US-014.2 | P0 | none | 27, 38, 47 |
@@ -751,8 +725,8 @@ Rule (`delivery-strategy.md` section 4): P0 stops a realistic local attack or pr
 | US-014.6 stylesheet containment rules | P0 (never cut) | none | 46 |
 | US-014.6 bounding-box measurement | P1 (cut list) | none | 52 |
 | US-014.7, US-014.8, SC-38 | P0 | none | 12, 45 |
-| Rows through the page: T-03 (one case), T-07, T-08, T-12, T-40, S-01 to S-03, S-05, S-06, C-01 (stub), E-16, E-21 (stub) | P0 | none | 14, 29, 39, 40, 44 |
-| Page display of T-06, T-10, T-22, T-24, S-04, S-11, E-38, E-39 | P1 as page checks; the API row keeps its tier | none | 29, 39, 52 |
+| Rows through the page: T-03 (one case), T-07, T-08, T-12, T-40, S-01 to S-03, S-05, S-06, C-01 (stub), E-16, E-21 (stub) | P0 | none | 14, 29, 39+40, 44 |
+| Page display of T-06, T-10, T-22, T-24, S-04, S-11, E-38, E-39 | P1 as page checks; the API row keeps its tier | none | 29, 39+40, 52 |
 
 ### 7.3 Differences to confirm
 D1 E-36 third row P0; D2 S-09 P0 at 20 iterations; D3 release sweep in Increment 3; D4 US-011.11 does not exist; M (moves made by the architect in 022 and agreed by the PM): E-22 live, E-30, E-33, T-23 to T-26 and T-24b at unit level, T-31, C-05 size bound, C-08, C-11, C-12, C-13 (5 iterations). All were confirmed by Security in handoff 026 section 5; the Liaison accepts them from the governance side (handoff 025, F-12).
@@ -766,7 +740,7 @@ D1 E-36 third row P0; D2 S-09 P0 at 20 iterations; D3 release sweep in Increment
 | Failsafe and Surefire split, merged JaCoCo data, coverage check with a failing-threshold run | 01 |
 | `-Xlint:all -Werror` | 01 |
 | Maven wrapper checksum and `--strict-checksums` | 01 |
-| Dependency tree against the ban list | 01 (re-checked in 42) |
+| Dependency tree against the ban list | 01 (re-checked in 41+42) |
 | Checkstyle pins; SpotBugs and Find Security Bugs pins | 02 |
 | Every mandatory property effective (Boot 4 and Jackson 3 key names) | 03b (set), 08 (proved); strictness switches in 21 |
 | Real-port security class with Host, CSRF, header, body-cap and error-path cases | 06 and 08; container error wrapper in 17 |
@@ -780,7 +754,7 @@ D1 E-36 third row P0; D2 S-09 P0 at 20 iterations; D3 release sweep in Increment
 
 | FR | Story | Rules | Endpoint | Tasks |
 |---|---|---|---|---|
-| FR1 | US-001 | BR-001, BR-006, BR-008, BR-009 | `POST /api/v1/books` | 07, 18 to 21, 23a, 31 (US-001.9) |
+| FR1 | US-001 | BR-001, BR-006, BR-008, BR-009 | `POST /api/v1/books` | 07, 18+19, 20, 21, 23a, 31 (US-001.9) |
 | FR1 | US-002 | BR-010 | `GET /api/v1/books` | 07, 16, 23b |
 | FR1 | US-004 | BR-003, BR-013 | `POST /api/v1/books` | 22, 23a, 32 |
 | FR3 | US-003 | BR-002, BR-007, BR-004 | `PUT`, `DELETE .../rating` | 30, 31 |
@@ -790,19 +764,28 @@ D1 E-36 third row P0; D2 S-09 P0 at 20 iterations; D3 release sweep in Increment
 | Metric M-3 | US-009 | BR-013 | all writes | 03a, 03b, 33, 34a, 34b |
 | Scope: frontend | US-010 | n/a | static content | 09, 12, 25, 28, 52 (US-010.9) |
 | FR1 | US-011 | n/a | `POST` | 12, 24, 26, 27, 29 |
-| FR2, FR3 | US-012 | BR-004 | status, rating, delete | 35 to 40 |
+| FR2, FR3 | US-012 | BR-004 | status, rating, delete | 35 to 38, 39+40 |
 | Constitution | US-013 | n/a | all | 11, 24, 26, 37, 44 |
 | Constitution | US-014 | n/a | static content | 12, 14, 43, 45, 46, 47, 52 |
 | Cross-cutting | BR-012 | | all | 06, 15, 16, 20, 21, 31 (route table) |
-| Cross-cutting | INV-1 to INV-8 | | all | 04, 23a, 30, 32, 41 |
+| Cross-cutting | INV-1 to INV-8 | | all | 04, 23a, 30, 32, 41+42 |
 
 FR4 has no downstream items by design (DEC-003). Plan sections: `plan.md` and `plan-appendix.md` (until the appendix is regenerated, the task numbers of this document govern).
 
 ## 9. Merge options (if the Sponsor prefers fewer, larger tasks)
 
-Merging changes the number of reviews, not the hours; each merged task would run 60 to 90 minutes and waives the 45-minute limit. Only low-risk pairs are listed: 10 + 13, 11 + 12, 18 + 19, 39 + 40, 41 + 42, 49 + 50. With all six the total is 50 tasks. The tasks split in round 2 (03, 23, 34) should not be merged back.
+Merging changes the number of reviews, not the hours; each merged task runs 60 to 90 minutes and waives the 45-minute limit. Only low-risk pairs were listed: 10 + 13, 11 + 12, 18 + 19, 39 + 40, 41 + 42, 49 + 50. The tasks split in round 2 (03, 23, 34) should not be merged back.
+
+**Decision of 2026-11-05 (Sponsor, option B).** Merged: 18+19, 39+40, 41+42 and 49+50 (the done or in-progress pairs 10+13 and 11+12 were not open and are not merged). Total: 52 tasks (4 merges from 56), effort unchanged at 2,265 minutes. A merged task that overruns is split back.
+
+**PM assessment of two further pairs (rule: merge only if the merged task keeps a clean acceptance list and the same layer; the files rule of section 0 is not waived).** Not merged:
+- **15 + 16** (route table and query/id rules): same layer, but the merged task would list 6 production entries (`RequestTarget`, `RouteTable`, `AcceptPolicy`, `QueryPolicy`, `BoundedBodyRequest`, `RequestGateFilter`) against the limit of 4, would hold 9 acceptance criteria, and both tasks are at the 45-minute ceiling ("dense"); Task 16 also carries a live drip-request spike that may force a decision (SEC-F-073), which is exactly the case where a merged task would have to be split back. Both edit `RequestGateFilter`, so they stay sequential and are cheap to review in order.
+- **30 + 31** (transitions; get, delete, status, rating): same layer, but the merge would list 5 production entries (`Book`, the `dto` files, `BookService`, `BookController`, `RouteTable`) against the limit of 4, would hold 8 criteria, and Task 31 is already at the ceiling with the invariant sequences and capacity clauses on the real port; Task 30 is the unit-level proof that 31 relies on and is better accepted first.
+If the Sponsor still wants either merge, the PM would first need an approved exception to the files rule.
 
 ## Changelog
+- 0.6.1 (2026-11-05): Orchestrator, applying the Security ruling of handoff 087: Tasks 23a, 48 and 53 move from `Security: increment` to `Security: per task`; Security accepts increment-level cover only for Tasks 22 and 30 and only if they change no error code, message or status and touch no control; both stay per task here. No task is marked increment.
+- 0.6 (2026-11-05): Sponsor decision (option B of section 9): Tasks 18+19, 39+40, 41+42 and 49+50 merged (long tasks of 90, 70, 75 and 90 minutes, branches combined, dependencies, tier register and traceability repointed, totals recomputed to 52 tasks, 2,265 minutes, 49 in the release); 15+16 and 30+31 assessed and not merged (files rule); a merged task that overruns is split back. Definition of Done gains the Sponsor-approved review-load rule (option A; constitution amendment in progress) and every open task carries "Security: per task" or "Security: increment" in its header.
 - 0.5.1 (2026-11-02): Task 02 amended (handoffs 043 and 044): SC-27 outbound-HTTP-client ban in the Checkstyle regex bans with a test-only suppression and one seeded run (SEC-F-089); time rule tightened to `new java.util.Date()` and `.now (` (SEC-F-090).
 - 0.5 (2026-11-02): Round 3, final edits for handoffs 031 and 032. Task 12 depends on 09 (R2-01); the UI Definition-of-Done rule is limited to criteria the real page can provoke, stub-only criteria are evidenced by logic and stub tests, and the missing backend dependencies of Tasks 25, 26, 27, 36, 37, 38 are added (R2-02); totals corrected to 660, 2,055, 2,145 and 1,240 minutes, headline 35.75 h and 20.7 h (R2-04); plan 0.2 cited (R2-05); stored-DDL round trip in Task 04 and the native-SQL grep gate in Task 42 (R2-06); Task 13 working directory, argument names and five hostile variables (R2-07, SEC-F-080); branch types of Tasks 08 and 41 and the `progress.md` exemption (R2-08); sharper oracles in Tasks 34b and 28 (R2-09); README memory bound in Tasks 14 and 41 (SEC-F-081).
 - 0.4 (2026-11-02): Round 2 of Phase 3, resolving handoffs 025 and 026 (answers by finding number in handoff 027). Dependencies corrected (F-01); Task 15 route table scope and Task 31 maintenance (F-02); `status` value check moved to Task 16 (F-03); Task 23 split into 23a and 23b and its capacity clauses limited to add (F-04, F-06); exception mapping in Task 22 (F-05); Task 34 split into 34a and 34b and Task 03 split into 03a and 03b (F-06, SEC-F-067, SEC-F-069); UI-task Definition of Done rule (F-07); release scope = Increments 0 to 3 plus Tasks 49 and 50, Task 48 built last (F-08); Task 43 per the Sponsor decision (F-09); tier register as single authority (F-12); file lists, branch types and README ownership (F-20); 0a/0b acceptance and try-it commands (F-21); CR approval before Task 11 (F-23); US-010.2 tier split (F-24); Security conditions SEC-F-066 to SEC-F-079 attached to Tasks 03a, 03b, 06, 07, 08, 09, 11, 13, 14, 16, 34b, 41, 42, 43, 49.

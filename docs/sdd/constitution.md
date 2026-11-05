@@ -1,8 +1,8 @@
 # Project Constitution: GloberBooks
 
 - Owner: Sponsor
-- Version: 1.2
-- Last updated: 2026-11-02
+- Version: 1.3
+- Last updated: 2026-11-05
 - Status: Approved by the Sponsor on 2026-10-30 (Phase 1 gate: Liaison round 3 APPROVED WITH CHANGES, Security round 3 PASS WITH CONDITIONS)
 
 This document is the highest authority in the repository. If `spec.md`, `plan.md`, `tasks.md` or code conflict with it, the constitution wins until the Sponsor amends it.
@@ -98,7 +98,7 @@ Task 1 (project scaffold) proves, with real output attached, what this constitut
 2. Coverage gate met; every acceptance criterion mapped to a test.
 3. No new dependency, schema change or file outside the task scope.
 4. `progress.md` and the affected documents updated in the same branch; the task's `status.md` row updated.
-5. Liaison ACCEPT, Security verdict `PASS` (or `PASS WITH CONDITIONS` with every condition closed), PM acceptance, Sponsor approval.
+5. Liaison ACCEPT (every task). Security: a task marked `Security: per task` in its `tasks.md` header needs a Security verdict `PASS` (or `PASS WITH CONDITIONS` with every condition closed) before merge; a task marked `Security: increment` is covered by the single Security review of its increment (see Security Standards, "Security review cadence"). Then PM acceptance and Sponsor approval.
 
 ## Architecture Principles
 - Layered architecture: Controllers → Services → Repositories. Dependencies point downward only.
@@ -193,6 +193,8 @@ public void assignRating(String bookId, int rating) {
 ## Security Standards
 Security is a first-class requirement. The goal is defense in depth with no known path to a vulnerability: every control below has a named verification in `docs/sdd/security.md`, and nothing is declared secure without evidence. The Security reviewer owns `security.md` and holds a veto at every phase gate; only the Sponsor may accept a residual risk, in writing, in the risk register of `security.md`.
 
+**Security review cadence.** The Liaison audits every task. The PM marks each task header `Security: per task` or `Security: increment`. `Security: per task` is mandatory for every task that touches input, output, configuration, dependencies, headers or the frontend, that touches or exercises any control (`SC-NN`) of `docs/sdd/security.md` (a tests-only task that exercises a control is per task), and for any change to a pin, lockfile, wrapper, `.npmrc`, workflow, hook, guard or pattern file. A task without a mark counts as per task. For every other task, one Security review per increment covers it: it is a review of the whole increment diff, recorded as an AUDIT_REPORT in a handoff and completed before the Sponsor tries the increment. The veto is unchanged: a Security `FAIL` blocks the increment tag and the release, and only the Sponsor may accept the residual risk in writing. The Security reviewer may upgrade any task to `per task` at any time, and the PM then updates the header. The pre-release review is unchanged. Automated checks (CI hygiene workflow, secrets scan) still run on every merge.
+
 - **Network exposure:** the application binds to `127.0.0.1` by default and refuses to start when the bound address is not loopback (SC-39); changing this is ASK FIRST and requires a Security review. Use the literal `127.0.0.1` in `baseURL`, MCP origins and documentation.
 - **Response headers**, set by one filter or configuration class on every response produced by the application (API and static): `Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; require-trusted-types-for 'script'`; `X-Content-Type-Options: nosniff`; `X-Frame-Options: DENY`; `Referrer-Policy: no-referrer`; `Cross-Origin-Opener-Policy: same-origin`; `Cross-Origin-Resource-Policy: same-origin`; `Permissions-Policy` with at least camera, microphone, geolocation, payment, usb, serial, bluetooth, clipboard-read, display-capture and fullscreen set to `()`; `Cache-Control: no-store`. No `upgrade-insecure-requests`. Trusted Types is enforced only by Chromium today and is hardening, not the primary XSS control. No inline script or style, no external script, font or stylesheet.
 - **Host allowlist** (DNS-rebinding defense), in the same filter: compare the raw `Host` header, lower-cased, by exact string equality with the set `{localhost:<port>, 127.0.0.1:<port>}`, where `<port>` is the actual listening port (`[::1]:<port>` only when the bind address is `::1`). Everything else, including an absent Host, is rejected with `400 INVALID_HOST`. Forwarded headers are ignored (`server.forward-headers-strategy: none`).
@@ -270,7 +272,7 @@ Status codes: 200 success with data; 201 created; 400 validation, malformed requ
 - Branches `<type>/<ref>-<slug>` as defined in `git-workflow.md`; atomic Conventional Commits on the branch and one squashed commit per accepted task on `main`. No direct commits to `main` except the initial repository bootstrap.
 - Every merge into `main` goes through a pull request with the required `hygiene` check; the Sponsor reviews and merges it. The Sponsor's approval of a task at its gate is the request to open and merge that pull request.
 - Commits use the human contributor's own identity and contain no AI attribution (see NEVER and `git-workflow.md`).
-- Every phase gate needs a Liaison verdict, a Security verdict and Sponsor approval (see `agent-protocol.md`).
+- Every phase gate needs a Liaison verdict, a Security verdict and Sponsor approval (see `agent-protocol.md`). Task-level review follows "Security review cadence" in the Security Standards.
 
 ## Amendment Procedure
 1. Anyone proposes a change by handoff; the owner of a referenced document proposes a rule change, never applies it; the Liaison and the Security reviewer review it; the Sponsor approves it.
@@ -289,6 +291,7 @@ Status codes: 200 success with data; 201 created; 400 validation, malformed requ
 | Commit `[Task-N] ... - ACCEPTED` | Conventional Commits with `[Task-N]` | Standard history; ACCEPTED is tracked in `progress.md` and `status.md` |
 
 ## Changelog
+- 1.3 (2026-11-05): Amendment: review load per task (delivery strategy S-6, option A). The Liaison audits every task; the Security reviewer reviews per task every task that touches input, output, configuration, dependencies, headers, the frontend or that touches or exercises a `security.md` control, and any change to a pin, lockfile, wrapper, `.npmrc`, workflow, hook, guard or pattern file; it covers all other tasks with one review of the increment diff before the Sponsor tries it; the veto and the pre-release review are unchanged; tasks are marked `Security: per task` or `Security: increment` (handoffs 086 and 087; Sponsor decision 2026-11-05).
 - 1.2 (2026-11-02): Amendment: SC-33 (E2E isolation) lets the launcher started by the web-server command create the temporary directory and requires command-line arguments, an allowlisted environment and a hostile-environment run (handoffs 026, 029; Sponsor approval 2026-11-02).
 - 1.1 (2026-10-30): Sponsor approved sub-packages inside the `config` package (Phase 3 plan decision 6). No other change.
 - 1.0 (2026-10-30): Approved by the Sponsor at the Phase 1 gate; content of 0.4 unchanged. Conditions carried forward: Task 1 proofs and the unverified pins, the Security conditions C-1 to C-5 of handoff 005 and the open items of `security.md` section 10.

@@ -1,10 +1,10 @@
 # Delivery Strategy: working software first, then iterate
 
 - Owner: Orchestrator (proposals that change a binding rule go through the constitution's Amendment Procedure)
-- Version: 1.0
-- Last updated: 2026-10-30
+- Version: 1.1
+- Last updated: 2026-11-05
 - Changelog: 2026-11-02, section 5: Increment 0 recorded as 0a (Tasks 01 to 08, tag `v0.1`) and 0b (Tasks 09 to 14, tag `v0.2`), Sponsor decision of 2026-11-02 (handoff 027). No other change.
-- Status: Approved by the Sponsor on 2026-10-30 ("accept all recommendations"). S-1 to S-5 adopted; S-6 adopted in principle and needs a constitution amendment proposal after Phase 2 closes.
+- Status: Approved by the Sponsor on 2026-10-30 ("accept all recommendations"). S-1 to S-5 adopted; S-6 adopted and applied through constitution 1.3 (Sponsor decision 2026-11-05, handoffs 086 and 087).
 
 ## 1. Why this document exists
 GloberBooks is a course exercise: a personal reading list that runs **locally**, as one process with an **embedded SQLite file**, for one user on one machine. The governance built so far (constitution, security controls, a 57-requirement spec with a 104-row test appendix) is more rigorous than the product strictly needs. That rigor is useful for the exercise, but only if it ends in **running software we can iterate on**. A perfect specification of software that does not exist yet has no value. This strategy fixes the order of work and the definition of "good enough" so that development starts soon and improves in short loops.
@@ -74,7 +74,7 @@ Spec defects found while building are cheap to fix when found; that is the reaso
 | S-3 | Adopt the increments of section 5, with the walking skeleton as Task 1 | Yes |
 | S-4 | Adopt the "good enough" release definition of section 6 | Yes |
 | S-5 | Lean planning: `plan.md` of 3 to 5 pages and tasks grouped by increment (as the exercise states) rather than a fully detailed plan for every increment upfront | Yes |
-| S-6 | Review load per task (proposal, needs a constitution amendment if accepted): the Liaison audits every task; the Security reviewer reviews every task that touches input, output, configuration, dependencies, headers or the frontend (already the rule) and otherwise once per increment | Yes, after Phase 2 closes |
+| S-6 | Review load per task (adopted and applied, constitution 1.3, 2026-11-05): the Liaison audits every task; the Security reviewer reviews per task every task that touches input, output, configuration, dependencies, headers, the frontend or a `security.md` control, and covers the others with one review of the increment diff before the Sponsor tries it; veto unchanged; the PM marks `Security: per task` or `Security: increment` | Adopted |
 
 ## 9. Next actions
 1. Finish review round 2 of the spec; close Phase 2 per S-1.
