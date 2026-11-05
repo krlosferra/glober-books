@@ -40,7 +40,7 @@ fi
 
 # 2. Attribution in commit, tag, notes and pull-request commands.
 if printf '%s' "$cmd" | grep -qE "${start}(git( +[^ ;&|]+)* +(commit|tag|notes)( |\$|\")|gh +(pr|issue|api)( |\$|\"))"; then
-  scrubbed=$(printf '%s' "$cmd" | sed -E 's#\.claude/##g; s#CLAUDE\.md##g')
+  scrubbed=$(printf '%s' "$cmd" | sed -E 's#\.claude/##g; s#CLAUDE\.md##g; s#/tmp/claude-[0-9]+/##g')
   if printf '%s' "$scrubbed" | grep -qiE "$pattern"; then
     block "The command text reveals an AI tool, agent or co-author (commit, tag or pull-request text must not contain attribution)"
   fi

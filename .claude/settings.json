@@ -4,6 +4,9 @@
     "pr": ""
   },
   "permissions": {
+    "allow": [
+      "Bash(gh api -X PUT repos/krlosferra/glober-books/pulls/*/merge *)"
+    ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
