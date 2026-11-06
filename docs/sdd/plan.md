@@ -152,3 +152,4 @@ Decided on 2026-11-02: items 1, 2, 4, 5, 6, 8, 10 and 11 are approved or accepte
 - Tasks 20 and 21: the nested `StatusDeserializer` / `StrictStringDeserializer` distinguishes an absent `status` (default `unread`) from an explicit `null` (`INVALID_STATUS`); the plan did not say how.
 - Task 23a: `findAllBy` is a Spring Data class-based projection onto `BookKeyRow`, not a JPQL constructor projection (the Task 04 guard forbids `@Query`).
 - Task 30: `Book.assignRating` throws a domain `IllegalStateException` on a book that is not completed; the service pre-checks the status and returns `RATING_NOT_ALLOWED` before calling it and never maps `IllegalStateException` (Task 31b).
+- Task 31a: the service method that removes a book is `discard` (the controller method stays `delete`), because SpotBugs reads a method named `delete` as a mutator and flags the controller with EI_EXPOSE_REP2; no exclusion is allowed without the Sponsor's approval.
