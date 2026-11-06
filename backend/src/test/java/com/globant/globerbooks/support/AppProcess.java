@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,24 +55,25 @@ public final class AppProcess {
      * @throws Exception when the jar is missing, the process cannot start or it does not become ready
      */
     public static AppProcess start(Path dataDir, Path consoleFile) throws Exception {
-        Path jar = Path.of("target", "globerbooks.jar").toAbsolutePath();
-        if (!Files.isRegularFile(jar)) {
-            throw new IllegalStateException("The packaged jar is missing: " + jar);
-        }
+        return start("jdbc:sqlite:" + dataDir.resolve("library.db"), null, null, consoleFile);
+    }
+
+    /**
+     * Starts the packaged jar with a given data source URL, an optional umask and an optional working
+     * directory, and waits until it answers.
+     *
+     * @param dataUrl the value of {@code --spring.datasource.url}, or null to use the shipped default
+     * @param umask the umask the child runs under (for example {@code 022}), or null for the inherited one
+     * @param workDir the working directory of the child, or null for the current one
+     * @param consoleFile the file that receives standard output and error
+     * @return the running process
+     * @throws Exception when the process cannot start or does not become ready
+     */
+    public static AppProcess start(String dataUrl, String umask, Path workDir, Path consoleFile)
+            throws Exception {
         int port = freePort();
-        ProcessBuilder builder = new ProcessBuilder(
-                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx512m", "-jar",
-                jar.toString(), "--server.address=127.0.0.1", "--server.port=" + port,
-                "--spring.datasource.url=jdbc:sqlite:" + dataDir.resolve("library.db"))
-                .redirectErrorStream(true).redirectOutput(consoleFile.toFile());
-        Map<String, String> environment = builder.environment();
-        Map<String, String> inherited = Map.copyOf(environment);
-        environment.clear();
-        ALLOWED_ENVIRONMENT.stream().filter(inherited::containsKey)
-                .forEach(key -> environment.put(key, inherited.get(key)));
         long begin = System.nanoTime();
-        Process process = builder.start();
-        LIVE.add(process);
+        Process process = launch(dataUrl, umask, workDir, consoleFile, port);
         AppProcess app = new AppProcess(process, port, consoleFile, 0);
         try {
             app.awaitReady();
@@ -80,6 +82,57 @@ public final class AppProcess {
             throw failure;
         }
         return new AppProcess(process, port, consoleFile, (System.nanoTime() - begin) / 1_000_000);
+    }
+
+    /**
+     * Starts the packaged jar and waits for it to end by itself (a refused start or a stop).
+     *
+     * @param dataUrl the value of {@code --spring.datasource.url}, or null to use the shipped default
+     * @param umask the umask of the child, or null
+     * @param workDir the working directory of the child, or null
+     * @param consoleFile the file that receives standard output and error
+     * @return the exit status
+     * @throws Exception when the process cannot start or is still running after the deadline
+     */
+    public static int runToExit(String dataUrl, String umask, Path workDir, Path consoleFile) throws Exception {
+        Process process = launch(dataUrl, umask, workDir, consoleFile, freePort());
+        if (!process.waitFor(READY_SECONDS, TimeUnit.SECONDS)) {
+            process.destroyForcibly().waitFor(STOP_SECONDS, TimeUnit.SECONDS);
+            LIVE.remove(process);
+            throw new IllegalStateException("The application did not end within " + READY_SECONDS + " s");
+        }
+        LIVE.remove(process);
+        return process.exitValue();
+    }
+
+    private static Process launch(String dataUrl, String umask, Path workDir, Path consoleFile, int port)
+            throws IOException {
+        Path jar = Path.of("target", "globerbooks.jar").toAbsolutePath();
+        if (!Files.isRegularFile(jar)) {
+            throw new IllegalStateException("The packaged jar is missing: " + jar);
+        }
+        List<String> command = new ArrayList<>();
+        if (umask != null) {
+            command.addAll(List.of("sh", "-c", "umask \"$1\" && shift && exec \"$@\"", "sh", umask));
+        }
+        command.addAll(List.of(Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx512m",
+                "-jar", jar.toString(), "--server.address=127.0.0.1", "--server.port=" + port));
+        if (dataUrl != null) {
+            command.add("--spring.datasource.url=" + dataUrl);
+        }
+        ProcessBuilder builder = new ProcessBuilder(command)
+                .redirectErrorStream(true).redirectOutput(consoleFile.toFile());
+        if (workDir != null) {
+            builder.directory(workDir.toFile());
+        }
+        Map<String, String> environment = builder.environment();
+        Map<String, String> inherited = Map.copyOf(environment);
+        environment.clear();
+        ALLOWED_ENVIRONMENT.stream().filter(inherited::containsKey)
+                .forEach(key -> environment.put(key, inherited.get(key)));
+        Process process = builder.start();
+        LIVE.add(process);
+        return process;
     }
 
     private static int freePort() throws IOException {

@@ -1,17 +1,14 @@
 package com.globant.globerbooks.config.sqlite;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.PosixFileAttributes;
-import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.nio.file.attribute.UserPrincipal;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Prepares and vets the place where the database lives, before any connection is opened.
@@ -26,8 +23,11 @@ import java.util.Set;
  * that cannot be created. The data directory is created one level deep only.
  *
  * <p>All inspections happen before the first creation, and they read attributes only (never the
- * content of the file), so a refusal creates, changes and deletes nothing. A refusal carries a fixed
- * {@link Reason}; the text never holds a path, an owner, a mode or book data.
+ * content of the file), so a refusal by an inspection creates, changes and deletes nothing. When a
+ * creation step fails halfway, the guard removes only what it created itself in that call, inside
+ * the guarded directory (and the directory when it created it), and refuses with
+ * {@link Reason#CANNOT_CREATE}. A refusal carries a fixed {@link Reason}; the text never holds a
+ * path, an owner, a mode or book data.
  *
  * <p>Documented limits: (1) On a file system without POSIX attributes the owner and mode checks are
  * not made (US-009.6 platform limit); the symbolic link, type and identity checks still are. (2)
@@ -43,9 +43,6 @@ public final class DataDirectoryGuard {
     private static final String DIRECTORY_MODE = "rwx------";
     private static final String FILE_MODE = "rw-------";
     private static final String POSIX_VIEW = "posix";
-    private static final Set<PosixFilePermission> WIDER_THAN_OWNER = Set.of(
-            PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_WRITE, PosixFilePermission.GROUP_EXECUTE,
-            PosixFilePermission.OTHERS_READ, PosixFilePermission.OTHERS_WRITE, PosixFilePermission.OTHERS_EXECUTE);
 
     private DataDirectoryGuard() {
     }
@@ -68,19 +65,35 @@ public final class DataDirectoryGuard {
         boolean directoryExists = inspect(directory, true, posix);
         boolean nativeExists = inspect(nativeDirectory, true, posix);
         boolean fileExists = inspect(file, false, posix);
+        Deque<Path> created = new ArrayDeque<>();
         try {
             if (!directoryExists) {
                 createDirectory(directory, posix);
+                created.push(directory);
             }
             if (!nativeExists) {
                 createDirectory(nativeDirectory, posix);
+                created.push(nativeDirectory);
             }
             if (!fileExists) {
                 createFile(file, posix);
+                created.push(file);
             }
             return new Guarded(file, nativeDirectory, FileIdentity.of(file));
         } catch (IOException | RuntimeException failure) {
+            removeCreated(created);
             throw new Refusal(Reason.CANNOT_CREATE);
+        }
+    }
+
+    /** Removes, newest first, only the entries this call created; a failure to remove is ignored. */
+    private static void removeCreated(Deque<Path> created) {
+        for (Path path : created) {
+            try {
+                Files.deleteIfExists(path);
+            } catch (IOException | RuntimeException ignored) {
+                continue;
+            }
         }
     }
 
@@ -121,7 +134,7 @@ public final class DataDirectoryGuard {
                 throw new Refusal(Reason.WRONG_FILE_TYPE);
             }
             if (posix) {
-                requireOwnerOnly(Files.readAttributes(path, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS));
+                OwnerOnlyCheck.require(path, expectDirectory);
             }
             return true;
         } catch (IOException | RuntimeException failure) {
@@ -130,22 +143,6 @@ public final class DataDirectoryGuard {
             }
             throw new Refusal(Reason.CANNOT_CREATE);
         }
-    }
-
-    private static void requireOwnerOnly(PosixFileAttributes attributes) throws IOException {
-        if (!attributes.owner().equals(currentUser())) {
-            throw new Refusal(Reason.FOREIGN_OWNER);
-        }
-        for (PosixFilePermission permission : attributes.permissions()) {
-            if (WIDER_THAN_OWNER.contains(permission)) {
-                throw new Refusal(Reason.PERMISSIONS_TOO_WIDE);
-            }
-        }
-    }
-
-    private static UserPrincipal currentUser() throws IOException {
-        return FileSystems.getDefault().getUserPrincipalLookupService()
-                .lookupPrincipalByName(System.getProperty("user.name"));
     }
 
     private static void createDirectory(Path directory, boolean posix) throws IOException {
@@ -184,6 +181,10 @@ public final class DataDirectoryGuard {
         PERMISSIONS_TOO_WIDE("The data directory or the database file is accessible to group or others"),
         /** The directory or the file could not be created or inspected. */
         CANNOT_CREATE("The data directory or the database file could not be created or opened"),
+        /** The database file has more than one hard link. */
+        MULTIPLE_LINKS("The database file has more than one hard link"),
+        /** The database could not be opened or is in use by another process. */
+        DATABASE_UNAVAILABLE("The database could not be opened or is in use by another process"),
         /** The database file is not the file that was checked. */
         IDENTITY_CHANGED("The database file is not the file that was checked");
 

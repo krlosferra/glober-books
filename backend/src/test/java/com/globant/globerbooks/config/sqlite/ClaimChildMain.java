@@ -1,6 +1,5 @@
-package com.globant.globerbooks.support;
+package com.globant.globerbooks.config.sqlite;
 
-import com.globant.globerbooks.config.sqlite.SqliteDataSourceProvider;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.IOException;
 import java.nio.file.Path;

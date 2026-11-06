@@ -1,1 +1,2 @@
 org.springframework.boot.EnvironmentPostProcessor=com.globant.globerbooks.config.sqlite.StartupPolicy
+org.springframework.boot.diagnostics.FailureAnalyzer=com.globant.globerbooks.config.sqlite.StartupFailureAnalyzer

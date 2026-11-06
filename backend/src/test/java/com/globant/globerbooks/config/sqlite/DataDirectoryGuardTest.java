@@ -233,7 +233,7 @@ class DataDirectoryGuardTest {
         Path tooLong = root.resolve("data").resolve("x".repeat(300));
 
         assertThat(refusal(tooLong).reason()).isEqualTo(Reason.CANNOT_CREATE);
-        assertThat(names(root)).containsExactly("data");
+        assertThat(names(root)).isEmpty();
     }
 
     @Test

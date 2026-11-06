@@ -48,13 +48,15 @@ public final class SqliteDataSourceProvider {
     }
 
     /**
-     * Creates the pool from a JDBC URL of the form {@code jdbc:sqlite:<file>}. The form itself is
+     * Plain pool for tests of the store itself, not reachable from the application configuration
+     * (package-private on purpose, Task 34a-2). Creates the pool from a JDBC URL of the form
+     * {@code jdbc:sqlite:<file>}. The form itself is
      * checked by the start policy of a later task; the text after the prefix is taken as given.
      *
      * @param jdbcUrl the value of {@code spring.datasource.url}
      * @return the started pool of one connection, with the schema applied
      */
-    public static HikariDataSource create(String jdbcUrl) {
+    static HikariDataSource create(String jdbcUrl) {
         if (jdbcUrl == null || !jdbcUrl.startsWith(URL_PREFIX)) {
             throw new IllegalStateException("The database URL is not a SQLite URL");
         }
@@ -62,12 +64,13 @@ public final class SqliteDataSourceProvider {
     }
 
     /**
-     * Prepares the storage, starts the pool, takes the claim and applies {@code schema.sql}.
+     * Plain pool for tests of the store itself, not guarded and not reachable from the application
+     * configuration. Prepares the storage, starts the pool, takes the claim and applies {@code schema.sql}.
      *
      * @param databaseFile the database file; its directory is created when missing
      * @return the started pool of one connection, with the schema applied
      */
-    public static HikariDataSource create(Path databaseFile) {
+    static HikariDataSource create(Path databaseFile) {
         Path absoluteFile = databaseFile.toAbsolutePath();
         String fileName = String.valueOf(absoluteFile.getFileName());
         Path nativeDirectory = prepareStorage(absoluteFile, fileName);
@@ -85,18 +88,25 @@ public final class SqliteDataSourceProvider {
     /**
      * Starts the pool on a location vetted by {@link DataDirectoryGuard}: the guard has created or
      * accepted the directory, the file and the native directory, and after the pool opens the file
-     * at the path must still be the file that was vetted. Not used by the packaged application yet
-     * (Task 34a-2 wires it).
+     * at the path must still be the file that was vetted. This is the only way the application builds
+     * its data source. A failure to open, claim or prepare the database is reported as a refusal with
+     * a fixed reason: no path, no file name and no cause.
      *
      * @param guarded the result of {@link DataDirectoryGuard#check(Path)}
      * @return the started pool of one connection, with the schema applied
-     * @throws DataDirectoryGuard.Refusal with the identity reason when the file was swapped
+     * @throws DataDirectoryGuard.Refusal with the identity reason when the file was swapped, or with
+     *     the unavailable reason when the database cannot be opened, claimed or prepared
      */
     public static HikariDataSource create(DataDirectoryGuard.Guarded guarded) {
         Path absoluteFile = guarded.databaseFile();
         String fileName = String.valueOf(absoluteFile.getFileName());
         System.setProperty(TMPDIR_PROPERTY, guarded.nativeDirectory().toString());
-        HikariDataSource pool = openPool(absoluteFile, fileName);
+        HikariDataSource pool;
+        try {
+            pool = openPool(absoluteFile, fileName);
+        } catch (IllegalStateException failure) {
+            throw new DataDirectoryGuard.Refusal(DataDirectoryGuard.Reason.DATABASE_UNAVAILABLE);
+        }
         try {
             guarded.requireSameFile();
             applySchema(pool);
@@ -105,7 +115,7 @@ public final class SqliteDataSourceProvider {
             throw refusal;
         } catch (SQLException | RuntimeException failure) {
             pool.close();
-            throw new IllegalStateException("The database schema could not be applied to " + fileName, failure);
+            throw new DataDirectoryGuard.Refusal(DataDirectoryGuard.Reason.DATABASE_UNAVAILABLE);
         }
         return pool;
     }
