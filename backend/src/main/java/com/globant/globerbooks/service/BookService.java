@@ -105,6 +105,59 @@ public class BookService {
         return repository.findByStatusOrderByDateAddedDescIdAsc(wanted).stream().map(BookResponse::from).toList();
     }
 
+    /**
+     * Reads one book. Read-only; the id is bound as a parameter.
+     *
+     * @param id the id text, already checked by the gate
+     * @return the book
+     * @throws ApiException {@code BOOK_NOT_FOUND} when no book has this id
+     */
+    @Transactional(readOnly = true)
+    public BookResponse get(String id) {
+        return BookResponse.from(find(id));
+    }
+
+    /**
+     * Changes the status of a book in one transaction (BR-004, BR-008, DEC-023). The status is judged
+     * first, then the existence, then the change goes through {@link Book#changeStatus}: entering
+     * completed sets the completion date, leaving it clears the rating and the date together, and the
+     * same status changes nothing.
+     *
+     * @param id the id text, already checked by the gate
+     * @param status the wire status
+     * @return the book after the change
+     * @throws BookValidationException {@code INVALID_STATUS} when the status is not one of the three
+     * @throws ApiException {@code BOOK_NOT_FOUND} when no book has this id
+     */
+    @Transactional
+    public BookResponse changeStatus(String id, String status) {
+        BookStatus target = BookStatus.fromWire(status).orElseThrow(() -> new BookValidationException(
+                ErrorCode.INVALID_STATUS, List.of(new FieldProblem("status", STATUS_MESSAGE))));
+        Book book = find(id);
+        book.changeStatus(target, clock);
+        return BookResponse.from(repository.saveAndFlush(book));
+    }
+
+    /**
+     * Deletes a book in one transaction and returns it as it was (US-008).
+     *
+     * @param id the id text, already checked by the gate
+     * @return the removed book
+     * @throws ApiException {@code BOOK_NOT_FOUND} when no book has this id
+     */
+    @Transactional
+    public BookResponse delete(String id) {
+        Book book = find(id);
+        BookResponse removed = BookResponse.from(book);
+        repository.delete(book);
+        repository.flush();
+        return removed;
+    }
+
+    private Book find(String id) {
+        return repository.findById(id).orElseThrow(() -> new ApiException(ErrorCode.BOOK_NOT_FOUND));
+    }
+
     /** One query for the key columns; the incoming key is computed once, stored rows from stored text. */
     private Optional<BookKeyRow> findEarliestMatch(String title, String author) {
         DuplicateKey incoming = DuplicateKey.of(title, author);
