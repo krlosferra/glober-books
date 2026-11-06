@@ -65,3 +65,45 @@ The cold-start figure of the first nested request (401 ms) is above 300 ms becau
 - SEC-F-170: the status check and the write run in one `@Transactional` method; the forced-failure and concurrency proofs stay with Task 32.
 
 ## 8. Git evidence
+```
+$ git diff --stat origin/main..HEAD   (before the final commit of this file)
+ .../globerbooks/config/transport/RouteTable.java   |  13 +-
+ .../globerbooks/controller/BookController.java     |  25 ++
+ .../globerbooks/error/GlobalExceptionHandler.java  |   3 +-
+ .../globant/globerbooks/service/BookService.java   |  44 +++-
+ .../service/BookValidationException.java           |   8 +-
+ .../globerbooks/BookRatingIntegrationTest.java     | 292 +++++++++++++++++++++
+ .../config/transport/RouteTableTest.java           |  26 +-
+ .../controller/BookRatingControllerTest.java       | 121 +++++++++
+ .../error/GlobalExceptionHandlerTest.java          |  31 +++
+ .../globerbooks/service/BookRatingServiceTest.java | 185 +++++++++++++
+ .../140-orchestrator-to-java-task-31b-brief.md     |  26 ++
+ .../141-java-to-liaison-task-31b-delivery.md       |  67 +++++
+ docs/sdd/plan.md                                   |   1 +
+ docs/sdd/progress.md                               |   5 +
+ docs/sdd/status.md                                 |   4 +-
+ docs/sdd/tasks.md                                  |   7 +-
+ 16 files changed, 846 insertions(+), 12 deletions(-)
+
+$ git log origin/main..HEAD --format='%an <%ae>%n%B---'
+krlosferra <carlos.ferra@globant.com>
+docs(handoff): Task 31b delivery [Task-31b]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(progress): Task 31b status and progress entry [Task-31b]
+---
+krlosferra <carlos.ferra@globant.com>
+test(api): real-port rating tests for Task 31b [Task-31b]
+---
+krlosferra <carlos.ferra@globant.com>
+feat(api): rating and clear rating endpoints with INVALID_RATING mapping [Task-31b]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(handoff): Task 31b brief, Task 31a done [Task-31b]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(tasks): amend Task 31b with E-02, E-29 and T-14 rows, plan note on discard [Task-31b]
+---
+```
+
+Branch not pushed. No trailers or session links in any commit message.
