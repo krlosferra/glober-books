@@ -61,7 +61,7 @@ class SqliteWiringIntegrationTest {
         assertThat(sources).hasSize(1);
         String name = sources.keySet().iterator().next();
         assertThat(context.getBeanFactory().getBeanDefinition(name).getFactoryBeanName())
-                .contains("SqliteDataSourceConfig");
+                .isEqualTo("sqliteDataSourceConfig");
         assertThat(sources.get(name)).isInstanceOf(HikariDataSource.class);
         assertThat(context.getBean("&entityManagerFactory", LocalContainerEntityManagerFactoryBean.class)
                 .getDataSource()).isSameAs(sources.get(name));
@@ -93,6 +93,8 @@ class SqliteWiringIntegrationTest {
         assertThat(FileFacts.mode(data)).isEqualTo("rwx------");
         assertThat(FileFacts.mode(data.resolve("tmp"))).isEqualTo("rwx------");
         assertThat(FileFacts.mode(file)).isEqualTo("rw-------");
+        assertThat(Files.list(data.resolve("tmp")).toList()).as("the extracted native library is there")
+                .isNotEmpty().allMatch(FileFacts::isNotWiderThan0600);
         HikariDataSource pool = (HikariDataSource) context.getBean(DataSource.class);
 
         try (Connection connection = pool.getConnection(); Statement statement = connection.createStatement()) {
@@ -104,7 +106,7 @@ class SqliteWiringIntegrationTest {
             assertThat(FileFacts.mode(journal)).isEqualTo("rw-------");
             connection.rollback();
         }
-        assertThat(FileFacts.regularFilesNextTo(data, file)).isEmpty();
+        assertThat(FileFacts.regularFilesNextTo(data, file)).allMatch(FileFacts::isNotWiderThan0600);
     }
 
     @Test

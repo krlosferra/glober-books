@@ -107,6 +107,7 @@ public final class SqliteDataSourceProvider {
         } catch (IllegalStateException failure) {
             throw new DataDirectoryGuard.Refusal(DataDirectoryGuard.Reason.DATABASE_UNAVAILABLE);
         }
+        NativeDirectoryModes.narrow(guarded.nativeDirectory());
         try {
             guarded.requireSameFile();
             applySchema(pool);
