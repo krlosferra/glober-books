@@ -4,8 +4,8 @@ import java.time.Instant;
 
 /**
  * The columns the duplicate scan reads (BR-003): id, stored title, stored author and creation instant.
- * It is a JPQL constructor projection, so the scan never loads whole books. Titles and authors are user
- * text: {@link #toString()} hides every member.
+ * It is a Spring Data class-based projection (Hibernate selects only these columns), so the scan never
+ * loads whole books. Titles and authors are user text: {@link #toString()} hides every member.
  *
  * @param id the book id
  * @param title the stored title

@@ -98,6 +98,27 @@ public final class LibrarySeeder {
         seed(repository, count, true);
     }
 
+    /**
+     * Stores maximum-size books that all share one maximum-size author (200 code points, the author of
+     * index 0) and have distinct maximum-size titles. This is the worst case of the duplicate scan: every
+     * row matches on the author, so the title key is computed for every row.
+     *
+     * @param repository the book store
+     * @param count how many books
+     */
+    public static void seedMaxSizeSharedAuthor(BookRepository repository, int count) {
+        List<Book> batch = new ArrayList<>(BATCH);
+        for (int index = 0; index < count; index++) {
+            batch.add(new Book(idOf(index), maxTitle(index), maxAuthor(0), BookStatus.UNREAD, null,
+                    addedAt(index), null));
+            if (batch.size() == BATCH) {
+                repository.saveAll(batch);
+                batch.clear();
+            }
+        }
+        repository.saveAll(batch);
+    }
+
     private static void seed(BookRepository repository, int count, boolean maxSize) {
         List<Book> batch = new ArrayList<>(BATCH);
         for (int index = 0; index < count; index++) {
