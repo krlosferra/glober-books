@@ -100,3 +100,15 @@ The cold 928 ms is the worst figure seen, a margin of about 2.2 times against th
 - Concurrency (C-11 c, 50 parallel adds) is not in this chunk; the count and scan share one transaction but SQLite single-writer behaviour under load is for the task that owns C-11 c.
 - The cold figure of 928 ms depends on the machine; Task 41 records the figures on the reference machine.
 - A status row for 23a/23b in `status.md` is for the orchestrator.
+
+## Follow-up round (handoffs 130 and 131)
+- F-4: in this delivery "cold" means the first request in the JVM of that test run (the first duplicate in `AddBoundIntegrationTest`, 928 ms).
+- F-1 (condition) done: `support/LibrarySeeder.seedMaxSizeSharedAuthor` and `AddBoundWorstCaseIntegrationTest`: 4,999 books with the same 200-code-point author and distinct 500-code-point titles, so the scan computes a title key for every row. Real port, `System.nanoTime`, 4 CPUs, Linux amd64, Java 21.0.12.1. The class ran after `AddBoundIntegrationTest` in the same JVM, so it is not the first request of the JVM (the JIT was warm from the earlier class); the numbers are the first and second round of this class.
+  | Round | Non-matching add | Duplicate of first / middle / last |
+  |---|---|---|
+  | 1 | 201 in 442 ms | 409 in 237 / 218 / 239 ms |
+  | 2 | 201 in 150 ms | 409 in 151 / 156 / 152 ms |
+  All under 2 s; the bound held, no schema change. Security's 1.64 s cold figure on its machine (first request in a fresh JVM) is the case to record on the reference machine in Task 41.
+- F-2/F-3 and the Security nit: `BookKeyRow` Javadoc now says Spring Data class-based projection; the plan wording needs the same amendment (noted in progress.md).
+- SEC-F-166, 167, 168 and the BR-009 validation-before-capacity PM question are carried as notes in progress.md; no code.
+- Build: `./mvnw clean verify` BUILD SUCCESS; 693 unit and 186 integration tests, 0 failures, 1 pre-existing skip.
