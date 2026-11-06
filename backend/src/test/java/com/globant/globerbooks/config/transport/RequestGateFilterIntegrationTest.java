@@ -167,7 +167,7 @@ class RequestGateFilterIntegrationTest {
 
     @Test
     void unexpectedExceptionAndXmlAcceptAnswerJsonWithHeaders() throws IOException {
-        when(service.list()).thenThrow(new IllegalStateException("secret user text"));
+        when(service.list(null)).thenThrow(new IllegalStateException("secret user text"));
         String boom = get("/api/v1/books", "Accept: application/json");
         row("forced exception, Accept application/json", boom);
         assertStatus(boom, 500, "INTERNAL_ERROR");

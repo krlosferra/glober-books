@@ -166,7 +166,7 @@ class BookServiceTest {
     void listsInRepositoryOrderWithEmptyAsEmptyList() {
         when(repository.findAllByOrderByDateAddedDescIdAsc()).thenReturn(List.of());
 
-        assertThat(service.list()).isEmpty();
+        assertThat(service.list(null)).isEmpty();
     }
 
     @Test
@@ -177,13 +177,29 @@ class BookServiceTest {
                 Instant.parse("2026-02-18T10:00:00.000Z"), null);
         when(repository.findAllByOrderByDateAddedDescIdAsc()).thenReturn(List.of(first, second));
 
-        assertThat(service.list()).extracting(BookResponse::title).containsExactly("T2", "T1");
+        assertThat(service.list(null)).extracting(BookResponse::title).containsExactly("T2", "T1");
+    }
+
+    @Test
+    void listWithAStatusUsesTheFilteredQueryInTheSameOrder() {
+        Book reading = new Book("00000000-0000-4000-8000-00000000000a", "T", "A", BookStatus.READING, null,
+                Instant.parse("2026-02-19T10:00:00.000Z"), null);
+        when(repository.findByStatusOrderByDateAddedDescIdAsc(BookStatus.READING)).thenReturn(List.of(reading));
+
+        assertThat(service.list("reading")).extracting(BookResponse::status).containsExactly("reading");
+        verify(repository, never()).findAllByOrderByDateAddedDescIdAsc();
+    }
+
+    @Test
+    void listRejectsAStatusThatIsNotOneOfTheThreeValues() {
+        assertThatThrownBy(() -> service.list("Reading")).isInstanceOfSatisfying(BookValidationException.class,
+                thrown -> assertThat(thrown.code()).isEqualTo(ErrorCode.INVALID_STATUS));
     }
 
     @Test
     void addIsTransactionalAndListIsReadOnlyTransactional() throws NoSuchMethodException {
         Method create = BookService.class.getMethod("create", CreateBookRequest.class);
-        Method list = BookService.class.getMethod("list");
+        Method list = BookService.class.getMethod("list", String.class);
 
         assertThat(create.getAnnotation(Transactional.class).readOnly()).isFalse();
         assertThat(list.getAnnotation(Transactional.class).readOnly()).isTrue();

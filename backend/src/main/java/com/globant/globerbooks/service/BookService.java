@@ -88,14 +88,21 @@ public class BookService {
     }
 
     /**
-     * Lists all books, newest first, ties by id. Read-only; the list is returned after the
-     * transaction ends.
+     * Lists the books, newest first, ties by id (BR-010), optionally of one status. Read-only; the list
+     * is returned after the transaction ends. The library holds at most 5,000 books, so the list does too.
      *
+     * @param status the exact wire status to keep, or null for every book
      * @return the books as responses, possibly empty
+     * @throws BookValidationException {@code INVALID_STATUS} when the status is not one of the three values
      */
     @Transactional(readOnly = true)
-    public List<BookResponse> list() {
-        return repository.findAllByOrderByDateAddedDescIdAsc().stream().map(BookResponse::from).toList();
+    public List<BookResponse> list(String status) {
+        if (status == null) {
+            return repository.findAllByOrderByDateAddedDescIdAsc().stream().map(BookResponse::from).toList();
+        }
+        BookStatus wanted = BookStatus.fromWire(status).orElseThrow(() -> new BookValidationException(
+                ErrorCode.INVALID_STATUS, List.of(new FieldProblem("status", STATUS_MESSAGE))));
+        return repository.findByStatusOrderByDateAddedDescIdAsc(wanted).stream().map(BookResponse::from).toList();
     }
 
     /** One query for the key columns; the incoming key is computed once, stored rows from stored text. */
