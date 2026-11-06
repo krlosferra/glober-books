@@ -66,6 +66,30 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Maps a service exception that carries a code to its code and status.
+     *
+     * @param failure the service exception
+     * @return the envelope without details
+     */
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorBody> handleApi(ApiException failure) {
+        return respond(failure.code());
+    }
+
+    /**
+     * Maps a duplicate add to {@code 409 DUPLICATE_BOOK} with {@code details.existing_book}.
+     *
+     * @param failure the duplicate exception holding the earliest match
+     * @return the envelope whose details hold exactly one book
+     */
+    @ExceptionHandler(DuplicateBookException.class)
+    public ResponseEntity<DuplicateErrorBody> handleDuplicate(DuplicateBookException failure) {
+        return ResponseEntity.status(failure.status())
+                .header(HttpHeaders.CONTENT_TYPE, JSON_UTF8.toString())
+                .body(DuplicateErrorBody.of(factory.create(failure.code()), failure.existingBook()));
+    }
+
+    /**
      * Maps a failed Bean Validation check of the body: one entry per failing field ordered title,
      * author, status; {@code INVALID_STATUS} when only {@code status} fails (BR-012 step 6), else
      * {@code VALIDATION_ERROR}. Only messages from the fixed list pass; none echoes the value.
