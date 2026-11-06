@@ -34,7 +34,7 @@ import java.util.Set;
  * Between the check and the open of the file by the database driver a local attacker who can write
  * to the parent directory could swap the file. The identity remembered in {@link Guarded} narrows
  * this window by comparing device and inode after the pool opens, but it cannot close it, and the
- * remaining race cannot be tested without a test-only switch (A-09). The data directory is mode
+ * remaining race cannot be tested without a switch that exists only for tests (A-09). The data directory is mode
  * 0700 and owned by the user, which removes the attacker except the same user or root.
  */
 public final class DataDirectoryGuard {
