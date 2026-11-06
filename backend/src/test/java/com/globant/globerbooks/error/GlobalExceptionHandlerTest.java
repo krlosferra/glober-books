@@ -2,6 +2,7 @@ package com.globant.globerbooks.error;
 
 import com.globant.globerbooks.config.transport.RouteTable;
 import com.globant.globerbooks.config.transport.StaticAssetCatalog;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -203,5 +204,66 @@ class GlobalExceptionHandlerTest {
         mvc.perform(post("/probe/typed").contentType(MediaType.TEXT_PLAIN))
                 .andExpect(status().isUnsupportedMediaType())
                 .andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_TYPE"));
+    }
+
+    /** Controller whose actions raise the service exceptions. */
+    @RestController
+    @RequestMapping("/probe/service")
+    static class Failing {
+        @GetMapping("/api")
+        String api() {
+            throw new ApiException(ErrorCode.LIBRARY_FULL);
+        }
+
+        @GetMapping("/duplicate")
+        String duplicate() {
+            throw new DuplicateBookException(new com.globant.globerbooks.domain.Book(
+                    "3f2b8c1e-5a4d-4e6f-9b7a-1c2d3e4f5a6b", "Clean Code", "Robert Martin",
+                    com.globant.globerbooks.domain.BookStatus.UNREAD, null,
+                    Instant.parse("2026-02-19T10:00:00.000Z"), null));
+        }
+    }
+
+    private MockMvc failingMvc() {
+        tools.jackson.databind.json.JsonMapper mapper = tools.jackson.databind.json.JsonMapper.builder()
+                .propertyNamingStrategy(tools.jackson.databind.PropertyNamingStrategies.SNAKE_CASE).build();
+        return MockMvcBuilders.standaloneSetup(new Failing())
+                .setMessageConverters(
+                        new org.springframework.http.converter.json.JacksonJsonHttpMessageConverter(mapper))
+                .setControllerAdvice(new GlobalExceptionHandler(factory, routes)).build();
+    }
+
+    @Test
+    void apiExceptionBecomesItsCodeAndStatusWithoutDetails() throws Exception {
+        failingMvc().perform(get("/probe/service/api"))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(JSON_UTF8))
+                .andExpect(content().string("{\"error\":\"The library is full.\",\"code\":\"LIBRARY_FULL\","
+                        + "\"timestamp\":\"2026-02-19T10:00:00.123Z\"}"));
+    }
+
+    @Test
+    void duplicateExceptionGives409WithExactlyOneExistingBookInTheSpecBody() throws Exception {
+        failingMvc().perform(get("/probe/service/duplicate"))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(JSON_UTF8))
+                .andExpect(content().string("{\"error\":\"A book with the same title and author already exists.\","
+                        + "\"code\":\"DUPLICATE_BOOK\",\"timestamp\":\"2026-02-19T10:00:00.123Z\","
+                        + "\"details\":{\"existing_book\":{\"id\":\"3f2b8c1e-5a4d-4e6f-9b7a-1c2d3e4f5a6b\","
+                        + "\"title\":\"Clean Code\",\"author\":\"Robert Martin\",\"status\":\"unread\","
+                        + "\"rating\":null,\"date_added\":\"2026-02-19T10:00:00.000Z\","
+                        + "\"date_completed\":null}}}"));
+    }
+
+    @Test
+    void duplicateBodyHasNoMemberOfTypeObjectAndExceptionMessageIsTheCodeName() {
+        for (java.lang.reflect.RecordComponent component : DuplicateErrorBody.class.getRecordComponents()) {
+            assertThat(component.getType()).isNotEqualTo(Object.class);
+        }
+        for (java.lang.reflect.RecordComponent component : DuplicateErrorBody.Details.class.getRecordComponents()) {
+            assertThat(component.getType()).isEqualTo(com.globant.globerbooks.dto.BookResponse.class);
+        }
+        assertThat(new ApiException(ErrorCode.LIBRARY_FULL).getMessage()).isEqualTo("LIBRARY_FULL");
+        assertThat(new ApiException(ErrorCode.LIBRARY_FULL).status()).isEqualTo(409);
     }
 }
