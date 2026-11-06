@@ -31,5 +31,5 @@ Course modules are in `docs/course/` (modules 1 to 5). The BRD and exercise inst
 - Trunk-based: no direct commits to `main`; branch `<type>/task-NN-<slug>` per task; Conventional Commits `type(scope): subject [Task-N]`; squash merge; every merge into `main` goes through a pull request, and the Sponsor's approval of a task at its gate is the request to open and merge it (no pull request before that approval).
 
 ## Workflow rules
-- One task at a time; stop after each task and wait for approval.
+- One task at a time for implementation. Review and the Sponsor gate follow the task or its review chunk of 2 to 4 related, non-protected tasks (constitution 1.6, "Review chunks"); stop after each task or chunk and wait for approval.
 - Update `docs/sdd/progress.md` and any affected spec/plan/tasks in the same change as the code.
