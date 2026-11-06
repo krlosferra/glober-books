@@ -99,9 +99,9 @@ class RoutingIntegrationTest {
     }
 
     @Test
-    void e02IdPathsAreNotRoutesYetAndAnswerNotFoundUntilTask31() throws IOException {
-        expect(send("E-02 (spec 405, Task 31)", "GET", BOOKS + "/" + ID + "/status"), 404, "NOT_FOUND", null);
-        expect(send("E-02 (spec 405, Task 31)", "POST", BOOKS + "/" + ID, JSON), 404, "NOT_FOUND", null);
+    void e02WrongMethodOnAnIdPathIsMethodNotAllowedWithTheAllowOfThatPath() throws IOException {
+        expect(send("E-02", "GET", BOOKS + "/" + ID + "/status"), 405, "METHOD_NOT_ALLOWED", "PUT");
+        expect(send("E-02", "POST", BOOKS + "/" + ID, JSON), 405, "METHOD_NOT_ALLOWED", "DELETE, GET");
     }
 
     @Test

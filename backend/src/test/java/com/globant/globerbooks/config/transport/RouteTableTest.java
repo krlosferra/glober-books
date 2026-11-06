@@ -53,7 +53,7 @@ class RouteTableTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/api/v1/unknown", "/api/v1/books/", "/api/v1/books/" + BOOK_ID + "/",
-        "/api/v1/books/" + BOOK_ID + ";x=1", "/api/v1/books;x=1", "/api/v1/books.json", "/api/v1/books/x",
+        "/api/v1/books/" + BOOK_ID + ";x=1", "/api/v1/books;x=1", "/api/v1/books.json", "/api/v1/books/x/y",
         "/api/v1/%62ooks", "/api/v1/%42ooks", "/API/V1/BOOKS", "/api/v1/books/%2e%2e", "/api/v1/books/%2E%2e",
         "/api/v1/books/..", "/api/v1/./books", "//api/v1/books", "/api/v1//books", "/api/v1/books%2f",
         "/api/v1/books\\", "/index.html/", "/index.htm", "/css", "/css/", "/%69ndex.html", "/INDEX.HTML",
@@ -78,6 +78,41 @@ class RouteTableTest {
     @ValueSource(strings = {"HEAD", "OPTIONS", "PUT", "DELETE", "PATCH", "TRACE", "CONNECT", "get", "post", "FOO"})
     void answersMethodNotAllowedWithGetAndPostOnTheBookCollection(String method) {
         assertThat(decide("/api/v1/books", method)).isEqualTo(new Decision(Outcome.METHOD_NOT_ALLOWED, "GET, POST"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"GET", "DELETE"})
+    void findsGetAndDeleteOnOneBookWhateverTheIdSegmentLooksLike(String method) {
+        for (String id : new String[] {BOOK_ID, "not-a-uuid", "%33f2b", "UPPER"}) {
+            assertThat(decide("/api/v1/books/" + id, method).outcome()).as(id).isEqualTo(Outcome.FOUND);
+        }
+    }
+
+    @Test
+    void findsPutOnTheStatusOfOneBook() {
+        assertThat(decide("/api/v1/books/" + BOOK_ID + "/status", "PUT").outcome()).isEqualTo(Outcome.FOUND);
+        assertThat(decide("/api/v1/books/not-a-uuid/status", "PUT").outcome()).isEqualTo(Outcome.FOUND);
+    }
+
+    /** E-27 rows 1 and 2: route and method first, id format second. */
+    @Test
+    void decidesMethodBeforeTheIdFormat() {
+        assertThat(decide("/api/v1/books/not-a-uuid", "POST"))
+                .isEqualTo(new Decision(Outcome.METHOD_NOT_ALLOWED, "DELETE, GET"));
+        assertThat(decide("/api/v1/books/not-a-uuid/status", "GET"))
+                .isEqualTo(new Decision(Outcome.METHOD_NOT_ALLOWED, "PUT"));
+        assertThat(decide("/api/v1/books/" + BOOK_ID, "PUT").allow()).isEqualTo("DELETE, GET");
+        assertThat(decide("/api/v1/books/" + BOOK_ID + "/status", "DELETE").allow()).isEqualTo("PUT");
+    }
+
+    @Test
+    void holdsExactlyTheFiveApiRoutes() {
+        assertThat(table.routes()).containsEntry("/api/v1/books", Set.of("GET", "POST"))
+                .containsEntry("/api/v1/books/{id}", Set.of("DELETE", "GET"))
+                .containsEntry("/api/v1/books/{id}/status", Set.of("PUT"));
+        long apiRoutes = table.routes().entrySet().stream().filter(entry -> entry.getKey().startsWith("/api/"))
+                .mapToLong(entry -> entry.getValue().size()).sum();
+        assertThat(apiRoutes).isEqualTo(5);
     }
 
     @ParameterizedTest

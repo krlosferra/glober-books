@@ -5,8 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,6 +18,7 @@ import com.globant.globerbooks.config.transport.StaticAssetCatalog;
 import com.globant.globerbooks.dto.BookListResponse;
 import com.globant.globerbooks.dto.BookResponse;
 import com.globant.globerbooks.dto.CreateBookRequest;
+import com.globant.globerbooks.error.ApiException;
 import com.globant.globerbooks.error.ErrorBody.FieldProblem;
 import com.globant.globerbooks.error.ErrorBodyFactory;
 import com.globant.globerbooks.error.ErrorCode;
@@ -182,6 +185,89 @@ class BookControllerTest {
 
         verify(service).list("reading");
         verify(service).list(null);
+    }
+
+    @Test
+    void getReturns200WithTheBookAndPassesTheIdText() throws Exception {
+        when(service.get(STORED_ID)).thenReturn(STORED);
+
+        mvc.perform(get("/api/v1/books/" + STORED_ID).header("Host", HOST))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(JSON_UTF8))
+                .andExpect(jsonPath("$.id").value(STORED_ID))
+                .andExpect(jsonPath("$.title").value("Clean Code"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("\"rating\":null")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("\"date_completed\":null")));
+    }
+
+    @Test
+    void getMapsBookNotFoundTo404() throws Exception {
+        when(service.get(STORED_ID)).thenThrow(new ApiException(ErrorCode.BOOK_NOT_FOUND));
+
+        mvc.perform(get("/api/v1/books/" + STORED_ID).header("Host", HOST))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(JSON_UTF8))
+                .andExpect(jsonPath("$.code").value("BOOK_NOT_FOUND"))
+                .andExpect(jsonPath("$.details").doesNotExist());
+    }
+
+    private org.springframework.test.web.servlet.ResultActions putStatus(String body) throws Exception {
+        return mvc.perform(put("/api/v1/books/" + STORED_ID + "/status").header("Host", HOST)
+                .contentType(MediaType.APPLICATION_JSON).content(body));
+    }
+
+    @Test
+    void putStatusReturns200WithTheBookAndPassesIdAndStatus() throws Exception {
+        when(service.changeStatus(STORED_ID, "reading")).thenReturn(STORED);
+
+        putStatus("{\"status\":\"reading\"}")
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(JSON_UTF8))
+                .andExpect(jsonPath("$.id").value(STORED_ID));
+
+        verify(service).changeStatus(STORED_ID, "reading");
+    }
+
+    @Test
+    void putStatusRejectsAnInvalidValueWithTheFieldAndNoServiceCall() throws Exception {
+        for (String body : new String[] {"{\"status\":\"Completed\"}", "{\"status\":\"\"}",
+            "{\"status\":null}", "{}"}) {
+            putStatus(body).andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("INVALID_STATUS"))
+                    .andExpect(jsonPath("$.details[0].field").value("status"))
+                    .andExpect(jsonPath("$.details.length()").value(1));
+        }
+
+        verify(service, never()).changeStatus(any(), any());
+    }
+
+    @Test
+    void putStatusMapsServiceNotFoundTo404() throws Exception {
+        when(service.changeStatus(STORED_ID, "reading")).thenThrow(new ApiException(ErrorCode.BOOK_NOT_FOUND));
+
+        putStatus("{\"status\":\"reading\"}").andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("BOOK_NOT_FOUND"));
+    }
+
+    @Test
+    void deleteReturns200WithTheRemovedBook() throws Exception {
+        when(service.discard(STORED_ID)).thenReturn(STORED);
+
+        mvc.perform(delete("/api/v1/books/" + STORED_ID).header("Host", HOST)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(JSON_UTF8))
+                .andExpect(jsonPath("$.id").value(STORED_ID));
+    }
+
+    @Test
+    void deleteMapsBookNotFoundTo404() throws Exception {
+        when(service.discard(STORED_ID)).thenThrow(new ApiException(ErrorCode.BOOK_NOT_FOUND));
+
+        mvc.perform(delete("/api/v1/books/" + STORED_ID).header("Host", HOST)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("BOOK_NOT_FOUND"));
     }
 
     @Test
