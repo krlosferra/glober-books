@@ -1,0 +1,24 @@
+# Handoff 132: Task brief, Task 30 (book transitions and value types)
+- From: orchestrator (compact brief issued by the orchestrator to save usage; the Liaison audits against it)
+- To: java
+- Phase: 4   Round: 1
+- Type: TASK_BRIEF
+
+## Task
+Task 30 of `docs/sdd/tasks.md` (v0.6.1): read its text, criteria 1 to 3 and traces. Branch `feature/task-30-rating` is checked out (the header names `feature/task-30-book-transitions`; record the difference). Tasks 01 to 23b are merged. This task introduces a new input field (the rating), so it is a protected-surface task: reviewed alone (constitution 1.6). Read also: `spec.md` BR-002, BR-004, BR-007, BR-008, INV-1 to INV-4, US-006.3 to .5, US-007, the rating grammar in BR-012 step 5.0 and the rows T-17, T-18, T-31, T-32, T-37, Appendix A (`INVALID_RATING`, `INVALID_STATUS`); `plan.md` and `plan-appendix.md` (Book transitions, RatingValue, RatingRequest, StatusRequest, the "judged from token and text" rule); `constitution.md` Security Standards (strict parsing, no coercion), Persistence Standards (schema CHECKs), Code Style (300 lines); `security.md` SC-08, SC-31 and the Task 21 notes (SEC-F-159, SEC-F-161: MAX_TOKENS 64 and MAX_DEPTH 16 to be re-checked here); the existing `domain/Book`, `config/json/*` (JacksonConfig, StrictJsonBodyResolver, StrictStringDeserializer, StrictBooleanDeserializer), `dto/CreateBookRequest`.
+
+## Scope
+`domain/Book.java` (edit), `dto/RatingValue.java`, `dto/RatingRequest.java`, `dto/StatusRequest.java`, a literal deserializer for the rating under `config/json` or `dto` as the plan says, tests `BookTest` and `RatingValueDeserializerTest` (and a full-context strictness test, see 4). Out of scope: the endpoints themselves (Task 31), any new dependency, any change to `pom.xml` or `backend/config/**` (the resource folder), the schema (the CHECKs already exist: verify and say so).
+
+## Binding constraints
+1. Domain transitions (criteria 1 and 2): entering `completed` sets `date_completed` from the injected clock (never the system clock directly); leaving `completed` clears rating and `date_completed` together; a same-state change changes nothing (no date change, no rating change); a rating on a non-completed book is refused by the domain with the exception type the plan names (so the service maps it to `INVALID_RATING` or the spec's code, check BR-007); the schema CHECKs repeat the rule (verify they exist and that a direct violation fails).
+2. Rating literal (criterion 3), judged from the token and its text, not from a coerced number: valid 1, 2, 3, 4, 5; give `INVALID_RATING`: 0, 6, -0, 4.9, 5.0, 1e0, 1E1, `null`, `{}`, a 100-digit integer; `1e999999999` gives `INVALID_RATING` within 300 ms (no BigDecimal expansion); give `MALFORMED_REQUEST`: strings, `true`, arrays, objects, `01`, `+5`, `NaN`, `5.`, `.5`, `5e`, 101 digits. Expected codes come from the spec rows (T-17, T-18, T-31, T-32, T-37), not from the code; if two spec rows seem to disagree, STOP and report.
+3. `StatusRequest`: strict like Task 20/21 (a missing or `null` `status` member and a non-string are judged as the spec says: re-use the semantics of Task 20/21; do not invent new ones; report any spec gap). Unknown members are rejected by the strict mapper already.
+4. SEC-F-159 carried: slice tests do not exercise strict parsing, so prove the rating literal rules also through the real strict resolver in a full-context or unit test that uses `StrictJsonBodyResolver` (not only `RatingValueDeserializerTest` with a bare mapper). SEC-F-161 carried: re-check `MAX_TOKENS` 64 and `MAX_DEPTH` 16 against the rating bodies; if the values need to change, STOP and report (Security decides), do not change them silently.
+5. No logging of values; no user text in messages; all files at or under 300 lines; no `Object` typed members.
+
+## Evidence required (real output, in the delivery)
+`cd backend && ./mvnw clean verify` green; a table mapping every criterion and every spec row (T-17, T-18, T-31, T-32, T-37, BR-004, BR-007, BR-008, US-006.3 to .5) to tests; a table of the rating literal inputs with the observed code and the elapsed ms for the `1e999999999` case; the confirmation of the schema CHECKs; real line coverage of the new classes; `git diff --stat origin/main..HEAD` and `git log origin/main..HEAD --format='%an <%ae>%n%B---'` pasted inside the delivery file.
+
+## Rules
+STOP and report on any spec gap or any Jackson 3 / Boot 4.1.2 behaviour that differs from the plan. Commit after each finished step (`type(scope): subject [Task-30]`), local commits only, explicit paths, never `--no-verify`, nothing naming a tool, model or vendor as author or co-author, never session links or trailers. Update `docs/sdd/progress.md` in the same change. Write the delivery as `docs/sdd/handoffs/133-java-to-liaison-task-30-delivery.md` early with a "Resume point" section (done / next) kept updated so nothing is lost if you are cut off.
