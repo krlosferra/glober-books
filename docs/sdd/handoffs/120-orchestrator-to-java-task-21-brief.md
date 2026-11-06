@@ -1,0 +1,25 @@
+# Handoff 120: Task brief, Task 21 (strict body reading and parser limits)
+- From: orchestrator (compact brief issued by the orchestrator to save usage; the Liaison audits against it)
+- To: java
+- Phase: 4   Round: 1
+- Type: TASK_BRIEF
+
+## Task
+Task 21 of `docs/sdd/tasks.md` (v0.6.1): read its text, criteria 1 to 4 and traces. Branch `feature/task-21-strict-body` is checked out; Tasks 01 to 20 are merged. The task header names the branch `feature/task-21-strict-json`; keep the checked-out name and record the difference. Read also: `spec.md` BR-012 steps 4 and 5 and 5.0 (strict parsing), BR-006 item 1 and the lone-surrogate rule (DEC-027), US-001.6, Appendix D rows and tests T-04, T-05, T-11, T-16, T-21, T-27 to T-31, T-39; `plan.md` and `plan-appendix.md` (JacksonConfig, StrictJsonBodyResolver, StrictStringDeserializer, WebMvcConfig, the Jackson 3 switch list); `constitution.md` Security Standards (Jackson strictness, request limits, no echo of body content) and Code Style (300 lines); `security.md` SC-08, SC-31, SEC-F-122 and the Jackson-related findings; the existing `BoundedBodyRequest` (the gate already buffers the body and caps it at 16 KiB), `dto/CreateBookRequest` with its nested `StatusDeserializer`, `error/GlobalExceptionHandler`.
+
+## Scope
+`config/json/JacksonConfig.java`, `config/json/StrictJsonBodyResolver.java`, `config/json/StrictStringDeserializer.java`, `config/WebMvcConfig.java`, tests `JacksonStrictnessTest` and `StrictJsonBodyResolverTest`. Out of scope: text rules (Task 20 exists), duplicate keys of books, the rating field, any new dependency, any change to `pom.xml` or `backend/config/**` (the resource folder).
+
+## Binding constraints
+1. Decode the buffered body with a reporting UTF-8 decoder (malformed or unmappable input is an error, never replaced) and parse strictly; every failure gives `400 MALFORMED_REQUEST` with the fixed message, never the parser message, never any body content (SC-31).
+2. Criterion 1 inputs (invalid UTF-8, BOM, comments, trailing comma, single quotes, unquoted names, raw control character in a string, trailing content, zero-byte body, non-object value) and criterion 2 inputs (unpaired surrogate escape or a pair in the wrong order, unknown member, duplicate member including after unescaping, wrong type, `allow_duplicate` as `"true"`, `1`, `null`) each have a test row with the spec's expected status and code. Expected values come from the spec, not from the code.
+3. SEC-F-122 (carried from Task 20): scalar coercion must be off. `{"title":5,"author":"b"}` must give `400 MALFORMED_REQUEST` (it returns 201 today); `"status":5` and `"status":true` give `MALFORMED_REQUEST`, not `INVALID_STATUS`. Task 20's behaviour stays: an absent `status` is `unread` and an explicit `null` status is `INVALID_STATUS`; keep the nested `StatusDeserializer` semantics or move it into `StrictStringDeserializer` without changing these results (re-run the Task 20 tests). A `null` title or author keeps its BR-006 meaning (required).
+4. Criterion 3: a string up to the 16 KiB cap is a length error (`VALIDATION_ERROR`), not a parse error (T-11); deep nesting and huge exponents answer within 300 ms and never `500` (T-31). Set the Jackson read constraints low (nesting depth, string length, number length, name length, token count where available) with values from `plan.md`; if the plan gives none, choose the smallest that satisfies T-11 and say so in the delivery.
+5. Criterion 4: every Jackson 3 switch is proved effective by its own test (disable the switch in the test and show the test fails, or use a mutation-style pair); a property name the framework does not recognize is corrected and reported: if a configured key does not exist in the pinned Jackson, stop and report, never leave a silently ignored setting.
+6. No logging of body content or parser messages. No new error code. All files at or under 300 lines.
+
+## Evidence required (real output, in the delivery)
+`cd backend && ./mvnw clean verify` green; a table of criteria and spec rows (T-04, T-05, T-11, T-16, T-21, T-27 to T-31, T-39) to tests; a real-port table for at least: invalid UTF-8, BOM, trailing comma, duplicate member after unescaping, `\uD800`, title as a number, `status` as a number, a 16 KiB string, 10,000-level nesting, a huge exponent (status, code, elapsed ms); the list of Jackson switches with the test that proves each; real line coverage of the new classes; `git diff --stat origin/main..HEAD` and `git log origin/main..HEAD --format='%an <%ae>%n%B---'` pasted inside the delivery file.
+
+## Rules
+STOP and report on any spec gap, any Jackson 3 or Boot 4.1.2 behaviour that differs from the plan, and any need for a new dependency. Commit after each finished step (`type(scope): subject [Task-21]`), local commits only, explicit paths, never `--no-verify`, nothing naming a tool, model or vendor as author or co-author, never session links or trailers. Update `docs/sdd/progress.md` in the same change. Write the delivery as `docs/sdd/handoffs/121-java-to-liaison-task-21-delivery.md` early with a "Resume point" section (done / next) kept updated so nothing is lost if you are cut off.
