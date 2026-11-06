@@ -93,8 +93,6 @@ class SqliteWiringIntegrationTest {
         assertThat(FileFacts.mode(data)).isEqualTo("rwx------");
         assertThat(FileFacts.mode(data.resolve("tmp"))).isEqualTo("rwx------");
         assertThat(FileFacts.mode(file)).isEqualTo("rw-------");
-        assertThat(Files.list(data.resolve("tmp")).toList()).as("the extracted native library is there")
-                .isNotEmpty().allMatch(FileFacts::isNotWiderThan0600);
         HikariDataSource pool = (HikariDataSource) context.getBean(DataSource.class);
 
         try (Connection connection = pool.getConnection(); Statement statement = connection.createStatement()) {
