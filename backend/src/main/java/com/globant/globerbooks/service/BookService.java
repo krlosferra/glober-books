@@ -18,15 +18,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Use cases for books. Each public method is one transaction. Task 07 holds only the thin checks
- * of title, author and status; the text policy (Tasks 18 to 20) and the duplicate and capacity
- * rules (Task 23a) come later. This class never logs request data.
+ * Use cases for books. Each public method is one transaction. The service repeats the text policy
+ * and the status check of the request (defence in depth); the duplicate and capacity rules
+ * (Task 23a) come later. This class never logs request data.
  */
 @Service
 public class BookService {
 
-    static final int TITLE_MAX = 500;
-    static final int AUTHOR_MAX = 200;
+    private static final String STATUS_MESSAGE = "must be one of: unread, reading, completed";
 
     private final BookRepository repository;
     private final Clock clock;
@@ -54,11 +53,11 @@ public class BookService {
      */
     @Transactional
     public BookResponse create(CreateBookRequest request) {
-        String title = request.title() == null ? "" : request.title().strip();
-        String author = request.author() == null ? "" : request.author().strip();
         BookStatus status = request.status() == null
                 ? BookStatus.UNREAD : BookStatus.fromWire(request.status()).orElse(null);
-        check(title, author, status);
+        check(request, status);
+        String title = TextPolicy.normalize(request.title());
+        String author = TextPolicy.normalize(request.author());
         Instant now = clock.instant().truncatedTo(ChronoUnit.MILLIS);
         Instant completed = status == BookStatus.COMPLETED ? now : null;
         Book book = new Book(idSupplier.get().toString(), title, author, status, null, now, completed);
@@ -76,16 +75,12 @@ public class BookService {
         return repository.findAllByOrderByDateAddedDescIdAsc().stream().map(BookResponse::from).toList();
     }
 
-    private static void check(String title, String author, BookStatus status) {
+    private static void check(CreateBookRequest request, BookStatus status) {
         List<FieldProblem> problems = new ArrayList<>();
-        if (outOfRange(title, TITLE_MAX)) {
-            problems.add(new FieldProblem("title", "must be between 1 and 500 characters"));
-        }
-        if (outOfRange(author, AUTHOR_MAX)) {
-            problems.add(new FieldProblem("author", "must be between 1 and 200 characters"));
-        }
+        addTextProblem(problems, "title", request.title(), TextPolicy.TITLE_MAX);
+        addTextProblem(problems, "author", request.author(), TextPolicy.AUTHOR_MAX);
         if (status == null) {
-            problems.add(new FieldProblem("status", "must be one of: unread, reading, completed"));
+            problems.add(new FieldProblem("status", STATUS_MESSAGE));
         }
         if (problems.isEmpty()) {
             return;
@@ -95,8 +90,8 @@ public class BookService {
                 onlyStatus ? ErrorCode.INVALID_STATUS : ErrorCode.VALIDATION_ERROR, problems);
     }
 
-    private static boolean outOfRange(String text, int max) {
-        int length = text.codePointCount(0, text.length());
-        return length < 1 || length > max;
+    private static void addTextProblem(List<FieldProblem> problems, String field, String raw, int max) {
+        TextPolicy.check(raw, max).ifPresent(
+                problem -> problems.add(new FieldProblem(field, BookValidationException.messageFor(problem, max))));
     }
 }

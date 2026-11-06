@@ -148,7 +148,7 @@ class BookApiIntegrationTest {
 
         assertThat(response.statusCode()).isEqualTo(400);
         assertThat(response.body()).contains("\"code\":\"VALIDATION_ERROR\"")
-                .contains("\"details\":[{\"field\":\"title\",\"message\":\"must be between 1 and 500 characters\"}]");
+                .contains("\"details\":[{\"field\":\"title\",\"message\":\"must not be empty\"}]");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM books", Integer.class)).isZero();
     }
 
