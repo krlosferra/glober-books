@@ -1,21 +1,21 @@
 # GloberBooks Task Backlog
 
 - Owner: PM (`sdd-product-manager`)
-- Version: 0.6.1
-- Last updated: 2026-11-05
+- Version: 0.6.2
+- Last updated: 2026-11-06
 - Status: Draft (Phase 3, round 3 of 3, final edits). Round 1 findings (handoffs 025, 026) were resolved in 0.4 and the round 2 findings (handoffs 031, 032) in 0.5; the answers by finding number are in handoff 027 (sections 2 and "Round 3"). Definitions only: task state lives in `status.md`.
 - Inputs: `delivery-strategy.md` v1.0, `spec.md` v0.4.3 (draft change requests CR-1 to CR-9 on top of the approved 0.4.1), `constitution.md` 1.1, `security.md`, `plan.md` and `plan-appendix.md` 0.2, handoff 022 (lean backend plan, tasks B01 to B27) and handoff 021 (frontend plan, candidates F0.1 to F4.3).
 - Sponsor decisions applied. 2026-10-30: spec frozen except change requests; Increment 4 is P1 hardening; Increment 0 is a thin walking skeleton; SQLite uses the default rollback journal with exclusive locking (no WAL) and the schema of the plan; static content by our own controller; `TRACE` answered by the container with a pre-application `405`. 2026-11-02: the full P0 scope is accepted against the indicative 6 to 8 h (the figure accepted was about 32 h of task time; section 1 shows the figure after the splits of round 2 and asks the Sponsor to confirm it); Increment 0 is split into 0a (Tasks 01 to 08) and 0b (Tasks 09 to 14), with tag `v0.1` after Task 08 and `v0.2` after Task 14; Tasks 49 and 50 run before the release tag; the accessibility checker runs in tests only and the application CSP is never relaxed; change requests CR-1 to CR-9 go to review.
 
 ## 0. How to read this backlog
 
-**Numbering.** Tasks are numbered 01 to 53 in build order; a task that was split in round 2 carries a letter (03a, 03b, 23a, 23b, 34a, 34b) so that no other number changes. Since 0.6 (Sponsor decision of 2026-11-05, option B of section 9) four pairs are merged and titled with both numbers: Task 18+19, Task 39+40, Task 41+42 and Task 49+50. Both numbers stay visible, every reference to a merged number points to the merged task, and the branch carries both numbers (for example `feature/task-18-19-text-policy`). A merged task waives the 45-minute limit (its estimate is the sum and it is flagged "long task"), but not the files rule. **A merged task that overruns is split back into its two original tasks at the point of the overrun; nothing is extended.** Branch `<type>/task-NN-<slug>`, commit `type(scope): subject [Task-N]` (`git-workflow.md`; `test/` branches contain tests only, anything that ships configuration, a README or documents uses `chore/`, `feature/` or `docs/`; the `progress.md` note every task updates is exempt on every branch). The architects' ids are kept as "Source: Bnn" and "Source: Fn.n". The constitution's "Task 1" is Increment 0 as a whole (Tasks 01 to 14); section 8 maps each Task 1 proof to its task.
+**Numbering.** Tasks are numbered 01 to 53 in build order; a task that was split in round 2 carries a letter (03a, 03b, 23a, 23b, 31a, 31b, 34a, 34b) so that no other number changes. Since 0.6 (Sponsor decision of 2026-11-05, option B of section 9) four pairs are merged and titled with both numbers: Task 18+19, Task 39+40, Task 41+42 and Task 49+50. Both numbers stay visible, every reference to a merged number points to the merged task, and the branch carries both numbers (for example `feature/task-18-19-text-policy`). A merged task waives the 45-minute limit (its estimate is the sum and it is flagged "long task"), but not the files rule. **A merged task that overruns is split back into its two original tasks at the point of the overrun; nothing is extended.** Branch `<type>/task-NN-<slug>`, commit `type(scope): subject [Task-N]` (`git-workflow.md`; `test/` branches contain tests only, anything that ships configuration, a README or documents uses `chore/`, `feature/` or `docs/`; the `progress.md` note every task updates is exempt on every branch). The architects' ids are kept as "Source: Bnn" and "Source: Fn.n". The constitution's "Task 1" is Increment 0 as a whole (Tasks 01 to 14); section 8 maps each Task 1 proof to its task.
 
 **Release scope.** The exercise release is Increments 0 to 3 plus Task 49+50 (Sponsor decision of 2026-11-02). Within the release, Task 48 (documentation) is built after Task 49+50 even though it is numbered earlier; Tasks 51 to 53 follow the tag, time permitting.
 
 **Files rule (accepted from 022, question L-1).** A task lists at most 4 production and resource entries it creates or edits; its own tests are listed separately ("Tests:") and belong to the task. An entry is one file or a group of closely coupled files in one folder; the build files and the generated Maven wrapper count as one entry. PM remark: the rule hides test volume, so the 45-minute estimate is the binding limit; a task that overruns it is split, never extended. In every task the first failed spike or the first unplanned fixture problem stops the task for a split. The same rule applies to the frontend.
 
-**Estimates** are agent working minutes for build plus own tests, excluding Liaison and Security reviews and the Sponsor gate. Tasks 01, 03a, 06, 08, 14, 16, 21, 31 and 34b are at the ceiling (plan N-6). **Tier** is P0, P1 or P2; section 7 is the tier register and is the single authority (the appendix of the plan is regenerated from it).
+**Estimates** are agent working minutes for build plus own tests, excluding Liaison and Security reviews and the Sponsor gate. Tasks 01, 03a, 06, 08, 14, 16, 21 and 34b are at the ceiling (plan N-6). **Tier** is P0, P1 or P2; section 7 is the tier register and is the single authority (the appendix of the plan is regenerated from it).
 
 **Parallelism.** The contract in `spec.md` is final for every clause the frontend uses, so frontend tasks may start before the backend tasks they are tested against; a frontend E2E task starts only when the backend tasks it lists are merged. Backend and frontend tasks never edit the same files.
 
@@ -31,17 +31,17 @@
 |---|---|---|---|---|---|
 | 0 Walking skeleton | 15 (01 to 14, 03a/03b) | 10 | 5 | 625 min, about 10.4 h | about 7.8 h |
 | 1 Core library | 15 (15 to 29 with 18+19 merged, 23a/23b) | 9 | 6 | 660 min, 11 h | about 7.6 h |
-| 2 Progress, rating, durability | 11 (30 to 40 with 39+40 merged, 34a/34b) | 6 | 5 | 460 min, about 7.7 h | about 4.8 h |
+| 2 Progress, rating, durability | 12 (30 to 40 with 39+40 merged, 31a/31b, 34a/34b) | 7 | 5 | 495 min, about 8.25 h | about 4.8 h (not recomputed at 0.6.2) |
 | 3 Interface quality and release gate | 7 (41 to 48 with 41+42 merged) | 1 | 6 | 310 min, about 5.2 h | about 4 h |
-| Increments 0 to 3 | 48 | 26 | 22 | 2,055 min, about 34.3 h | about 24 h |
+| Increments 0 to 3 | 49 | 27 | 22 | 2,090 min, about 34.8 h | about 24 h |
 | Release gate Task 49+50 | 1 | 1 | 0 | 90 min, 1.5 h (long task) | about 1.5 h |
-| **Exercise release** | **49** | **27** | **22** | **2,145 min, about 35.75 h** | **about 25.5 h** |
+| **Exercise release** | **50** | **28** | **22** | **2,180 min, about 36.3 h** | **about 25.5 h** |
 | After the tag: Tasks 51 to 53 | 3 | 1 | 2 | 120 min, 2 h | about 1.5 h |
-| All | 52 | 28 | 24 | 2,265 min, about 37.75 h | |
+| All | 53 | 29 | 24 | 2,300 min, about 38.3 h | |
 
 Merged tasks (0.6, estimate is the sum, all flagged long tasks): Task 18+19 = 90 min, Task 39+40 = 70 min, Task 41+42 = 75 min, Task 49+50 = 90 min. Effort does not shrink; the number of review cycles does (four fewer).
 
-Backend work in the release is 1,240 minutes (about 20.7 h: 1,150 minutes, 19.2 h, for Increments 0 to 3 plus 90 minutes, 1.5 h, for Task 49+50); frontend is 905 minutes (15.1 h). With the architect's rework allowance of about 25% the backend is about 26 h and the whole release about 45 h of task time. These are the figures the Sponsor is asked to confirm; the sums of the per-task estimates are the only source.
+Backend work in the release is 1,275 minutes (about 21.25 h: 1,185 minutes, 19.75 h, for Increments 0 to 3 plus 90 minutes, 1.5 h, for Task 49+50; Task 31 became 31a and 31b in 0.6.2, 80 minutes instead of 45); frontend is 905 minutes (15.1 h). With the architect's rework allowance of about 25% the backend is about 26 h and the whole release about 45 h of task time. These are the figures the Sponsor is asked to confirm; the sums of the per-task estimates are the only source.
 
 Findings the Sponsor must see:
 1. **Budget.** On 2026-11-02 the Sponsor accepted the full P0 scope against the indicative 6 to 8 h, with about 32 h of task time for Increments 0 to 3 and about 21 h of backend work in view. After round 2 the release figures are 35.75 h (release scope) and 20.7 h (backend), because three tasks were split on the Liaison's and Security's findings (03, 23, 34), Task 31 and Task 42 gained work, and Tasks 49 and 50 joined the release (since 0.6 merged into Task 49+50). The increase is about 12% on the task time of the release scope. The PM asks the Sponsor to confirm the new figure; planning cannot reduce it, only scope can.
@@ -242,7 +242,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
   1. Unknown paths, trailing slash, suffix, `;`, encoded variants of fixed segments and encoded dot segments give `404 NOT_FOUND`; HEAD, OPTIONS and other methods on a defined path give `405` (E-01 to E-03, E-05, E-17, E-24 rows 2 and 3, E-27).
   2. Every `405` carries `Allow` with exactly the defined methods and never HEAD or OPTIONS (E-29).
   3. `Accept: text/xml` gives `406`; absent, empty, `*/*`, `application/json` give `200`; error bodies stay JSON (E-06).
-  4. The route table holds the routes that exist at this task (`POST` and `GET /api/v1/books`, `/`, `/index.html` and the static paths); `RouteTableTest` enumerates the controllers' mappings and fails on any difference. Task 31 extends the table with the five endpoints it adds (X-11, SC-18, SC-40).
+  4. The route table holds the routes that exist at this task (`POST` and `GET /api/v1/books`, `/`, `/index.html` and the static paths); `RouteTableTest` enumerates the controllers' mappings and fails on any difference. Tasks 31a and 31b extend the table with the five endpoints they add (three and two) (X-11, SC-18, SC-40).
 - Traces: 5.0 routing, methods, Accept, BR-012 step 2.
 
 ### Task 16: Query, id and empty-body rules; transport limits
@@ -283,7 +283,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: BR-006 items 1 to 6d, DEC-029, SC-16.
 
 ### Task 20: Validation wiring and field-error mapping
-- Source: B15 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 18+19, 06, 07 | Security: per task | Branch: `feature/task-20-validation-wiring`
+- Source: B15 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 18+19, 06, 07 | Security: per task | Branch: `feature/task-20-validation`
 - Description: Wire the text policy into Bean Validation without expression language and choose `VALIDATION_ERROR`, `INVALID_STATUS` or `INVALID_RATING` by BR-012 step 6; the service repeats the checks.
 - Production: (1) `config/BookText.java`; (2) `config/ValidatorConfig.java`; (3) `error/GlobalExceptionHandler.java` (edit); (4) `dto/CreateBookRequest.java` (edit). Tests: `BookTextTest`, `GlobalExceptionHandlerTest` (edit).
 - Acceptance criteria:
@@ -294,7 +294,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: US-001.4 to .6, .10, BR-001, BR-012 step 6.
 
 ### Task 21: Strict body reading and parser limits
-- Source: B16 | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 07 | Security: per task | Branch: `feature/task-21-strict-json`
+- Source: B16 | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 07 | Security: per task | Branch: `feature/task-21-strict-body`
 - Description: Decode the buffered body with a reporting UTF-8 decoder and parse it strictly, mapping every failure to `MALFORMED_REQUEST` within 300 ms under low read constraints.
 - Production: (1) `config/json/JacksonConfig.java`; (2) `config/json/StrictJsonBodyResolver.java`; (3) `config/json/StrictStringDeserializer.java`; (4) `config/WebMvcConfig.java`. Tests: `JacksonStrictnessTest`, `StrictJsonBodyResolverTest`.
 - Acceptance criteria:
@@ -305,7 +305,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: 5.0 strict parsing, BR-012 step 5, SC-31, T-04, T-05, T-16, T-21, T-27 to T-31, T-39.
 
 ### Task 22: Duplicate key and service exceptions
-- Source: B17 | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 18+19, 04, 05, 06 | Security: per task | Branch: `feature/task-22-duplicate-key`
+- Source: B17 | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 18+19, 04, 05, 06 | Security: per task | Branch: `feature/task-22-duplicates`
 - Description: Implement the BR-003 key, the service exceptions with the duplicate body and their mapping by the advice.
 - Production: (1) `service/DuplicateKey.java`; (2) `error/ApiException.java` and `error/DuplicateBookException.java`; (3) `error/DuplicateErrorBody.java`; (4) `error/GlobalExceptionHandler.java` (edit). Tests: `DuplicateKeyTest`, a case in `GlobalExceptionHandlerTest`.
 - Acceptance criteria:
@@ -316,7 +316,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: BR-003, US-004.5, T-40, Appendix A.
 
 ### Task 23a: Add rules (capacity and duplicates)
-- Source: B18 (first part) | Layer: backend | Tier: P0 | Estimate: 45 | Depends on: 20, 21, 22 | Security: per task | Branch: `feature/task-23a-add-rules`
+- Source: B18 (first part) | Layer: backend | Tier: P0 | Estimate: 45 | Depends on: 20, 21, 22 | Security: per task | Branch: `feature/task-23-add-rules` (chunk branch shared with 23b)
 - Description: Implement capacity and duplicate detection inside the one add transaction, the override and the 409 bodies, with a seeded library.
 - Production: (1) `service/BookService.java`; (2) `repository/BookRepository.java` and `BookKeyRow.java`. Tests: `BookServiceTest`, `AddRulesIntegrationTest`, `support/LibrarySeeder`.
 - Acceptance criteria:
@@ -327,7 +327,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 - Traces: US-001.7, US-004, BR-003, BR-009, INV-5, INV-7, C-01, C-02, T-12, T-40.
 
 ### Task 23b: List filter and the 2-second add bound
-- Source: B18 (second part) | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 23a, 16 | Security: per task | Branch: `feature/task-23b-list-filter-add-bound`
+- Source: B18 (second part) | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 23a, 16 | Security: per task | Branch: `feature/task-23-add-rules` (chunk branch shared with 23a)
 - Description: Apply the validated `status` filter to the list in the order of BR-010 and prove the 2-second add bound with 4,999 maximum-size books.
 - Production: (1) `service/BookService.java` (edit); (2) `controller/BookController.java` (edit). Tests: `BookListIntegrationTest`, `AddBoundIntegrationTest`.
 - Acceptance criteria:
@@ -409,7 +409,7 @@ Goal: the reader manages a list: full validation, filter, duplicates, capacity, 
 Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T-17 to T-19, T-31 numeric rows, T-32, T-36 to T-38, C-03, C-04, C-12, C-13 (5 iterations), US-009.1 to .3, .5 to .7, US-012.1 to .7, .9.
 
 ### Task 30: Book transitions and value types
-- Source: B19 | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 21 | Security: per task | Branch: `feature/task-30-book-transitions`
+- Source: B19 | Layer: backend | Tier: P0 | Estimate: 35 | Depends on: 21 | Security: per task | Branch: `feature/task-30-rating`
 - Description: Add the transitions that keep INV-1 to INV-4 and the rating literal judged from token and text.
 - Production: (1) `domain/Book.java` (edit); (2) `dto/RatingValue.java` and `RatingRequest.java`; (3) `dto/StatusRequest.java`. Tests: `BookTest`, `RatingValueDeserializerTest`.
 - Acceptance criteria:
@@ -418,20 +418,32 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
   3. 1 to 5 valid; 0, 6, -0, 4.9, 5.0, 1e0, 1E1, `null`, `{}`, 100-digit integer give `INVALID_RATING`; strings, `true`, arrays, objects, `01`, `+5`, `NaN`, `5.`, `.5`, `5e`, 101 digits give `MALFORMED_REQUEST`; `1e999999999` gives `INVALID_RATING` within 300 ms (T-17, T-18, T-31, T-32, T-37).
 - Traces: BR-002, BR-004, BR-007, BR-008, INV-1 to INV-4.
 
-### Task 31: Get, delete, status, rating, clear rating
-- Source: B20 | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 23b, 30, 15, 16 | Security: per task | Branch: `feature/task-31-remaining-endpoints`
-- Description: Implement the five remaining endpoints in the order of BR-012 steps 7 and 8, extend the route table, and test the stories, the invariant sequences and the capacity clauses on the real port.
-- Production: (1) `service/BookService.java` (edit); (2) `controller/BookController.java` (edit); (3) `config/transport/RouteTable.java` (edit). Tests: `BookControllerTest`, `BookStoryIntegrationTest`.
+### Task 31a: Get, delete, status change
+- Source: B20 (first part) | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 23b, 30, 15, 16 | Security: per task | Branch: `feature/task-31a-get-delete-status`
+- Description: Implement `GET /api/v1/books/{id}`, `PUT .../status` and `DELETE /api/v1/books/{id}` in the order of BR-012 steps 3 to 7, extend the route table with these three routes, and test the stories and the capacity clauses on the real port. Split from Task 31 on the Liaison and Security findings of Task 30 (handoffs 134 and 135, version 0.6.2).
+- Production: (1) `service/BookService.java` (edit); (2) `controller/BookController.java` (edit); (3) `config/transport/RouteTable.java` (edit). Tests: `BookControllerTest`, `BookStatusServiceTest` (fixed clock), `BookStoryIntegrationTest`.
 - Acceptance criteria:
-  1. 5.3 to 5.7 answer as written; a `201` is followed by a `GET` of the same book; delete returns the removed book and a second delete is `BOOK_NOT_FOUND` (US-001.9, US-007, US-008). `RouteTableTest` still passes with the seven routes.
-  2. S-01 to S-06 and S-11 give the stated results; after any failed request the library content is identical (S-07).
-  3. Field values are judged before existence (T-36, T-38); `PUT status` with `"Completed"`, `""`, `null`, `{}` is `INVALID_STATUS` and with `5` or `true` `MALFORMED_REQUEST` (T-19).
-  4. At 5,000 books, list, status change, rating and delete succeed; after one delete one add succeeds and the next gives `LIBRARY_FULL` (C-03, C-04, US-008.3).
+  1. 5.3, 5.4 and 5.7 answer as written; a `201` is followed by a `GET` of the same book; delete returns the removed book and a second delete is `BOOK_NOT_FOUND` (S-06); same-state status changes change nothing (S-04, S-11). `RouteTableTest` passes with the five routes (US-001.9, US-006, US-007, US-008).
+  2. Field values are judged before existence: `PUT status` on an unknown well-formed id with `{"status":"Done"}` is `INVALID_STATUS` (T-38); `"Completed"`, `""`, `null`, `{}` give `INVALID_STATUS` and `5` or `true` `MALFORMED_REQUEST` (T-19); after any failed request the library content is identical (S-07).
+  3. A service test with a fixed clock proves that entering completed sets `date_completed` to the clock value and that leaving completed clears the rating and `date_completed` in the same transaction as the status (BR-004, BR-008, DEC-023; the forced-failure proof is Task 32).
+  4. At 5,000 books, list, status change and delete succeed; after one delete one add succeeds and the next gives `LIBRARY_FULL` (C-04, US-008.3). The rating step of C-03 is Task 31b.
   5. On the new endpoints, `DELETE` with `Content-Type` and no body passes the gate and a one-space body gives `400` (the rule is Task 16; E-18 is exercised here on real endpoints).
-- Traces: 5.3 to 5.7, US-003, US-006 to US-008, BR-012, S-01 to S-07, S-11, T-14, T-15, T-19, T-36, T-38, C-03, C-04.
+- Traces: 5.3, 5.4, 5.7, US-006 to US-008, BR-004, BR-012, S-04, S-06, S-07, S-11, T-14, T-15, T-19, T-38, C-04.
+
+### Task 31b: Rating, clear rating and the rating error mapping
+- Source: B20 (second part) | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 31a, 30 | Security: per task | Branch: `feature/task-31b-rating-endpoints`
+- Description: Implement `PUT .../rating` and `DELETE .../rating`; map the invalid-rating marker of `RatingValue` to `400 INVALID_RATING` with a `details` entry for field `rating` ("must be an integer from 1 to 5", 5.5) and no echo of the received value; refuse a rating on a book that is not completed with `RATING_NOT_ALLOWED` before the domain method is called; extend the route table with the two rating routes (seven in all).
+- Production: (1) `service/BookService.java` (edit); (2) `controller/BookController.java` (edit); (3) `config/transport/RouteTable.java` (edit); (4) `error/GlobalExceptionHandler.java` (edit) and, only if `ApiException` cannot carry the `details` entry, one typed exception in the same folder. Tests: `BookControllerTest` (edit), `BookRatingServiceTest`, `GlobalExceptionHandlerTest` (edit), `BookRatingIntegrationTest`.
+- Acceptance criteria:
+  1. The service judges the invalid-rating marker before the existence check and also for an unread or reading book: the marker gives `400 INVALID_RATING` with one `details` entry (`field` `rating`, fixed message, no value echo), also for an unknown well-formed id and for an unread book; a valid rating on an unknown id is `404 BOOK_NOT_FOUND` (T-36, T-37, US-003.3, US-003.8).
+  2. The service checks the status first (BR-012 step 8): `unread` or `reading` gives `400 RATING_NOT_ALLOWED` without a call to `Book.assignRating`; the service does not catch `IllegalStateException`, so an unexpected domain refusal is `500 INTERNAL_ERROR`, never a mapped 400 (INV-1, BR-007).
+  3. A set or clear of the rating is one transaction and leaves the book unchanged on any failure; a completed book accepts 1 to 5 and a replacement, and `DELETE .../rating` twice gives `200` with a null rating both times (S-01, S-02, S-03, S-05, BR-013).
+  4. On the real port: `INVALID_RATING` (`7`, `null`, `5.0`, 100 digits), `RATING_NOT_ALLOWED` (valid value on an unread and on a reading book) and `BOOK_NOT_FOUND` are each answered with the stated code, and the ordering holds: field value before existence (invalid value on an unknown id is `INVALID_RATING`), existence before state (T-36, T-37, T-31 numeric rows).
+  5. At 5,000 books a rating change succeeds (the rating step of C-03).
+- Traces: 5.5, 5.6, US-003, BR-002, BR-007, BR-012 steps 6 to 8, BR-013, S-01, S-02, S-03, S-05, T-31, T-36, T-37, C-03.
 
 ### Task 32: Concurrency and fault injection
-- Source: B21 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 31, 23a | Security: per task | Branch: `test/task-32-concurrency-faults`
+- Source: B21 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 31a, 31b, 23a | Security: per task | Branch: `test/task-32-concurrency-faults`
 - Description: Test concurrent adds and updates and a forced failure with a trigger on the test database.
 - Production: none. Tests: `ConcurrencyIntegrationTest`, `support/FaultInjection`.
 - Acceptance criteria:
@@ -442,7 +454,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: BR-013, C-06, C-07, C-09, C-10, S-08, S-09, S-10, E-21.
 
 ### Task 33: Durability across restart and kill
-- Source: B22 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 31 | Security: per task | Branch: `test/task-33-durability`
+- Source: B22 | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 31a, 31b | Security: per task | Branch: `test/task-33-durability`
 - Description: Start the packaged application as a separate process and prove acknowledged writes survive a normal stop and a forced kill.
 - Production: none. Tests: `support/AppProcess`, `DurabilityIntegrationTest`.
 - Acceptance criteria:
@@ -485,7 +497,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: 5.3 to 5.7, BR-011.
 
 ### Task 36: Entry view, status control and confirmation
-- Source: F2.2 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 35, 25, 31 | Security: per task | Branch: `feature/task-36-entry-status`
+- Source: F2.2 | Layer: frontend | Tier: P0 | Estimate: 45 | Depends on: 35, 25, 31a | Security: per task | Branch: `feature/task-36-entry-status`
 - Description: Build one entry from the template with a status control and the confirmation dialog, using the server's returned values. Tested by Task 39+40.
 - Production: (1) `frontend/index.html` and `css/styles.css` (edit); (2) `frontend/js/ui/entryView.js`; (3) `frontend/js/ui/entryActions.js`. Tests: none.
 - Acceptance criteria:
@@ -496,7 +508,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: US-012.1 to .3, .6, .8.
 
 ### Task 37: Rating group and clear rating
-- Source: F2.3 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 36, 31 | Security: per task | Branch: `feature/task-37-rating-group`
+- Source: F2.3 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 36, 31b | Security: per task | Branch: `feature/task-37-rating-group`
 - Description: Add the labelled rating group, the clear button and the failure paths. Tested by Task 39+40.
 - Production: (1) `frontend/js/ui/entryView.js` and `entryActions.js` (edit); (2) `frontend/js/logic/failures.js` (edit); (3) `frontend/css/styles.css` (edit). Tests: `failures.test.js` (edit).
 - Acceptance criteria:
@@ -507,7 +519,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: US-012.4, .7, US-013.4, 5.9.
 
 ### Task 38: Delete with confirmation
-- Source: F2.4 | Layer: frontend | Tier: P0 | Estimate: 35 | Depends on: 36, 31 | Security: per task | Branch: `feature/task-38-delete-entry`
+- Source: F2.4 | Layer: frontend | Tier: P0 | Estimate: 35 | Depends on: 36, 31a | Security: per task | Branch: `feature/task-38-delete-entry`
 - Description: Add the delete button and confirmation dialog with the focus rules. Tested by Task 39+40.
 - Production: (1) `frontend/js/ui/entryActions.js` (edit); (2) `frontend/js/ui/dialogs.js` (edit); (3) `frontend/index.html` (edit). Tests: none.
 - Acceptance criteria:
@@ -518,7 +530,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: US-012.5, .9, US-010.4, .6.
 
 ### Task 39+40: E2E status, rating and delete
-- Merged 2026-11-05 (Sponsor, option B of section 9) from Task 39 (Source: F2.5) and Task 40 (Source: F2.6) | Layer: frontend | Tier: P0 | Security: per task | Estimate: 70 (40 + 30, long task; the 45-minute limit is waived; if it overruns it is split back into 39 and 40) | Depends on: 37, 38, 31, 14 | Branch: `test/task-39-40-e2e-status-rating-delete`
+- Merged 2026-11-05 (Sponsor, option B of section 9) from Task 39 (Source: F2.5) and Task 40 (Source: F2.6) | Layer: frontend | Tier: P0 | Security: per task | Estimate: 70 (40 + 30, long task; the 45-minute limit is waived; if it overruns it is split back into 39 and 40) | Depends on: 37, 38, 31a, 31b, 14 | Branch: `test/task-39-40-e2e-status-rating-delete`
 - Description: Test status changes, clearing of rating and date, rating set, replace and clear, the stale-state failures, delete and the stale 404; add smoke tests 5 and 6. Build order: criteria 1 to 4 (status and rating) first, then 5 to 8 (delete).
 - Production: none. Tests: `us-012-status-rating.spec.ts`, `us-012-delete.spec.ts`.
 - Acceptance criteria (1 to 4 from Task 39, 5 to 8 from Task 40):
@@ -537,7 +549,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-014.1, .2, .4 (without 320), .6 (inert, no violation, stylesheet containment), .7, .8, SC-38, the sweep of Task 41+42, and every earlier P0 row. After this increment, Task 49+50 runs, then Task 48 (documentation), then the release criteria of `delivery-strategy.md` section 6 are checked and the release tag is set.
 
 ### Task 41+42: Capacity and performance at maximum size, and backend release sweep
-- Merged 2026-11-05 (Sponsor, option B of section 9) from Task 41 (Source: B24) and Task 42 (Source: part of B27, moved here by the PM) | Layer: backend | Tier: P0 | Security: per task | Estimate: 75 (40 + 35, long task; the 45-minute limit is waived, the files rule is not; if it overruns it is split back into 41 and 42) | Depends on: 31, 23b, 34b, 10 | Branch: `chore/task-41-42-capacity-and-release-sweep`
+- Merged 2026-11-05 (Sponsor, option B of section 9) from Task 41 (Source: B24) and Task 42 (Source: part of B27, moved here by the PM) | Layer: backend | Tier: P0 | Security: per task | Estimate: 75 (40 + 35, long task; the 45-minute limit is waived, the files rule is not; if it overruns it is split back into 41 and 42) | Depends on: 31a, 31b, 23b, 34b, 10 | Branch: `chore/task-41-42-capacity-and-release-sweep`
 - Description: Prove the response bound, the add loop and the mixed load at maximum size, with a fixed heap, and tune the limits if needed (tuning of SC-06 values is ASK FIRST and returns to Security, SEC-F-078); then, last, run the repository-wide checks needed for the pre-release Security review, for both package managers, and fix or report each finding. Build order: criteria 1 to 4 (capacity), then 5 to 9 (sweep), so that the sweep sees the final tree.
 - Production: (1) `application.yml` (edit only if tuning); (2) `README.md` (edit: the confirmed memory bound in both run commands); (3) `config/spotbugs/exclude.xml` (edit); (4) `config/dependency-tree.txt` (edit if approved). Tests: `CapacityPerformanceIntegrationTest`; sweep runs are recorded in `progress.md`.
 - Acceptance criteria (1 to 4 from Task 41, 5 to 9 from Task 42):
@@ -681,18 +693,18 @@ Rule (`delivery-strategy.md` section 4): P0 stops a realistic local attack or pr
 | Routing, methods, Accept, query, id | E-01 to E-03, E-06, E-17 to E-19, E-24 (rows 1 to 3), E-26, E-27, E-29, E-38; T-14, T-14b | P0 | T-14b added (AP-5 omitted it) | 15, 16 |
 | E-36 third row (2,000 query pairs) | E-36 row 3 | P0 | **D1**: architect P1 | 16 |
 | Static content | E-15 (application rows), E-16, E-30, E-39 | P0 | none | 09 |
-| Strict parsing and value domains | T-04, T-05, T-15 to T-21, T-27 to T-30, T-32, T-34 to T-40 | P0 | none | 16, 20, 21, 30, 31 |
-| Parser limits never 500, under 300 ms | T-31 | P0 | none | 21, 30 |
+| Strict parsing and value domains | T-04, T-05, T-15 to T-21, T-27 to T-30, T-32, T-34 to T-40 | P0 | none | 16, 20, 21, 30, 31a, 31b |
+| Parser limits never 500, under 300 ms | T-31 | P0 | none | 21, 30, 31b |
 | Text policy core and injection payloads | T-01 to T-03, T-06 to T-13, T-22, T-26 | P0 | none | 18+19, 23a |
 | Hidden-channel text rules | T-23 to T-25, T-24b | P0 at unit level; P1 real-port repeat | none | 18+19, 49+50 |
 | Capacity and duplicates | C-01, C-02, C-11 (a) and (b) bounds | P0 | none | 23a, 23b |
-| Capacity with other operations | C-03, C-04 | P0 | moved from Task 23 to Task 31 (endpoints exist there) | 31 |
+| Capacity with other operations | C-03, C-04 | P0 | moved from Task 23 to Tasks 31a and 31b (endpoints exist there) | 31a, 31b |
 | Concurrency | C-06, C-07, C-09, C-10 | P0 | none | 32 |
 | Size bound and load | C-05 size, C-08, C-11 (c) assertions, memory bound | P0 | none | 41+42 |
 | Recorded timing figures | C-05 time, M-2 figures, C-11 durations | P1 | none | 51 |
 | Second instance | C-12 | P0 | none | 34b |
 | Durability | C-13 (5 iterations) | P0; 50 iterations P1 | none | 33, 51 |
-| Invariant sequences | S-01 to S-07, S-10, S-11; S-08 with 20 iterations | P0 | none | 31, 32 |
+| Invariant sequences | S-01 to S-07, S-10, S-11; S-08 with 20 iterations | P0 | none | 31a, 31b, 32 |
 | Concurrent status, rating and delete | S-09 with 20 iterations | P0 | **D2**: architect P1 | 32 |
 | Long runs | S-08 and S-09 at 200 iterations | P1 | none | 51 |
 | Grammar corners | E-34 rows 2 to 7, E-35, E-24b, E-25 (application rows) | P1 | none | 49+50 |
@@ -754,20 +766,20 @@ D1 E-36 third row P0; D2 S-09 P0 at 20 iterations; D3 release sweep in Increment
 
 | FR | Story | Rules | Endpoint | Tasks |
 |---|---|---|---|---|
-| FR1 | US-001 | BR-001, BR-006, BR-008, BR-009 | `POST /api/v1/books` | 07, 18+19, 20, 21, 23a, 31 (US-001.9) |
+| FR1 | US-001 | BR-001, BR-006, BR-008, BR-009 | `POST /api/v1/books` | 07, 18+19, 20, 21, 23a, 31a (US-001.9) |
 | FR1 | US-002 | BR-010 | `GET /api/v1/books` | 07, 16, 23b |
 | FR1 | US-004 | BR-003, BR-013 | `POST /api/v1/books` | 22, 23a, 32 |
-| FR3 | US-003 | BR-002, BR-007, BR-004 | `PUT`, `DELETE .../rating` | 30, 31 |
-| FR2 | US-006 | BR-001, BR-004, BR-008 | `PUT .../status` | 30, 31 |
-| FR1 | US-007 | BR-011 | `GET /api/v1/books/{id}` | 31 |
-| CRUD | US-008 | BR-011 | `DELETE /api/v1/books/{id}` | 31 |
+| FR3 | US-003 | BR-002, BR-007, BR-004 | `PUT`, `DELETE .../rating` | 30, 31b |
+| FR2 | US-006 | BR-001, BR-004, BR-008 | `PUT .../status` | 30, 31a |
+| FR1 | US-007 | BR-011 | `GET /api/v1/books/{id}` | 31a |
+| CRUD | US-008 | BR-011 | `DELETE /api/v1/books/{id}` | 31a |
 | Metric M-3 | US-009 | BR-013 | all writes | 03a, 03b, 33, 34a, 34b |
 | Scope: frontend | US-010 | n/a | static content | 09, 12, 25, 28, 52 (US-010.9) |
 | FR1 | US-011 | n/a | `POST` | 12, 24, 26, 27, 29 |
 | FR2, FR3 | US-012 | BR-004 | status, rating, delete | 35 to 38, 39+40 |
 | Constitution | US-013 | n/a | all | 11, 24, 26, 37, 44 |
 | Constitution | US-014 | n/a | static content | 12, 14, 43, 45, 46, 47, 52 |
-| Cross-cutting | BR-012 | | all | 06, 15, 16, 20, 21, 31 (route table) |
+| Cross-cutting | BR-012 | | all | 06, 15, 16, 20, 21, 31a, 31b (route table) |
 | Cross-cutting | INV-1 to INV-8 | | all | 04, 23a, 30, 32, 41+42 |
 
 FR4 has no downstream items by design (DEC-003). Plan sections: `plan.md` and `plan-appendix.md` (until the appendix is regenerated, the task numbers of this document govern).
@@ -780,10 +792,11 @@ Merging changes the number of reviews, not the hours; each merged task runs 60 t
 
 **PM assessment of two further pairs (rule: merge only if the merged task keeps a clean acceptance list and the same layer; the files rule of section 0 is not waived).** Not merged:
 - **15 + 16** (route table and query/id rules): same layer, but the merged task would list 6 production entries (`RequestTarget`, `RouteTable`, `AcceptPolicy`, `QueryPolicy`, `BoundedBodyRequest`, `RequestGateFilter`) against the limit of 4, would hold 9 acceptance criteria, and both tasks are at the 45-minute ceiling ("dense"); Task 16 also carries a live drip-request spike that may force a decision (SEC-F-073), which is exactly the case where a merged task would have to be split back. Both edit `RequestGateFilter`, so they stay sequential and are cheap to review in order.
-- **30 + 31** (transitions; get, delete, status, rating): same layer, but the merge would list 5 production entries (`Book`, the `dto` files, `BookService`, `BookController`, `RouteTable`) against the limit of 4, would hold 8 criteria, and Task 31 is already at the ceiling with the invariant sequences and capacity clauses on the real port; Task 30 is the unit-level proof that 31 relies on and is better accepted first.
+- **30 + 31** (transitions; get, delete, status, rating; Task 31 itself was later split into 31a and 31b, version 0.6.2): same layer, but the merge would list 5 production entries (`Book`, the `dto` files, `BookService`, `BookController`, `RouteTable`) against the limit of 4, would hold 8 criteria, and Task 31 is already at the ceiling with the invariant sequences and capacity clauses on the real port; Task 30 is the unit-level proof that 31 relies on and is better accepted first.
 If the Sponsor still wants either merge, the PM would first need an approved exception to the files rule.
 
 ## Changelog
+- 0.6.2 (2026-11-06): Task 31 amended and split after the Liaison audit of Task 30 (handoff 134, L30-1 to L30-4, finding (c)) and the Security review (handoff 135, SEC-F-170). Required scope added: the invalid-rating marker of `RatingValue` maps to `400 INVALID_RATING` with a `details` entry for field `rating` and no value echo (`error/GlobalExceptionHandler.java` edit, and a typed exception only if `ApiException` cannot carry the `details`); the service judges the marker before the existence check and also for an unread book (T-36, T-38); it pre-checks status per BR-012 step 8 and returns `RATING_NOT_ALLOWED` before calling `Book.assignRating`, without catching `IllegalStateException`; status and rating changes are single transactions; a service test with a fixed clock covers `date_completed`; the real port proves `INVALID_RATING`, `RATING_NOT_ALLOWED` and `BOOK_NOT_FOUND` ordering. The result (5 production entries, 8+ criteria, over 45 minutes) exceeds the limits, so Task 31 is split at the status/rating boundary: 31a (get, delete, status; 40 min) and 31b (rating, clear rating, error mapping; 40 min; depends on 31a and 30). Dependencies of 32, 33, 36 to 38, 39+40 and 41+42, the traceability matrix, the tier register and the totals are repointed (53 tasks, 2,300 minutes, 50 in the release, 36.3 h). Both stay `Security: per task`. Branch names aligned to those used: Task 20 `feature/task-20-validation`, 21 `feature/task-21-strict-body`, 22 `feature/task-22-duplicates`, 23a and 23b `feature/task-23-add-rules` (chunk branch), 30 `feature/task-30-rating`. Task 51 depends on 32 and 41+42 and is unchanged. The plan N-6 list (ceiling tasks) still names Task 31: the Orchestrator is asked to remove it.
 - 0.6.1 (2026-11-05): Orchestrator, applying the Security ruling of handoff 087: Tasks 23a, 48 and 53 move from `Security: increment` to `Security: per task`; Security accepts increment-level cover only for Tasks 22 and 30 and only if they change no error code, message or status and touch no control; both stay per task here. No task is marked increment.
 - 0.6 (2026-11-05): Sponsor decision (option B of section 9): Tasks 18+19, 39+40, 41+42 and 49+50 merged (long tasks of 90, 70, 75 and 90 minutes, branches combined, dependencies, tier register and traceability repointed, totals recomputed to 52 tasks, 2,265 minutes, 49 in the release); 15+16 and 30+31 assessed and not merged (files rule); a merged task that overruns is split back. Definition of Done gains the Sponsor-approved review-load rule (option A; constitution amendment in progress) and every open task carries "Security: per task" or "Security: increment" in its header.
 - 0.5.1 (2026-11-02): Task 02 amended (handoffs 043 and 044): SC-27 outbound-HTTP-client ban in the Checkstyle regex bans with a test-only suppression and one seeded run (SEC-F-089); time rule tightened to `new java.util.Date()` and `.now (` (SEC-F-090).
