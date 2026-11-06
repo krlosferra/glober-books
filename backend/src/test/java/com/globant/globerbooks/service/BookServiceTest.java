@@ -60,7 +60,7 @@ class BookServiceTest {
     }
 
     @Test
-    void ignoresAllowDuplicate() {
+    void storesWithOverrideTrueWhenNothingMatches() {
         BookResponse result = addSaved(new CreateBookRequest("A", "B", "reading", true));
 
         assertThat(result.status()).isEqualTo("reading");

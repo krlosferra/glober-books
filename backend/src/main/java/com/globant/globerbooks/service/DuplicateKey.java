@@ -100,8 +100,13 @@ public record DuplicateKey(String titleKey, String authorKey) {
         return true;
     }
 
-    /** The Unicode White_Space property, listed by code point (UCD PropList). */
-    private static boolean isWhiteSpace(int point) {
+    /**
+     * The Unicode White_Space property, listed by code point (UCD PropList).
+     *
+     * @param point a code point
+     * @return true when the code point has the property
+     */
+    static boolean isWhiteSpace(int point) {
         return (point >= 0x09 && point <= 0x0D) || point == 0x20 || point == 0x85 || point == 0xA0
                 || point == 0x1680 || (point >= 0x2000 && point <= 0x200A) || point == 0x2028
                 || point == 0x2029 || point == 0x202F || point == 0x205F || point == 0x3000;
