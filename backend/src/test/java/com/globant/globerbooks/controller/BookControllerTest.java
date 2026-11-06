@@ -251,7 +251,7 @@ class BookControllerTest {
 
     @Test
     void deleteReturns200WithTheRemovedBook() throws Exception {
-        when(service.delete(STORED_ID)).thenReturn(STORED);
+        when(service.discard(STORED_ID)).thenReturn(STORED);
 
         mvc.perform(delete("/api/v1/books/" + STORED_ID).header("Host", HOST)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -262,7 +262,7 @@ class BookControllerTest {
 
     @Test
     void deleteMapsBookNotFoundTo404() throws Exception {
-        when(service.delete(STORED_ID)).thenThrow(new ApiException(ErrorCode.BOOK_NOT_FOUND));
+        when(service.discard(STORED_ID)).thenThrow(new ApiException(ErrorCode.BOOK_NOT_FOUND));
 
         mvc.perform(delete("/api/v1/books/" + STORED_ID).header("Host", HOST)
                 .contentType(MediaType.APPLICATION_JSON))

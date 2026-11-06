@@ -162,7 +162,7 @@ class BookStatusServiceTest {
     void deleteRemovesTheBookAndReturnsItAsItWas() {
         Book book = stored(BookStatus.COMPLETED, 5, COMPLETED_EARLIER);
 
-        BookResponse result = service.delete(ID);
+        BookResponse result = service.discard(ID);
 
         assertThat(result).isEqualTo(new BookResponse(
                 ID, "Clean Code", "Robert Martin", "completed", 5, ADDED, COMPLETED_EARLIER));
@@ -173,7 +173,7 @@ class BookStatusServiceTest {
     void deleteOfAnUnknownIdGivesBookNotFoundAndDeletesNothing() {
         when(repository.findById(ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.delete(ID)).isInstanceOfSatisfying(ApiException.class,
+        assertThatThrownBy(() -> service.discard(ID)).isInstanceOfSatisfying(ApiException.class,
                 failure -> assertThat(failure.code()).isEqualTo(ErrorCode.BOOK_NOT_FOUND));
 
         verify(repository, never()).delete(any(Book.class));
@@ -182,7 +182,7 @@ class BookStatusServiceTest {
     @Test
     void everyUseCaseRunsInOneTransactionAndReadsAreReadOnly() throws NoSuchMethodException {
         Method change = BookService.class.getMethod("changeStatus", String.class, String.class);
-        Method remove = BookService.class.getMethod("delete", String.class);
+        Method remove = BookService.class.getMethod("discard", String.class);
         Method read = BookService.class.getMethod("get", String.class);
 
         assertThat(change.getAnnotation(Transactional.class).readOnly()).isFalse();

@@ -99,6 +99,6 @@ public class BookController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<BookResponse> delete(@PathVariable("id") String id) {
-        return ResponseEntity.ok().contentType(JSON_UTF8).body(service.delete(id));
+        return ResponseEntity.ok().contentType(JSON_UTF8).body(service.discard(id));
     }
 }
