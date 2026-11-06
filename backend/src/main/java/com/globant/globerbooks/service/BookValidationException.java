@@ -10,6 +10,12 @@ import java.util.List;
  */
 public class BookValidationException extends RuntimeException {
 
+    /** Fixed detail message of a status that is not one of the three values. */
+    public static final String STATUS_MESSAGE = "must be one of: unread, reading, completed";
+
+    /** Fixed detail message of a rating that is not an integer from 1 to 5; it never holds the value. */
+    public static final String RATING_MESSAGE = "must be an integer from 1 to 5";
+
     private static final long serialVersionUID = 1L;
 
     private final ErrorCode code;
@@ -18,7 +24,7 @@ public class BookValidationException extends RuntimeException {
     /**
      * Creates the exception.
      *
-     * @param code {@code VALIDATION_ERROR} or {@code INVALID_STATUS}
+     * @param code {@code VALIDATION_ERROR}, {@code INVALID_STATUS} or {@code INVALID_RATING}
      * @param problems the failing fields, never empty
      */
     public BookValidationException(ErrorCode code, List<ErrorBody.FieldProblem> problems) {

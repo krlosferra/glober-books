@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 /**
  * The fixed table of routes and methods, decided from the raw request target (spec 5.0). It holds
  * {@code GET} and {@code POST} on {@code /api/v1/books}, {@code GET} and {@code DELETE} on
- * {@code /api/v1/books/{id}}, {@code PUT} on {@code /api/v1/books/{id}/status}, plus {@code GET} on
+ * {@code /api/v1/books/{id}}, {@code PUT} on {@code /api/v1/books/{id}/status}, {@code PUT} and
+ * {@code DELETE} on {@code /api/v1/books/{id}/rating}, plus {@code GET} on
  * {@code /} and on every path of the static catalog. Any non-empty single segment stands for the id:
  * the route is decided first and the shape of the id second (BR-012 steps 2 and 3).
  * No property, profile or request can add a route; a new endpoint is added here by hand, and
@@ -29,6 +30,9 @@ public final class RouteTable {
 
     /** Template of the path of the status of one book. */
     public static final String BOOK_STATUS = BOOK + "/status";
+
+    /** Template of the path of the rating of one book. */
+    public static final String BOOK_RATING = BOOK + "/rating";
 
     private static final int BOOKS_SEGMENTS = 3;
     private static final int ID_SEGMENT_COUNT = 4;
@@ -48,6 +52,7 @@ public final class RouteTable {
         table.put(BOOKS, new TreeSet<>(Set.of("GET", "POST")));
         table.put(BOOK, new TreeSet<>(Set.of("GET", "DELETE")));
         table.put(BOOK_STATUS, new TreeSet<>(Set.of("PUT")));
+        table.put(BOOK_RATING, new TreeSet<>(Set.of("PUT", "DELETE")));
         table.put("/", new TreeSet<>(Set.of("GET")));
         for (String path : catalog.paths()) {
             table.put(path, new TreeSet<>(Set.of("GET")));
@@ -122,7 +127,11 @@ public final class RouteTable {
         if (segments.size() == ID_SEGMENT_COUNT) {
             return Optional.of(BOOK);
         }
-        return "status".equals(segments.get(ID_SEGMENT_COUNT)) ? Optional.of(BOOK_STATUS) : Optional.empty();
+        return switch (segments.get(ID_SEGMENT_COUNT)) {
+            case "status" -> Optional.of(BOOK_STATUS);
+            case "rating" -> Optional.of(BOOK_RATING);
+            default -> Optional.empty();
+        };
     }
 
     /**

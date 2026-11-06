@@ -106,13 +106,33 @@ class RouteTableTest {
     }
 
     @Test
-    void holdsExactlyTheFiveApiRoutes() {
+    void findsPutAndDeleteOnTheRatingOfOneBookWhateverTheIdSegmentLooksLike() {
+        for (String id : new String[] {BOOK_ID, "not-a-uuid", "UPPER"}) {
+            assertThat(decide("/api/v1/books/" + id + "/rating", "PUT").outcome()).as(id).isEqualTo(Outcome.FOUND);
+            assertThat(decide("/api/v1/books/" + id + "/rating", "DELETE").outcome()).as(id).isEqualTo(Outcome.FOUND);
+        }
+    }
+
+    /** E-02 rating row and E-29: GET on the rating is 405 with exactly DELETE, PUT (it was 404 before the routes). */
+    @Test
+    void answersMethodNotAllowedWithDeleteAndPutForTheOtherMethodsOnTheRating() {
+        for (String method : new String[] {"GET", "POST", "PATCH", "HEAD", "OPTIONS"}) {
+            assertThat(decide("/api/v1/books/" + BOOK_ID + "/rating", method))
+                    .isEqualTo(new Decision(Outcome.METHOD_NOT_ALLOWED, "DELETE, PUT"));
+        }
+        assertThat(decide("/api/v1/books/" + BOOK_ID + "/rating/", "PUT").outcome()).isEqualTo(Outcome.NOT_FOUND);
+        assertThat(decide("/api/v1/books/" + BOOK_ID + "/ratings", "PUT").outcome()).isEqualTo(Outcome.NOT_FOUND);
+    }
+
+    @Test
+    void holdsExactlyTheSevenApiRoutes() {
         assertThat(table.routes()).containsEntry("/api/v1/books", Set.of("GET", "POST"))
                 .containsEntry("/api/v1/books/{id}", Set.of("DELETE", "GET"))
-                .containsEntry("/api/v1/books/{id}/status", Set.of("PUT"));
+                .containsEntry("/api/v1/books/{id}/status", Set.of("PUT"))
+                .containsEntry("/api/v1/books/{id}/rating", Set.of("DELETE", "PUT"));
         long apiRoutes = table.routes().entrySet().stream().filter(entry -> entry.getKey().startsWith("/api/"))
                 .mapToLong(entry -> entry.getValue().size()).sum();
-        assertThat(apiRoutes).isEqualTo(5);
+        assertThat(apiRoutes).isEqualTo(7);
     }
 
     @ParameterizedTest
