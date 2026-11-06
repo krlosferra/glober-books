@@ -26,11 +26,9 @@ cd backend && ./mvnw verify
 This runs the tests and builds `backend/target/globerbooks.jar`.
 
 ## Run
-The database lives in `backend/data/`. The application does not create that directory yet, so create it once from the repository root:
-```
-mkdir -p backend/data
-```
-Then start the application in one of two ways (the memory bound is confirmed or changed later in the project):
+The database lives in `backend/data/`. The application creates that directory (mode 0700) and the database file (mode 0600) on the first start; nothing needs to be created by hand. It refuses to start, with a fixed reason and without touching anything, when the directory or the file is a symbolic link, belongs to another user, is accessible to group or others, or is linked twice. To use another location, pass its real path (`--spring.datasource.url=jdbc:sqlite:<real path>/library.db`): a path that goes through a symbolic link is refused on purpose.
+
+Start the application in one of two ways (the memory bound is confirmed or changed later in the project):
 ```
 cd backend && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m
 ```
@@ -38,7 +36,7 @@ or, after the build, the jar (`backend/target/globerbooks.jar`):
 ```
 cd backend && java -Xmx512m -jar target/globerbooks.jar
 ```
-Run both from `backend/`: the database path `./data/globerbooks.db` is relative to the working directory, so from any other directory the start fails with "unable to open database file".
+Run both from `backend/`: the database path `./data/globerbooks.db` is relative to the working directory, so from any other directory the database is created in that directory instead (the parent of `data/` must exist).
 Open the page at `http://127.0.0.1:8080/`. The application listens on the loopback address only. Stop it with `Ctrl+C`.
 
 The database file is locked exclusively while the application runs: no other tool (no `sqlite3`, no viewer) can open it. Stop the application first.
