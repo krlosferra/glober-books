@@ -149,3 +149,9 @@ docs(handoff): Task 21 brief, Task 20 done [Task-21]
 - `MAX_TOKENS` 64 is my choice; revisit if a later body (Task 30 rating, status) needs more.
 - Rating (Task 30) will need its own literal deserializer; this task leaves `rating` as an unknown member of the create body, as T-16 requires.
 - `status.md` has no Task 21 row; I did not add one (orchestrator owns it).
+
+## Follow-up round (after handoffs 122 and 123)
+- Liaison F3: `StrictBodyIntegrationTest` now sends one untimed valid POST and one untimed zero-byte POST before the first timed row (`warmUp`, once per class). The 300 ms assertion is unchanged. After the change the slowest row is 25 ms and the first row (zero bytes) is 3 ms (`backend/target/strict-body-real-port.txt`).
+- Security C-1 (SEC-F-159): note added to `docs/sdd/progress.md` that `@WebMvcTest` slices do not import `WebMvcConfig` and do not exercise strict parsing; later body tasks (Task 30) must prove strictness in unit or full-context tests.
+- `./mvnw clean verify`: BUILD SUCCESS, 661 + 167 tests, 0 failures, 1 skipped (pre-existing), coverage checks met.
+- The final `git diff --stat origin/main..HEAD` now also includes the docs commits (handoffs 122 and 123, progress.md note, this section) and the test change above; the stat pasted earlier predates them.
