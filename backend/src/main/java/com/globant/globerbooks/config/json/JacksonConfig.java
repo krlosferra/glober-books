@@ -89,7 +89,7 @@ public class JacksonConfig {
                 DeserializationFeature.FAIL_ON_TRAILING_TOKENS,
                 DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
         builder.enable(EnumFeature.FAIL_ON_NUMBERS_FOR_ENUMS);
-        builder.disable(MapperFeature.ALLOW_COERCION_OF_SCALARS, MapperFeature.USE_STATIC_TYPING);
+        builder.disable(MapperFeature.ALLOW_COERCION_OF_SCALARS);
         builder.disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT,
                 DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS,
                 DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT,
