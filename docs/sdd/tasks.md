@@ -1,7 +1,7 @@
 # GloberBooks Task Backlog
 
 - Owner: PM (`sdd-product-manager`)
-- Version: 0.6.3
+- Version: 0.6.4 (changelog: 0.6.4, 2026-11-06, Task 33 criterion 3 narrowed to "modes stay no wider" with a pre-created 0700/0600 location; creation of the directory and file with these modes, wiring of `SqliteDataSourceProvider`/`DataDirectoryGuard` in the packaged jar and the clean failure on an uncreatable directory moved to Task 34a, criteria 4 and 5 and a split proposal; dependencies of 34a and 34b updated; handoff 145)
 - Last updated: 2026-11-06
 - Status: Draft (Phase 3, round 3 of 3, final edits). Round 1 findings (handoffs 025, 026) were resolved in 0.4 and the round 2 findings (handoffs 031, 032) in 0.5; the answers by finding number are in handoff 027 (sections 2 and "Round 3"). Definitions only: task state lives in `status.md`.
 - Inputs: `delivery-strategy.md` v1.0, `spec.md` v0.4.3 (draft change requests CR-1 to CR-9 on top of the approved 0.4.1), `constitution.md` 1.1, `security.md`, `plan.md` and `plan-appendix.md` 0.2, handoff 022 (lean backend plan, tasks B01 to B27) and handoff 021 (frontend plan, candidates F0.1 to F4.3).
@@ -462,22 +462,25 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Acceptance criteria:
   1. After an acknowledged add, status change, rating change and delete, a normal stop and start show the same data (US-009.1).
   2. After a forced kill right after each of the four operations returned `2xx`, 5 iterations each, the restart shows the acknowledged change and opens normally (US-009.2, C-13, M-3).
-  3. Modes of the directory, file and companion files stay 0700 and 0600 or narrower (SC-13).
+  3. With the data directory pre-created with mode 0700 and the database file with mode 0600 (as the E2E launcher does), the modes of the directory and the file stay no wider than 0700 and 0600 after the start, after each of the four operations, after a normal stop, after a kill and after the restart, and the same holds for the companion files (`-journal` and any other), SC-13 as far as the application can widen them. The creation of the directory and the file with these modes by the application itself is proved in Task 34a, not here (the packaged jar uses the auto-configured data source until Task 34a wires `SqliteDataSourceProvider`; handoff 145).
   4. The child process console contains no book data.
-- Traces: US-009.1, .2, M-3, C-13.
+- Traces: US-009.1, .2, M-3, C-13, SC-13 (widening part only; creation part in Task 34a).
 
 ### Task 34a: Directory trust and clean start failure
-- Source: B23 (first part) | Layer: backend | Tier: P0 | Estimate: 40 | Depends on: 33 | Security: per task | Branch: `feature/task-34a-directory-trust`
-- Description: Refuse an untrustworthy data directory or file on POSIX and report every start refusal with a fixed reason and no book data.
-- Production: (1) `config/sqlite/DataDirectoryGuard.java`; (2) `config/sqlite/StartupFailureAnalyzer.java`; (3) `config/sqlite/SqliteDataSourceProvider.java` (edit: file identity remembered). Tests: `DataDirectoryGuardTest`, `StartupRefusalIntegrationTest`.
+- Source: B23 (first part) | Layer: backend | Tier: P0 | Estimate: 40 (see the size note) | Depends on: 33 (for `support/AppProcess`; Task 33 itself does not depend on 34a or 34b, handoff 145) | Security: per task | Branch: `feature/task-34a-directory-trust`
+- Description: Wire the packaged application to `SqliteDataSourceProvider` and `DataDirectoryGuard` (today the jar uses the auto-configured data source, creates `library.db` with mode 0644 and does not create the data directory, giving "unable to open database file"; `SqliteDataSourceProvider` is used only by tests; handoff 145). Create a missing data directory with mode 0700 and a missing database file with mode 0600, refuse an untrustworthy data directory or file on POSIX, and report every start refusal with a fixed reason and no book data.
+- Production: (1) `config/sqlite/DataDirectoryGuard.java`; (2) `config/sqlite/StartupFailureAnalyzer.java`; (3) `config/sqlite/SqliteDataSourceProvider.java` (edit: file identity remembered); (4) the data source configuration class that makes the provider and guard the application's data source in place of the auto-configured one (name fixed in the task brief from the plan). Tests: `DataDirectoryGuardTest`, `StartupRefusalIntegrationTest`, and a packaged-jar start test on an empty temporary data location (reusing `support/AppProcess` from Task 33).
 - Acceptance criteria:
   1. A symbolic link as directory or file, another owner, or any group or other permission bit makes the start fail non-zero with a fixed reason and the file untouched (US-009.6, SC-13).
   2. The comparison of the remembered file identity with the identity after the pool opens is proved by a unit test with two distinct files. The race between check and open is not testable without a test-only switch (A-09); it is recorded as a documented limit and the Sponsor is asked to agree (handoff 027).
   3. Every refusal reason is a fixed string; no cell value, path of a book or other book data appears on the console or in a log (SC-11, SC-37).
-- Traces: US-009.6, SC-13, SC-39, DEC-028.
+  4. The packaged application uses `SqliteDataSourceProvider` and `DataDirectoryGuard`, not the auto-configured data source. Started as the packaged jar on an empty temporary data location, it creates the missing data directory with mode 0700 and the missing database file with mode 0600 before the first connection, and after an add every journal or companion file is no wider than 0600; the test asserts these modes (US-009.6, SC-13).
+  5. When the data directory cannot be created or opened (a path that is not absolute after the guard's resolution, a symbolic link in the guarded path, or the "unable to open database file" case of SEC-F-098 and SEC-F-140), the start fails non-zero with a fixed reason that holds no path of a book or book data, and no file is created outside the guarded directory.
+- Traces: US-009.6, SC-13 (creation part), SC-39, DEC-028, SEC-F-098, SEC-F-140.
+- Size note (0.6.4): production entries are now 4 (at the limit) and criteria are 5 (guide 3 to 5, at the limit). The estimate of 40 minutes is likely to be exceeded: guard and failure analyzer, the wiring, the identity unit test, the refusal fixtures (link, owner, modes) and a jar-start test with mode assertions. Proposed split, not applied: **34a-1** wiring and creation (production entries 3 and 4 plus the guard's create-with-mode part; criteria 4 and 5; jar-start test; about 30 minutes) and **34a-2** refusals and reporting (guard checks, `StartupFailureAnalyzer`; criteria 1 to 3; about 30 minutes), 34a-2 depending on 34a-1; Task 34b would then depend on 34a-2. Awaiting the Sponsor's decision.
 
 ### Task 34b: Stored-library validation, hot journal and second instance
-- Source: B23 (second part) | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 34a, 33 | Security: per task | Branch: `feature/task-34b-stored-library-validation`
+- Source: B23 (second part) | Layer: backend | Tier: P0 | Estimate: 45 (dense) | Depends on: 34a, 33 (Task 33 does not depend on 34a or 34b) | Security: per task | Branch: `feature/task-34b-stored-library-validation`
 - Description: Validate an existing database read-only before anything writes to it, in the order set by Security, and prove the hot-journal cases and the second-instance failure.
 - Production: (1) `config/sqlite/StoredLibraryValidator.java`; (2) `config/sqlite/SqliteDataSourceProvider.java` (edit: header check, order of start). Tests: `StoredLibraryValidatorTest`, `StartupRefusalIntegrationTest` (edit), `SecondInstanceIntegrationTest`.
 - Acceptance criteria:
