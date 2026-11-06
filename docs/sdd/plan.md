@@ -120,11 +120,11 @@ The task list, estimates and dependencies are in `tasks.md`; this plan fixes onl
 | X-06 | `ddl-auto: validate` with STRICT and CHECK on the community dialect is untested | Spike in Task 04; fallback `typeof` CHECKs changes `schema.sql`: ASK FIRST, stop and request approval; the spike also proves that the stored DDL text equals the normalised statement (AP-12.1) |
 | X-08 | Jackson 3 key names and strictness switches come from knowledge, not tests | Proved in Task 03b and Task 08 (naming, unknown fields), Task 21 (rest) |
 | X-10 | `org.sqlite.tmpdir` under the data directory | Task 03a; if the driver cannot load from it the property is dropped and the risk recorded in `security.md` |
-| X-11 | The gate's route table duplicates the MVC mappings | `RouteTableTest` enumerates the controllers' mappings and fails on any difference. The table holds the routes that exist at that task: two in Task 15, seven after Task 31, which edits `RouteTable` and keeps the test green |
+| X-11 | The gate's route table duplicates the MVC mappings | `RouteTableTest` enumerates the controllers' mappings and fails on any difference. The table holds the routes that exist at that task (seven after Tasks 31a and 31b): two in Task 15, seven after Task 31, which edits `RouteTable` and keeps the test green |
 | X-12 | Memory: a maximum list is about 31 MB of strings and entities per in-flight request, up to 8 in flight | Fixed `-Xmx` (proposed 512 MB, final value from Task 41) in the README command and in the C-11 (c) JVM; Task 41 AC4 passes when 8 slow readers end without `OutOfMemoryError` and the process then serves; failure goes to the Sponsor |
 | N-1 | Hot journal rollback at first open is a write before validation | Spec change CR-9 states it is not a violation |
 | N-2, N-3 | Claim semantics, per-connection init and sqlite-jdbc keys come from knowledge | Task 03a reads effective values back with pragmas, proves the claim from a child JVM and after a forced eviction; fallback a no-op write transaction, decided in Task 03a |
-| N-6 | Tasks at the 45-minute ceiling (01, 03a, 06, 08, 14, 16, 21, 31, 34b) | A task that overruns is split, never extended; the first failed spike stops the task for a split (done so far: 03a/03b, 23a/23b, 34a/34b) |
+| N-6 | Tasks at the 45-minute ceiling (01, 03a, 06, 08, 14, 16, 21, 34b; Task 31 was split into 31a and 31b in tasks.md 0.6.2) | A task that overruns is split, never extended; the first failed spike stops the task for a split (done so far: 03a/03b, 23a/23b, 34a/34b) |
 | N-9 | Exclusive lock: the database cannot be inspected with another tool while the application runs | README states it |
 | N-10 | Planted or hot journal beside an invalid file (R-20 proposed) | Cases in Task 34b AC3; accepted residual risk is a Sponsor matter |
 | F-axe | The accessibility checker may be blocked by the CSP or Trusted Types | Runs in test code only; first try with no bypass; if one is needed it is a `bypassCSP` on a dedicated context inside `us-014-accessibility.spec.ts` (never global, never for the guard tests); the application CSP and headers are never relaxed (Sponsor decision 2026-11-02; SEC-F-076) |
@@ -146,3 +146,9 @@ Decided on 2026-11-02: items 1, 2, 4, 5, 6, 8, 10 and 11 are approved or accepte
 9. Task 43: if the accessibility scan cannot run without relaxing the application, the Sponsor decides; a `bypassCSP` context is reported before it is merged.
 10. Whether the focus targets after `404` and after a request that removes nothing (AP-8, P-F1 and P-F2) stay plan assumptions or become a change request.
 11. Rejection of a stored cell containing U+0000 (AP-12.1), which US-009.5 does not state: confirm it is covered by "invalid format".
+
+## Plan amendments from the implemented tasks (2026-11-06)
+- Task 21: the strict body resolver is installed first by a `BeanPostProcessor` on the handler adapter, because `addArgumentResolvers` would place it after the framework's own processor.
+- Tasks 20 and 21: the nested `StatusDeserializer` / `StrictStringDeserializer` distinguishes an absent `status` (default `unread`) from an explicit `null` (`INVALID_STATUS`); the plan did not say how.
+- Task 23a: `findAllBy` is a Spring Data class-based projection onto `BookKeyRow`, not a JPQL constructor projection (the Task 04 guard forbids `@Query`).
+- Task 30: `Book.assignRating` throws a domain `IllegalStateException` on a book that is not completed; the service pre-checks the status and returns `RATING_NOT_ALLOWED` before calling it and never maps `IllegalStateException` (Task 31b).
