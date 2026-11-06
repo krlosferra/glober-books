@@ -2,6 +2,7 @@ package com.globant.globerbooks.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import com.globant.globerbooks.domain.Book;
 import com.globant.globerbooks.domain.BookStatus;
@@ -251,6 +252,20 @@ class BookRepositoryTest {
                 .count();
 
         assertThat(annotated).isZero();
+    }
+
+    @Test
+    void keyRowsCarryTheFourScanColumnsOfEveryBookInOneQuery() {
+        insert(ID_A, "Title A", "Author A", "completed", 5, STAMP, STAMP);
+        insert(ID_B, "Title B", "Author B", "unread", null, STAMP, null);
+
+        List<BookKeyRow> rows = repository.findAllBy();
+
+        assertThat(rows).extracting(BookKeyRow::id, BookKeyRow::title, BookKeyRow::author, BookKeyRow::dateAdded)
+                .containsExactlyInAnyOrder(
+                        tuple(ID_A, "Title A", "Author A", Instant.parse(STAMP)),
+                        tuple(ID_B, "Title B", "Author B", Instant.parse(STAMP)));
+        assertThat(rows.get(0).toString()).doesNotContain("Title");
     }
 
     @Test

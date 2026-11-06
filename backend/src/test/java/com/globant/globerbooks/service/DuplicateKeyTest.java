@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 /** Tests of the BR-003 duplicate key (tasks.md Task 22 criteria 1 to 3; US-004.5, T-40). */
@@ -137,6 +138,20 @@ class DuplicateKeyTest {
             String once = DuplicateKey.textKey(randomAscii(random));
             assertThat(DuplicateKey.textKey(once)).isEqualTo(once);
         }
+    }
+
+    @Test
+    void whiteSpaceEqualsTheUnicodeWhiteSpacePropertyOverAllCodePoints() {
+        Pattern property = Pattern.compile("\\p{IsWhite_Space}");
+        int disagreements = 0;
+        for (int point = 0; point <= Character.MAX_CODE_POINT; point++) {
+            boolean expected = property.matcher(new String(Character.toChars(point))).matches();
+            if (DuplicateKey.isWhiteSpace(point) != expected) {
+                disagreements++;
+            }
+        }
+
+        assertThat(disagreements).isZero();
     }
 
     @Test

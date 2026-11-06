@@ -1,5 +1,6 @@
 package com.globant.globerbooks.controller;
 
+import com.globant.globerbooks.config.transport.QueryPolicy;
 import com.globant.globerbooks.dto.BookListResponse;
 import com.globant.globerbooks.dto.BookResponse;
 import com.globant.globerbooks.dto.CreateBookRequest;
@@ -10,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,12 +50,16 @@ public class BookController {
     }
 
     /**
-     * Lists the books, newest first.
+     * Lists the books, newest first. The optional {@code status} filter is read from the request
+     * attribute set by the gate, which has already decoded and checked it (never from the servlet
+     * parameter API).
      *
+     * @param status the checked filter value, or null for every book
      * @return {@code 200} with the books and their total
      */
     @GetMapping
-    public ResponseEntity<BookListResponse> list() {
-        return ResponseEntity.ok().contentType(JSON_UTF8).body(BookListResponse.of(service.list()));
+    public ResponseEntity<BookListResponse> list(
+            @RequestAttribute(name = QueryPolicy.STATUS_ATTRIBUTE, required = false) String status) {
+        return ResponseEntity.ok().contentType(JSON_UTF8).body(BookListResponse.of(service.list(status)));
     }
 }

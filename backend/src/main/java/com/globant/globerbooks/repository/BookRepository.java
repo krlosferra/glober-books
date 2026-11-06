@@ -22,4 +22,13 @@ public interface BookRepository extends JpaRepository<Book, String> {
      * @return the ordered books
      */
     List<Book> findByStatusOrderByDateAddedDescIdAsc(BookStatus status);
+
+    /**
+     * Reads the key columns of every book for the duplicate scan, in one query. The class-based projection
+     * makes Spring Data select the four columns of {@link BookKeyRow} through a constructor expression
+     * (no entity is loaded, no hand-written query).
+     *
+     * @return one row per stored book
+     */
+    List<BookKeyRow> findAllBy();
 }

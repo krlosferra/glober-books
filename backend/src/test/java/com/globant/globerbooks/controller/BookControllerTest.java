@@ -151,7 +151,7 @@ class BookControllerTest {
 
     @Test
     void listReturns200WithBooksAndTotal() throws Exception {
-        when(service.list()).thenReturn(List.of(STORED));
+        when(service.list(null)).thenReturn(List.of(STORED));
 
         mvc.perform(get("/api/v1/books").header("Host", HOST))
                 .andExpect(status().isOk())
@@ -162,11 +162,26 @@ class BookControllerTest {
 
     @Test
     void emptyListReturnsEmptyArrayAndZero() throws Exception {
-        when(service.list()).thenReturn(List.of());
+        when(service.list(null)).thenReturn(List.of());
 
         mvc.perform(get("/api/v1/books").header("Host", HOST))
                 .andExpect(status().isOk())
                 .andExpect(content().string("{\"books\":[],\"total\":0}"));
+    }
+
+    @Test
+    void listPassesTheStatusAttributeOfTheGateAndNullWhenThereIsNone() throws Exception {
+        when(service.list("reading")).thenReturn(List.of(STORED));
+
+        mvc.perform(get("/api/v1/books").header("Host", HOST).requestAttr("globerbooks.status", "reading"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1));
+        mvc.perform(get("/api/v1/books").header("Host", HOST))
+                .andExpect(status().isOk())
+                .andExpect(content().string("{\"books\":[],\"total\":0}"));
+
+        verify(service).list("reading");
+        verify(service).list(null);
     }
 
     @Test
