@@ -12,8 +12,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +39,7 @@ class StrictBodyIntegrationTest {
 
     private static final String BOOKS = "/api/v1/books";
     private static final String MALFORMED = "MALFORMED_REQUEST";
+    private static final AtomicBoolean WARMED = new AtomicBoolean();
     private static final List<String> ROWS = new ArrayList<>();
     private static final String VALID_TAIL = ",\"author\":\"b\"}";
 
@@ -52,6 +55,17 @@ class StrictBodyIntegrationTest {
     @BeforeAll
     static void writeFixture() throws IOException {
         Files.writeString(staticDir.resolve("index.html"), "<!doctype html><title>t</title>");
+    }
+
+    /** Sends untimed requests once so class loading and the first connection are not in a timed row. */
+    @BeforeEach
+    void warmUp() throws IOException {
+        if (WARMED.compareAndSet(false, true)) {
+            RawHttpClient client = new RawHttpClient(port);
+            byte[] valid = text("{\"title\":\"warm-up\",\"author\":\"b\"}");
+            client.request("POST", BOOKS, valid, "Content-Type: application/json", "Content-Length: " + valid.length);
+            client.request("POST", BOOKS, new byte[0], "Content-Type: application/json", "Content-Length: 0");
+        }
     }
 
     @AfterAll
