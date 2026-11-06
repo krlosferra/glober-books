@@ -4,6 +4,7 @@ import com.globant.globerbooks.config.transport.QueryPolicy;
 import com.globant.globerbooks.dto.BookListResponse;
 import com.globant.globerbooks.dto.BookResponse;
 import com.globant.globerbooks.dto.CreateBookRequest;
+import com.globant.globerbooks.dto.RatingRequest;
 import com.globant.globerbooks.dto.StatusRequest;
 import com.globant.globerbooks.service.BookService;
 import jakarta.validation.Valid;
@@ -100,5 +101,29 @@ public class BookController {
     @DeleteMapping("/{id}")
     public ResponseEntity<BookResponse> delete(@PathVariable("id") String id) {
         return ResponseEntity.ok().contentType(JSON_UTF8).body(service.discard(id));
+    }
+
+    /**
+     * Sets or replaces the rating. The body is read and checked before the service looks for the book.
+     *
+     * @param id the id text
+     * @param request the rating as written
+     * @return {@code 200} with the book after the change
+     */
+    @PutMapping("/{id}/rating")
+    public ResponseEntity<BookResponse> rate(@PathVariable("id") String id,
+            @Valid @RequestBody RatingRequest request) {
+        return ResponseEntity.ok().contentType(JSON_UTF8).body(service.rate(id, request.rating()));
+    }
+
+    /**
+     * Removes the rating. There is no body.
+     *
+     * @param id the id text
+     * @return {@code 200} with the book whose rating is null
+     */
+    @DeleteMapping("/{id}/rating")
+    public ResponseEntity<BookResponse> unrate(@PathVariable("id") String id) {
+        return ResponseEntity.ok().contentType(JSON_UTF8).body(service.unrate(id));
     }
 }

@@ -38,7 +38,8 @@ public class GlobalExceptionHandler {
     private static final List<String> FIELD_ORDER = List.of("title", "author", "status");
     private static final Set<String> FIXED_MESSAGES = Set.of("is required", "must not be empty",
             "must be between 1 and 500 characters", "must be between 1 and 200 characters",
-            "contains characters that are not allowed", "must be one of: unread, reading, completed");
+            "contains characters that are not allowed", BookValidationException.STATUS_MESSAGE,
+            BookValidationException.RATING_MESSAGE);
 
     private final ErrorBodyFactory factory;
     private final RouteTable routes;

@@ -4,6 +4,7 @@ import com.globant.globerbooks.domain.Book;
 import com.globant.globerbooks.domain.BookStatus;
 import com.globant.globerbooks.dto.BookResponse;
 import com.globant.globerbooks.dto.CreateBookRequest;
+import com.globant.globerbooks.dto.RatingValue;
 import com.globant.globerbooks.error.ApiException;
 import com.globant.globerbooks.error.DuplicateBookException;
 import com.globant.globerbooks.error.ErrorBody.FieldProblem;
@@ -36,7 +37,7 @@ public class BookService {
     private static final Comparator<BookKeyRow> EARLIEST = Comparator
             .comparing(BookKeyRow::dateAdded).thenComparing(BookKeyRow::id);
 
-    private static final String STATUS_MESSAGE = "must be one of: unread, reading, completed";
+    private static final String STATUS_MESSAGE = BookValidationException.STATUS_MESSAGE;
 
     private final BookRepository repository;
     private final Clock clock;
@@ -154,6 +155,47 @@ public class BookService {
         repository.delete(book);
         repository.flush();
         return removed;
+    }
+
+    /**
+     * Sets or replaces the rating of a completed book in one transaction (BR-002, BR-007, BR-012 steps 6
+     * to 8). The value is judged first, also for an unread or reading book and an unknown id, then the
+     * existence, then the status; the domain method is called only for a completed book. The domain
+     * refusal is not caught: an unexpected one is an internal error.
+     *
+     * @param id the id text, already checked by the gate
+     * @param rating the rating as written in the request
+     * @return the book after the change
+     * @throws BookValidationException {@code INVALID_RATING} when the value is not an integer from 1 to 5
+     * @throws ApiException {@code BOOK_NOT_FOUND}, or {@code RATING_NOT_ALLOWED} when not completed
+     */
+    @Transactional
+    public BookResponse rate(String id, RatingValue rating) {
+        if (!rating.isValid()) {
+            throw new BookValidationException(ErrorCode.INVALID_RATING,
+                    List.of(new FieldProblem("rating", BookValidationException.RATING_MESSAGE)));
+        }
+        Book book = find(id);
+        if (book.getStatus() != BookStatus.COMPLETED) {
+            throw new ApiException(ErrorCode.RATING_NOT_ALLOWED);
+        }
+        book.assignRating(rating.value());
+        return BookResponse.from(repository.saveAndFlush(book));
+    }
+
+    /**
+     * Removes the rating in one transaction (BR-013). It is idempotent: a book without a rating is
+     * returned as it is. Status and completion date stay.
+     *
+     * @param id the id text, already checked by the gate
+     * @return the book with a null rating
+     * @throws ApiException {@code BOOK_NOT_FOUND} when no book has this id
+     */
+    @Transactional
+    public BookResponse unrate(String id) {
+        Book book = find(id);
+        book.clearRating();
+        return BookResponse.from(repository.saveAndFlush(book));
     }
 
     private Book find(String id) {

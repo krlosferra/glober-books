@@ -215,6 +215,18 @@ class GlobalExceptionHandlerTest {
             throw new ApiException(ErrorCode.LIBRARY_FULL);
         }
 
+        @GetMapping("/rating")
+        String rating() {
+            throw new com.globant.globerbooks.service.BookValidationException(ErrorCode.INVALID_RATING,
+                    java.util.List.of(new ErrorBody.FieldProblem("rating",
+                            com.globant.globerbooks.service.BookValidationException.RATING_MESSAGE)));
+        }
+
+        @GetMapping("/domain-refusal")
+        String domainRefusal() {
+            throw new IllegalStateException("rating needs a completed book");
+        }
+
         @GetMapping("/duplicate")
         String duplicate() {
             throw new DuplicateBookException(new com.globant.globerbooks.domain.Book(
@@ -265,5 +277,24 @@ class GlobalExceptionHandlerTest {
         }
         assertThat(new ApiException(ErrorCode.LIBRARY_FULL).getMessage()).isEqualTo("LIBRARY_FULL");
         assertThat(new ApiException(ErrorCode.LIBRARY_FULL).status()).isEqualTo(409);
+    }
+
+    @Test
+    void invalidRatingGives400WithOneFixedDetailEntryAndNoValue() throws Exception {
+        failingMvc().perform(get("/probe/service/rating"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(JSON_UTF8))
+                .andExpect(content().string("{\"error\":\"Rating must be an integer from 1 to 5.\","
+                        + "\"code\":\"INVALID_RATING\",\"timestamp\":\"2026-02-19T10:00:00.123Z\","
+                        + "\"details\":[{\"field\":\"rating\",\"message\":\"must be an integer from 1 to 5\"}]}"));
+    }
+
+    @Test
+    void anUnexpectedDomainRefusalIsNeverMappedTo400AndGives500WithoutItsMessage() throws Exception {
+        failingMvc().perform(get("/probe/service/domain-refusal"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("completed book"))));
     }
 }
