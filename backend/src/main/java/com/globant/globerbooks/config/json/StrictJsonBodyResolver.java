@@ -21,7 +21,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectReader;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.type.TypeFactory;
 
 /**
  * Resolves a {@code @RequestBody} argument strictly (BR-012 step 5). The buffered body is decoded
@@ -32,7 +34,9 @@ import tools.jackson.databind.json.JsonMapper;
  */
 public class StrictJsonBodyResolver implements HandlerMethodArgumentResolver {
 
-    private final JsonMapper mapper;
+    private static final TypeFactory TYPES = TypeFactory.createDefaultInstance();
+
+    private final ObjectReader reader;
 
     /**
      * Creates the resolver.
@@ -40,7 +44,7 @@ public class StrictJsonBodyResolver implements HandlerMethodArgumentResolver {
      * @param mapper the strict mapper
      */
     public StrictJsonBodyResolver(JsonMapper mapper) {
-        this.mapper = mapper;
+        this.reader = mapper.reader();
     }
 
     @Override
@@ -56,7 +60,8 @@ public class StrictJsonBodyResolver implements HandlerMethodArgumentResolver {
         if (servlet == null) {
             throw new MalformedRequestException();
         }
-        Object value = parse(decode(servlet), mapper.constructType(parameter.getNestedGenericParameterType()));
+        JavaType type = TYPES.constructType(parameter.getNestedGenericParameterType());
+        Object value = parse(decode(servlet), type);
         if (value == null) {
             throw new MalformedRequestException();
         }
@@ -81,7 +86,7 @@ public class StrictJsonBodyResolver implements HandlerMethodArgumentResolver {
 
     private Object parse(String text, JavaType type) {
         try {
-            return mapper.readValue(text, type);
+            return reader.forType(type).readValue(text);
         } catch (JacksonException failure) {
             throw new MalformedRequestException();
         }

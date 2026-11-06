@@ -29,14 +29,21 @@ public class WebMvcConfig {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String name) {
-                if (bean instanceof RequestMappingHandlerAdapter adapter && adapter.getArgumentResolvers() != null) {
-                    List<HandlerMethodArgumentResolver> all = new ArrayList<>();
-                    all.add(new StrictJsonBodyResolver(mapper.getObject()));
-                    all.addAll(adapter.getArgumentResolvers());
-                    adapter.setArgumentResolvers(all);
+                if (bean instanceof RequestMappingHandlerAdapter adapter) {
+                    install(adapter, mapper.getObject());
                 }
                 return bean;
             }
         };
+    }
+
+    private static void install(RequestMappingHandlerAdapter adapter, JsonMapper mapper) {
+        List<HandlerMethodArgumentResolver> existing = adapter.getArgumentResolvers();
+        List<HandlerMethodArgumentResolver> all = new ArrayList<>();
+        all.add(new StrictJsonBodyResolver(mapper));
+        if (existing != null) {
+            all.addAll(existing);
+        }
+        adapter.setArgumentResolvers(all);
     }
 }
