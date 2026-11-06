@@ -1,11 +1,11 @@
 package com.globant.globerbooks.dto;
 
 import com.globant.globerbooks.config.BookText;
+import com.globant.globerbooks.config.json.StrictStringDeserializer;
 import com.globant.globerbooks.service.TextPolicy;
 import jakarta.validation.constraints.Pattern;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.annotation.JsonDeserialize;
-import tools.jackson.databind.deser.jdk.StringDeserializer;
 
 /**
  * Request body of {@code POST /api/v1/books} (spec 5.2). Components are declared in the order of
@@ -27,10 +27,11 @@ public record CreateBookRequest(
         Boolean allowDuplicate) {
 
     /**
-     * Reads {@code status} as text. A missing member stays null (the default {@code unread}); an
-     * explicit JSON null becomes the empty text, which is not a status (BR-001, DEC-016).
+     * Reads {@code status} as text, strictly (a number or boolean is a type mismatch). A missing
+     * member stays null (the default {@code unread}); an explicit JSON null becomes the empty
+     * text, which is not a status (BR-001, DEC-016).
      */
-    public static class StatusDeserializer extends StringDeserializer {
+    public static final class StatusDeserializer extends StrictStringDeserializer {
 
         @Override
         public Object getNullValue(DeserializationContext context) {
