@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.globant.globerbooks.config.ClockConfig;
 import com.globant.globerbooks.support.ChildJvm;
-import com.globant.globerbooks.support.ClaimChildMain;
 import com.globant.globerbooks.support.FileFacts;
 import com.globant.globerbooks.support.PoolFacts;
 import com.zaxxer.hikari.HikariDataSource;

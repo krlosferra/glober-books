@@ -3,6 +3,7 @@ package com.globant.globerbooks.config.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.globant.globerbooks.GloberBooksApplication;
+import com.globant.globerbooks.support.FileFacts;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -50,7 +51,8 @@ class StartupPolicyIntegrationTest {
 
     @Test
     void startsWithAnotherDatabasePath() throws IOException {
-        Path other = Files.createDirectory(tempDir.resolve("other")).resolve("library.db");
+        Path other = Files.createDirectory(tempDir.resolve("other"), FileFacts.dirAttr("rwx------"))
+                .resolve("library.db");
 
         try (ConfigurableApplicationContext context = start("127.0.0.1", "jdbc:sqlite:" + other)) {
             assertThat(context.isRunning()).isTrue();

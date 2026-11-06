@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-/** Starts {@link ClaimChildMain} in its own JVM (no shell string) and hashes files. */
+/** Starts {@code ClaimChildMain} in its own JVM (no shell string) and hashes files. */
 public final class ChildJvm {
 
     private static final int WAIT_SECONDS = 60;
@@ -19,7 +19,8 @@ public final class ChildJvm {
     private static ProcessBuilder childBuilder(String mode, Path file) {
         String java = Path.of(System.getProperty("java.home"), "bin", "java").toString();
         return new ProcessBuilder(java, "-cp", System.getProperty("java.class.path"),
-                ClaimChildMain.class.getName(), mode, file.toString()).redirectErrorStream(true);
+                "com.globant.globerbooks.config.sqlite.ClaimChildMain", mode, file.toString())
+                .redirectErrorStream(true);
     }
 
     public static Process startHolder(Path file) throws Exception {
