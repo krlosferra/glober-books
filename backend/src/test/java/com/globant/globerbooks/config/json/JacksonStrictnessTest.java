@@ -196,7 +196,6 @@ class JacksonStrictnessTest {
     @Test
     void refusesScalarCoercionOnlyBecauseTheSwitchIsOff() {
         JsonMapper relaxed = withMapper(cfg -> cfg.enable(MapperFeature.ALLOW_COERCION_OF_SCALARS));
-        pair(relaxed, "{\"flag\":\"true\"}", Flag.class);
         pair(relaxed, "{\"whole\":\"5\"}", Whole.class);
     }
 
@@ -208,8 +207,8 @@ class JacksonStrictnessTest {
     }
 
     @Test
-    void refusesNullBooleanOnlyBecauseOfTheNullOverride() {
-        // the override cannot be undone on the configured builder, so the control is a plain mapper
+    void refusesNullBooleanAndKeepsAbsentBooleanNull() {
+        // the control is a plain mapper: the library default reads null as a null Boolean
         pair(JsonMapper.builder().build(), "{\"flag\":null}", Flag.class);
         assertThat(STRICT.readValue("{}", Flag.class).flag()).isNull();
     }

@@ -1,19 +1,21 @@
 package com.globant.globerbooks.config.json;
 
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import org.springframework.boot.jackson.autoconfigure.JsonFactoryBuilderCustomizer;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.json.JsonFactoryBuilder;
 import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.MapperFeature;
 import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.deser.std.StdDeserializer;
 import tools.jackson.databind.module.SimpleModule;
 
 /**
@@ -94,9 +96,40 @@ public class JacksonConfig {
                 DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS,
                 DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT,
                 DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
-        builder.withConfigOverride(Boolean.class,
-                override -> override.setNullHandling(JsonSetter.Value.forValueNulls(Nulls.FAIL)));
-        builder.addModule(new SimpleModule("strict-string")
-                .addDeserializer(String.class, new StrictStringDeserializer()));
+        builder.addModule(new SimpleModule("strict-scalars")
+                .addDeserializer(String.class, new StrictStringDeserializer())
+                .addDeserializer(Boolean.class, new StrictBooleanDeserializer()));
+    }
+
+    /**
+     * Reads a JSON {@code true} or {@code false} and nothing else: text, numbers and an explicit
+     * {@code null} are type mismatches (T-21); a member that is absent stays null.
+     */
+    static final class StrictBooleanDeserializer extends StdDeserializer<Boolean> {
+
+        private static final long serialVersionUID = 1L;
+
+        StrictBooleanDeserializer() {
+            super(Boolean.class);
+        }
+
+        @Override
+        public Boolean deserialize(JsonParser parser, DeserializationContext context) {
+            JsonToken token = parser.currentToken();
+            if (token == JsonToken.VALUE_TRUE || token == JsonToken.VALUE_FALSE) {
+                return token == JsonToken.VALUE_TRUE;
+            }
+            return (Boolean) context.handleUnexpectedToken(Boolean.class, parser);
+        }
+
+        @Override
+        public Object getNullValue(DeserializationContext context) {
+            return context.reportInputMismatch(Boolean.class, "null is not a boolean");
+        }
+
+        @Override
+        public Object getAbsentValue(DeserializationContext context) {
+            return null;
+        }
     }
 }
