@@ -82,6 +82,34 @@ public final class SqliteDataSourceProvider {
         return pool;
     }
 
+    /**
+     * Starts the pool on a location vetted by {@link DataDirectoryGuard}: the guard has created or
+     * accepted the directory, the file and the native directory, and after the pool opens the file
+     * at the path must still be the file that was vetted. Not used by the packaged application yet
+     * (Task 34a-2 wires it).
+     *
+     * @param guarded the result of {@link DataDirectoryGuard#check(Path)}
+     * @return the started pool of one connection, with the schema applied
+     * @throws DataDirectoryGuard.Refusal with the identity reason when the file was swapped
+     */
+    public static HikariDataSource create(DataDirectoryGuard.Guarded guarded) {
+        Path absoluteFile = guarded.databaseFile();
+        String fileName = String.valueOf(absoluteFile.getFileName());
+        System.setProperty(TMPDIR_PROPERTY, guarded.nativeDirectory().toString());
+        HikariDataSource pool = openPool(absoluteFile, fileName);
+        try {
+            guarded.requireSameFile();
+            applySchema(pool);
+        } catch (DataDirectoryGuard.Refusal refusal) {
+            pool.close();
+            throw refusal;
+        } catch (SQLException | RuntimeException failure) {
+            pool.close();
+            throw new IllegalStateException("The database schema could not be applied to " + fileName, failure);
+        }
+        return pool;
+    }
+
     private static HikariDataSource openPool(Path absoluteFile, String fileName) {
         try {
             return new HikariDataSource(poolConfig(absoluteFile));

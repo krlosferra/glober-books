@@ -1,0 +1,68 @@
+# Handoff 150: Audit of Task 34a-1 (complete directory guard and file identity, not wired)
+- From: liaison
+- To: orchestrator
+- Phase: 4   Round: 1
+- Type: REVIEW_REPORT
+
+Mode: F (with G for the oracles). Artifacts: `git diff origin/main..HEAD` (4 commits on `feature/task-34a1-directory-guard`, base 1cecb43), handoffs 148 and 149, `DataDirectoryGuard`, `SqliteDataSourceProvider`, `DataDirectoryGuardTest`, `SqliteFileIdentityTest`, `TreeSnapshot`, `GuardChildMain`, tasks.md 0.6.5 Task 34a-1, spec US-009.3 and US-009.6, security.md SC-13, SC-39, SC-11, SC-37, SEC-F-178, SEC-F-181.
+
+## Verdict: ACCEPT Task 34a-1 (Liaison). Security verdict still required (protected surface, reviewed alone), then Sponsor gate.
+Compliance: criteria 1 to 5 and brief constraints 1 to 6 met. No BLOCKER, no MAJOR. Four MINOR points and follow-ups for 34a-2 below.
+
+I re-ran `cd backend && ./mvnw -o clean verify` myself: BUILD SUCCESS, "All coverage checks have been met". Failsafe 269 tests, 0 failures, 1 skipped (the existing root-only not-writable test in `SqliteStoreIntegrationTest`, the same skip as before). `DataDirectoryGuardTest` 33 tests, 0 skipped; `SqliteFileIdentityTest` 7 tests, 0 skipped. I did not re-measure the JaCoCo percentages of the delivery (95.7% / 90%); the 80% gate passed.
+
+## Criteria and constraints
+| # | Check | Result | Evidence |
+|---|---|---|---|
+| 1 | Creation 0700/0600 before any connection, umask-independent | PASS | `createsDirectoryWith0700AndFileWith0600UnderAnyUmask` runs a child JVM via `sh -c "umask N && exec java"` for 022, 000, 277, 077. My surefire output shows `dir=rwx------ file=rw------- tmp=rwx------` four times. The guard passes 0700/0600 at creation and sets them again explicitly. The test JVM umask is not relied on. |
+| 2 | Refusal: link as directory, file, in path, native dir, dangling; foreign owner; any group/other bit; file untouched | PASS | Each case goes through `assertRefused`: tree snapshot (type, mode, owner, link target, SHA-256) before and after is equal. 6 directory modes and 6 file modes. Dangling link: the target is not created. |
+| 3 | Not absolute, link in path, missing or non-directory parent, cannot create; fixed reason; nothing outside | PASS | Relative, non-normalized, null, root-level file (name count under 2); missing parent leaves `names(root)` empty; the 300-byte name gives `CANNOT_CREATE`. |
+| 4 | Fixed reasons | PASS | Enum `Reason` with one constant text each; `Refusal` carries only that text, no cause; `Guarded.toString()` returns "Guarded"; no logging in the guard. The test compares two different bad locations with the same text and checks that no path, owner or mode appears in any text. |
+| 5 | Identity with two distinct files; documented race limit; no test-only switch | PASS | `SqliteFileIdentityTest`: same file accepted, swapped file, link to the original, gone file refused, two distinct files differ, and the provider refuses a swap and closes the pool (a second `create(file)` then succeeds, proving the claim was released). Limit written in the Javadoc and delivery section 6. `grep` finds no new property or switch in `src/main`. |
+| 6 | Existing behaviour, 300 lines, no sleep | PASS | `SqliteStoreIntegrationTest` 16 run, 1 skipped as before; files 282, 297, 123, 231 lines. |
+
+## Key judgments
+**(a) Umask and "checks first, then creates".** Correct. `check` runs `inspect` on directory, `tmp` and file, and only then calls `createDirectory`/`createFile`. All refusals from inspection (link, type, owner, mode) therefore happen before any write, and the snapshot test proves it. Creating with the 0700/0600 attribute means the object never exists wider than that. Caveat in MINOR-1.
+
+**(b) Reasons and foreign owner.** Fixed enum confirmed; `Refusal` extends `IllegalStateException` with only the constant text. Foreign-owner tests really ran: the sandbox is uid 0, `Files.setOwner` to `nobody` worked, the surefire output holds two `REFUSED reason=FOREIGN_OWNER` lines and the report shows 0 skipped. Without root the helper aborts with an explicit message (not silent), as the brief allows. One oracle note: the "no owner in any text" assertion uses `System.getProperty("user.name")`, which is "root" here; that is acceptable.
+
+**(c) Identity and the race.** Honest and acceptable as a Sponsor-agreed limit. The delivery and Javadoc state that the swap between check and open cannot be closed, that the check is after the pool opens (so pragmas can already have run on a swapped file; the schema is not applied, because `requireSameFile` precedes `applySchema`), and that the 0700 owner-only directory leaves only the same user or root as the attacker (R-08 level). The swap before the open is tested; the race itself is not testable without an A-09 switch. Handoff 027 asks the Sponsor to agree: the orchestrator must put this limit in front of the Sponsor at the gate (it is not yet recorded as agreed). `fileKey` may be null on some platforms; then only the regular-file check remains, which is stated ("null where the platform has none").
+
+**(d) Deviations.**
+- The `tmp` native directory is not new: `SqliteDataSourceProvider.create(Path)` already created `<data dir>/tmp` (0700) for `org.sqlite.tmpdir` (SC-32 "private tmpdir", SC-13 evidence in Task 03a, handoff 052 "tmp 0700"). The guard moving that creation in front of the connection is consistent with the plan; no spec change. Acceptable. It is not named in US-009.6 or in criteria 1 to 5, so MINOR-4 asks 34a-2 to mention it.
+- Two helpers (`TreeSnapshot`, `GuardChildMain`): test-only, under `src/test`, justified by the 300-line limit and by the need for a child process for umask. Accepted. They are not production code and add no switch.
+- File sizes 282/297: within the limit. `DataDirectoryGuardTest` at 297 leaves no room; 34a-2 must add its tests in new classes.
+- `create(Path)` and `create(String)` left unchanged: correct for this task (brief constraint 6 requires existing tests green; the unwired guard must not change the jar). Cost: while both paths exist, a caller that uses `create(Path)` gets no refusal, no 0700/0600 creation guarantee for the directory and no identity check. Today only tests and nothing in the packaged jar call either, so the control surface does not weaken; it simply is not yet strengthened (SEC-F-178 open, as stated). 34a-2 must decide (see follow-up F-1).
+- Javadoc rewording for the A-09 scan: the scan forbids the words "test-only" in `src/main`; the first build failed once and the fix touched only a comment, no test. Accepted. Note the sentence in the class Javadoc now reads "a switch that exists only for tests (A-09)"; the line is long (over 100 columns) but Checkstyle passed.
+
+**(e) Symlink in every path component.** It follows criterion 3 ("a symbolic link in the guarded path") and SEC-F-098, which is stricter than the US-009.6 text ("the data directory or the database file is a symbolic link"). The stricter reading is the task's, approved with the 0.6.5 amendment, and it is the safer one (a link above the directory lets a same-user process redirect the data). It is spec-compatible (refusing more than the minimum is allowed where the task criterion says so), but it has a user-facing cost:
+- It refuses legitimate setups when an ancestor is a link: macOS (`/tmp`, `/var`, `/etc` are links to `/private/...`, and `java.io.tmpdir` is under `/var/folders`), a home directory reached through an automount or a `/home` link, a project folder under a linked mount. On a typical Linux install (real `/home`, real `/tmp`) there is no effect. The delivery states this (limit 3).
+- The refusal text is fixed and holds no path, so the user cannot see which component was the link. README run instructions (34a-2 or the docs task) must say: give the real path of the data directory (for example the output of `realpath`), and that a path through a link is refused on purpose. 34a-2 must resolve a relative or default location with `toAbsolutePath().normalize()` and not `toRealPath()`, otherwise the check is defeated or a legitimate relative path is wrongly accepted. This is follow-up F-2.
+- Note the relative default `data/` is resolved by the JVM from the working directory, which the OS reports as a real path, so the default case should pass; 34a-2 must prove it on the jar.
+
+**(f) Not wired.** Confirmed. `git diff --name-only origin/main..HEAD` has no `pom.xml`, `application.yml`, Spring configuration or `backend/config/**` change. The only production edits are the new guard and the new overload in the provider; nothing calls `create(Guarded)` from `src/main`. SC-13 for the jar stays FAILED and SEC-F-178 open; tasks.md and the delivery say so.
+
+**(g) Attribution.** `git log origin/main..HEAD --format=%B` has no tool, model, vendor, trailer, session link or "Generated" text; author is the Sponsor's identity (`krlosferra`); I grepped the new sources for those names: none. Commit subjects follow Conventional Commits with `[Task-34a-1]`; branch name follows `<type>/task-NN-<slug>`. The Layer 1b check passes. Atomic: PM docs and brief, guard, Javadoc fix, delivery docs.
+
+## Findings
+| ID | Severity | Location | Finding | Proposed resolution |
+|---|---|---|---|---|
+| L-1 | MINOR | `DataDirectoryGuard.check` lines 71 to 84 | "A refusal creates nothing" holds for every inspection refusal. A `CANNOT_CREATE` after a partial creation (for example the directory exists now and the file name is too long) leaves the newly created directory and `tmp` in place; the test asserts `names(root)` is `data`. Inside the guarded directory, so within criterion 3, but the doc sentence "creates, changes and deletes nothing" in the Javadoc is stronger than the behaviour. | Reword the Javadoc to "inspection refusals create nothing; a failure while creating can leave the parts created so far, always inside the guarded directory". No code change needed. |
+| L-2 | MINOR | `currentUser()` | The expected owner is the principal named by the system property `user.name`, which can be set by `-Duser.name` and differs from the effective uid after `sudo` or in some containers. A failed lookup fails closed (good). A wrong property value makes the guard refuse a good directory, or accept a directory owned by the named user. Same-user trust model (R-08) makes this low. | 34a-2: compare with the owner of the process (for example the owner of a file the guard just created, or the owner of the running process) instead of the property, or record the choice. Not blocking. |
+| L-3 | MINOR | `inspect` / `requireOwnerOnly` | A directory or file narrower than owner-only, for example 0000 or 0500 on the directory, is accepted (the test `acceptsAFileNarrowerThan0600` documents it for the file). That matches "no group or other bit" in US-009.6 and fails later with an open error, mapped by 34a-2. | None now. 34a-2 should make sure the analyzer maps the later SQLite open error to a fixed reason. |
+| L-4 | MINOR | tasks.md / spec | The guard also owns the `tmp` native directory; neither US-009.6 nor criteria 1 to 5 name it. | PM may add one clause to 34a-2 criterion 2 ("and the private native directory `tmp` 0700"); no spec change needed for this task. |
+| L-5 | MINOR | `SqliteDataSourceProvider.create(Guarded)` | The identity check runs after the pool opened and the per-connection pragmas ran, so a swapped file already received pragma statements. Criterion 5 says exactly "after the pool opens", so this is as specified. | Mention in the Sponsor explanation of the limit (handoff 027). |
+
+## Follow-ups for Task 34a-2 (the PM and orchestrator should carry them into the brief)
+- F-1: Decide the fate of `create(Path)` and `create(String)`. Recommendation: the application bean uses only `check` then `create(Guarded)`; the old overloads are removed or made package-private, and the existing tests that need lax modes (for example `doesNotChangeModesOfAnExistingDirectoryAndFile` with `rwxr-x---`) are rewritten to use 0700, or keep a package-private path for tests only if no A-09 problem arises. This is the only way to avoid two creation paths, one unguarded.
+- F-2: Resolve the configured location with `toAbsolutePath().normalize()`, never `toRealPath()`; document in the README that a data path through a symbolic link is refused and how to pass the real path; prove the default relative location on the jar.
+- F-3: Prove on the jar what 34a-1 proves only at unit level: modes under umask 022/000, sidecar `-journal` no wider than 0600 (SEC-F-181 vacuous so far), every refusal reason on the console with no path (SC-11, SC-37) through the `StartupFailureAnalyzer`.
+- F-4: Order the guard after `StartupPolicy` and before the first connection, and keep the second-instance claim (US-009.7) working with `create(Guarded)`; the provider's claim code is shared, the unit test shows the pool is released on a refusal.
+- F-5: Sponsor agreement on the check/open race (handoff 027) is to be recorded in the Decision Log or the gate note; Security SEC-F-178 re-probe after 34a-2.
+
+## Next step
+1. Security review of 34a-1 alone (protected surface; it should check the guard code, the umask child test and the foreign-owner test; the veto is theirs).
+2. If Security passes: Sponsor gate for 34a-1, including agreement on the documented race limit; then the PR and squash merge as the git workflow says (the Sponsor's approval is the request to merge). Remind: `progress.md` is already updated in the branch.
+3. Do not tag or release: SEC-F-178 blocks until 34a-2 is merged and re-probed.
+
+I made no edit outside this file. I did not change `status.md` (the audit column is the orchestrator's to set from this verdict, ACCEPT).
