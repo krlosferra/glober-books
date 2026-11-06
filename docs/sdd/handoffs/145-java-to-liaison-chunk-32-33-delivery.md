@@ -1,16 +1,15 @@
-# Handoff 145: Delivery, review chunk 32+33 (PARTIAL: Task 32 done, Task 33 stopped on a production gap)
+# Handoff 145: Delivery, review chunk 32+33 (Task 32 and Task 33 done; Task 33 criterion 3 per coordinator decision (a))
 - From: java
 - To: liaison (via orchestrator)
 - Phase: 4   Round: 1
 - Type: TASK_DELIVERY (partial) and STOP report
 
 ## Resume point
-- DONE: Task 32 built, `cd backend && ./mvnw clean verify` green, committed locally as 0fa7428 `[Task-32]`.
-- DONE (uncommitted, in the working tree): Task 33 files `support/AppProcess.java` and `DurabilityIntegrationTest.java`. They run the packaged jar as a separate process. All durability assertions pass; criterion 3 (SC-13 modes) FAILS on production behaviour (below), so the strict test is red and is NOT committed.
-- NEXT: the orchestrator decides (see Decision needed). After that: commit Task 33, run `./mvnw clean verify`, finish the criteria table, push.
-- Nothing pushed. No trailer or session link in any commit.
+- DONE: Task 32 (commit 0fa7428, `[Task-32]`). Task 33 committed `test(backend): Task 33 durability across restart and kill [Task-33]` (files `support/AppProcess.java`, `DurabilityIntegrationTest.java`) after the coordinator decision (a): the test pre-creates the directory 0700 and the empty database file 0600, then asserts after every phase (start, operation, normal stop, kill, restart) that the directory is not wider than 0700, the database and companion files not wider than 0600, and owned by the test user. A marked comment says creation modes are proved in Task 34a (SC-13).
+- Green run of the strict version: `cd backend && ./mvnw clean verify`: 900 unit, 269 integration (0 failures, 1 existing skip), `All coverage checks have been met`, `BUILD SUCCESS`, 4 m 49 s; `DurabilityIntegrationTest` 5 tests in 161.9 s (about 32 s each, none over 60 s). 20 kill rounds ran. Leftover processes after the run: 0.
+- NEXT: Liaison audit and Security review of the chunk; the orchestrator pushes. Nothing pushed. No trailer or session link.
 
-## STOP: production gap found by Task 33 (not fixed, not weakened)
+## Production gap found by Task 33 (resolved by decision (a); not fixed in this chunk)
 `SqliteDataSourceProvider` (claim, 0700/0600 creation, `tmp` directory, locking) is used only by tests (`grep -rl SqliteDataSourceProvider backend/src` lists the provider, `SqliteStoreIntegrationTest` and `ClaimChildMain`). The packaged application builds its data source from Spring Boot auto-configuration (`spring.datasource.url`, Hikari pool of 1), so in the jar:
 - a missing database file is created by SQLite with the process umask: `library.db` is `rw-r--r--` (0644), the data directory must already exist (the app does not create it: `SQLITE_CANTOPEN`), no `tmp` directory exists;
 - SC-13 criterion 3 of Task 33 (file 0600) therefore fails: `library.db has mode rw-r--r--` in all 5 tests.
@@ -62,6 +61,40 @@ A-09 grep: `grep -rniE "create trigger|raise\(|faultinjection|appprocess|x-probe
 ```
 ### git log origin/main..HEAD --format='%an <%ae>%n%B---'
 ```
+krlosferra <carlos.ferra@globant.com>
+test(backend): Task 32 concurrency races and forced-failure rollback [Task-32]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(handoff): chunk 32+33 brief, Task 31b done [Task-32]
+---
+```
+
+## Final state after decision (a)
+Observed modes with the strict test: directory `rwx------`, `library.db` `rw-------` (pre-created), never widened by the application at any phase; no `-journal` file at the kill points. Final `git diff --stat origin/main..HEAD` and author log are below (replace the earlier snapshot).
+```
+ .../globerbooks/ConcurrencyIntegrationTest.java    | 120 ++++++++++++
+ .../ConcurrencyRaceIntegrationTest.java            | 169 ++++++++++++++++
+ .../globerbooks/DurabilityIntegrationTest.java     | 218 +++++++++++++++++++++
+ .../globerbooks/FaultInjectionIntegrationTest.java | 167 ++++++++++++++++
+ .../com/globant/globerbooks/support/ApiCalls.java  | 101 ++++++++++
+ .../globant/globerbooks/support/AppProcess.java    | 178 +++++++++++++++++
+ .../globerbooks/support/FaultInjection.java        |  53 +++++
+ .../144-orchestrator-to-java-chunk-32-33-brief.md  |  25 +++
+ .../145-java-to-liaison-chunk-32-33-delivery.md    |  73 +++++++
+ docs/sdd/progress.md                               |   8 +
+ docs/sdd/status.md                                 |   2 +-
+ 11 files changed, 1113 insertions(+), 1 deletion(-)
+```
+```
+krlosferra <carlos.ferra@globant.com>
+docs(handoff): Task 33 delivery evidence and progress [Task-33]
+---
+krlosferra <carlos.ferra@globant.com>
+test(backend): Task 33 durability across restart and kill [Task-33]
+---
+krlosferra <carlos.ferra@globant.com>
+docs(handoff): chunk 32+33 partial delivery and stop report [Task-33]
+---
 krlosferra <carlos.ferra@globant.com>
 test(backend): Task 32 concurrency races and forced-failure rollback [Task-32]
 ---
