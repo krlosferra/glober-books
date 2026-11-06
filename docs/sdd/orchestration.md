@@ -42,7 +42,9 @@ Phase 6  Contrast       Sponsor
 2. Liaison reviews the plan (Mode D). PM then builds `tasks.md`: vertical slices, each task tagged `backend`, `frontend` or `integration`, with dependencies and the API contract clauses it relies on. Each task header carries `Security: per task` or `Security: increment` (PM).
 3. Liaison reviews the backlog; Sponsor approves.
 
-### Phase 4 detail (per task)
+### Phase 4 detail (per task; review chunks)
+By constitution 1.6 the orchestrator may group 2 to 4 related, non-protected tasks into a review chunk: briefs and implementation stay per task and per commit; the Liaison audit, the Security review and the pull request cover the chunk once. Protected-surface tasks are never chunked, and each increment ends with a full review. The orchestrator names the chunk in the first brief and in `status.md` (one row per task, same pull request number).
+
 1. **Select:** orchestrator reads `docs/sdd/status.md` and picks tasks that are `READY` (Definition of Ready met, dependencies `DONE`). It also lists remote branches (`git ls-remote --heads origin '*/task-*'`) to make sure no one already holds the item. `DONE`, `IN_PROGRESS`, `IN_REVIEW` and `BLOCKED` items are never dispatched. On dispatch it sets the row to `IN_PROGRESS` with agent and branch.
 2. **Brief:** Liaison writes a TASK_BRIEF per task (Mode E).
 3. **Implement:** Java Architect and/or Frontend Developer work **in parallel** when the tasks are independent (see section 4). Each works on its own branch and delivers a TASK_DELIVERY.
