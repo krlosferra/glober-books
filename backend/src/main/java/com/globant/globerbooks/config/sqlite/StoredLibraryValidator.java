@@ -8,7 +8,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.Objects;
@@ -38,6 +40,8 @@ public final class StoredLibraryValidator {
             "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
     private static final Pattern DATE_FORMAT = Pattern.compile(
             "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z");
+    private static final DateTimeFormatter STRICT_TIMESTAMP = DateTimeFormatter
+            .ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSS'Z'").withResolverStyle(ResolverStyle.STRICT);
     private static final String SQL_OBJECTS = "SELECT name, type, tbl_name, sql FROM sqlite_master";
     private static final String SQL_QUICK_CHECK = "PRAGMA quick_check";
     private static final String SQL_PRECHECK = "SELECT typeof(id), typeof(title), typeof(author), typeof(status), "
@@ -263,7 +267,7 @@ public final class StoredLibraryValidator {
             return false;
         }
         try {
-            Instant.parse(text);
+            LocalDateTime.parse(text, STRICT_TIMESTAMP);
             return true;
         } catch (DateTimeParseException failure) {
             return false;
