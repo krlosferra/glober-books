@@ -32,14 +32,15 @@ final class StoredLibraryHeader {
      * {@code -journal} exists, because the page count is valid only after a commit.
      *
      * @param databaseFile the vetted database file
+     * @return true when the file has zero length (nothing to validate, the schema is created)
      * @throws StoredLibraryValidator.Refusal for a file that is not a database, is WAL-marked or is damaged
      * @throws DataDirectoryGuard.Refusal with the unavailable reason when another process holds the file
      */
-    static void check(Path databaseFile) {
+    static boolean check(Path databaseFile) {
         try (FileChannel channel = FileChannel.open(databaseFile, StandardOpenOption.READ)) {
             long size = channel.size();
             if (size == 0) {
-                return;
+                return true;
             }
             FileLock lock = channel.tryLock(0, Long.MAX_VALUE, true);
             if (lock == null) {
@@ -50,6 +51,7 @@ final class StoredLibraryHeader {
                 continue;
             }
             require(header.array(), header.position(), size, hasHotJournal(databaseFile));
+            return false;
         } catch (IOException | OverlappingFileLockException failure) {
             throw new DataDirectoryGuard.Refusal(DataDirectoryGuard.Reason.DATABASE_UNAVAILABLE);
         }

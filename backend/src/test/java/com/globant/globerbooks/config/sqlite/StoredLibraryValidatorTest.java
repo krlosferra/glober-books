@@ -82,6 +82,10 @@ class StoredLibraryValidatorTest {
         file = StoredLibraryFixtures.emptyFile(temp.resolve("library.db"));
 
         assertThat(headerRefusal()).isNull();
+        assertThat(StoredLibraryHeader.check(file)).as("zero length: nothing to validate").isTrue();
+        Files.delete(file);
+        library(1);
+        assertThat(StoredLibraryHeader.check(file)).as("non-empty: validate").isFalse();
     }
 
     @Test

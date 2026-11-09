@@ -103,7 +103,7 @@ public final class SqliteDataSourceProvider {
         Path absoluteFile = guarded.databaseFile();
         String fileName = String.valueOf(absoluteFile.getFileName());
         System.setProperty(TMPDIR_PROPERTY, guarded.nativeDirectory().toString());
-        StoredLibraryHeader.check(absoluteFile);
+        boolean emptyFile = StoredLibraryHeader.check(absoluteFile);
         HikariDataSource pool;
         try {
             pool = openPool(absoluteFile, fileName);
@@ -114,7 +114,7 @@ public final class SqliteDataSourceProvider {
         }
         try {
             guarded.requireSameFile();
-            validateStoredLibrary(pool, absoluteFile);
+            validateStoredLibrary(pool, emptyFile);
             applySchema(pool);
         } catch (DataDirectoryGuard.Refusal | StoredLibraryValidator.Refusal refusal) {
             pool.close();
@@ -126,14 +126,9 @@ public final class SqliteDataSourceProvider {
         return pool;
     }
 
-    private static void validateStoredLibrary(HikariDataSource pool, Path absoluteFile)
-            throws SQLException {
-        try {
-            if (Files.size(absoluteFile) == 0) {
-                return;
-            }
-        } catch (IOException failure) {
-            throw new DataDirectoryGuard.Refusal(DataDirectoryGuard.Reason.DATABASE_UNAVAILABLE);
+    private static void validateStoredLibrary(HikariDataSource pool, boolean emptyFile) throws SQLException {
+        if (emptyFile) {
+            return;
         }
         try (Connection connection = pool.getConnection(); Statement statement = connection.createStatement()) {
             statement.execute(SQL_QUERY_ONLY_ON);
