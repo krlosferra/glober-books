@@ -9,6 +9,7 @@ import com.globant.globerbooks.support.FileFacts;
 import com.globant.globerbooks.support.HotJournalWriter;
 import com.globant.globerbooks.support.StoredLibraryFixtures;
 import com.globant.globerbooks.support.TreeSnapshot;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -47,6 +48,9 @@ class HotJournalIntegrationTest {
 
     private String leaveJournalAndReferenceHash() throws Exception {
         long committedSize = Files.size(file);
+        String committedHash = FileFacts.sha256(file);
+        assertThat(new String(Files.readAllBytes(file), StandardCharsets.ISO_8859_1))
+                .as("the marker is in the file before the writer runs").contains(StoredLibraryFixtures.MARKER);
         HotJournalWriter.leaveHotJournal(file);
         Path scratch = Files.createDirectory(temp.resolve("reference"));
         String reference = HotJournalWriter.hashAfterReferenceRollback(file, scratch);
@@ -55,6 +59,8 @@ class HotJournalIntegrationTest {
                 + Files.size(HotJournalWriter.journalOf(file)) + " sha_before_start=" + FileFacts.sha256(file)
                 + " sha_after_reference_rollback=" + reference);
         assertThat(Files.size(file)).as("the file grew").isGreaterThan(committedSize);
+        assertThat(reference).as("the rollback restores exactly the committed bytes")
+                .isEqualTo(committedHash);
         return reference;
     }
 
