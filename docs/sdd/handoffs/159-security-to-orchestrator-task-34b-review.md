@@ -56,3 +56,28 @@ No CRITICAL or HIGH finding. Conditions, closed before merge:
 - C-1: SEC-F-189 fixed (refuse when `-wal` or `-shm` exists beside the database before the pool opens, with a test and a re-probe by Security), or the Sponsor accepts it in the R-20 row.
 - C-2: SEC-F-190 fixed in the header test, or recorded in US-009.5 and accepted (LOW).
 Non-blocking: README, the wording of the delivery claim "the start writes nothing" (true only for valid headers), the brief claim "one oversized cell is never loaded" (SEC-F-191), the Liaison's question on SQLite deleting a garbage journal (my answer: acceptable, section 3). Next step: Liaison audit, then the Java architect applies C-1 and C-2 as one small follow-up commit, Security re-verifies, then the Sponsor gate. No git write was made by me; the repository is unmodified except `docs/sdd/security.md`, `docs/sdd/status.md` and this file.
+
+## 8. Re-verification (2026-11-09, HEAD 1f1bed0, diff 29eb414..HEAD)
+
+Scope: commits 21e0804 and 1f1bed0 (production change: `StoredLibraryHeader` only, +21/-2 lines, plus tests, README, notes). Method: read the diff and the follow-up section of handoff 157; built a jar from `git archive HEAD` in a scratch directory (`./mvnw -o -DskipTests package`), ran it on loopback ports 28431 to 28446 (not 8080, 18080) with throwaway 0700 data directories; Python `sqlite3` 3.45.1 to craft files; every process stopped (`pgrep` empty at the end); the repository was not modified except this file, `security.md` and the Security cell of `status.md`.
+
+### SEC-F-189 (C-1): CLOSED
+- My attack reproduced exactly (valid file, hand-built journal with a correct checksum whose page 1 has bytes 18 and 19 = 2, planted genuine uncheckpointed `-wal` with table `evil`/row `ATTACKER`): exit 1, WAL_MARKED, SHA-256 of the main file and of the `-wal` unchanged, journal untouched, `ATTACKER` not in the main file, no new files.
+- Also refused WAL_MARKED, exit 1, all files unchanged: `-wal` alone; `-shm` alone; dangling symbolic-link `-wal`; symbolic-link `-wal` to an existing file; symbolic-link `-shm`; `-wal` that is a directory; zero-length main file plus `-wal`.
+- Legitimate paths still work: fresh start creates the file (0600), insert, SIGTERM stop (exit 143), two more start/stop cycles; no `-wal` or `-shm` ever appeared (journal mode `delete`).
+- Journal alone (no `-wal`), page 1 image carrying the WAL marker: SQLite rolls it back, the start fails closed (exit 1, generic unavailable reason), main file keeps bytes 2/2 and the next start refuses it as WAL_MARKED; nothing from a WAL is applied, no `-wal`/`-shm` created. This is within R-20.
+
+### SEC-F-190 (C-2): CLOSED
+- No journal, page count 0 (hash `de826547..`): exit 1 DAMAGED, hash unchanged. No journal, byte 92 different from 24: exit 1 DAMAGED (file not rewritten).
+- Hot journal (genuine: writer with `cache_size=8` snapshotted mid-transaction, 1.6 MB journal) with the main header forced to page count 0 and bytes 24/92 different (valid-for 9 vs 10): accepted, journal rolled back, app serves the data, marker rows gone, header normalised by SQLite. Genuine hot journal with an intact header: recovered and accepted as before.
+- Valid files accepted: freshly created by the app (24=2, 28=3, 92=2, 12,288 bytes); grown by 3000 rows to 415 pages (24=3, 92=3) then accepted; emptied and VACUUMed (24=5, 28=3, 92=5, 12,288 bytes) then accepted. Legacy semantics: a file with bytes 24 and 92 both 0 (pre-3.7.0 writer) and a correct size is accepted, since the test is equality; only a mismatch or a zero page count is refused, which SQLite itself treats as "page count in header not trusted". A legitimate file written by a current or legacy SQLite is not wrongly refused in anything I could build; a file from a non-conforming writer with stale byte 92 would be refused (by design).
+- kill -9 during a stream of POSTs, 5 rounds then 3 more starts: every restart accepted, all data readable (464 rows). A kill can leave a non-empty `-journal` with a zeroed header (not hot, ignored by SQLite); the header test treats it as "journal present" and skips the count tests, as designed in 34b; the file is one this application wrote, so no regression. No `-wal` or `-shm` ever left behind, so the next start never refuses because of them.
+
+### New issues from the fix
+- None blocking. INFO (accepted under R-20/R-25): (a) a same-user actor who plants a `-wal` or `-shm` makes the start refuse (denial of service, recoverable by deleting the file); (b) a window between the `-wal`/`-shm` test and the open exists (the existing header-to-open window as well), but the actor needs write access to the 0700 data directory and could edit the main file directly (R-25); not tested as a race, no cheap way to hit it from outside; (c) a zero-header leftover `-journal` after SIGKILL weakens the SEC-F-190 test for that one start (same-user actor could do it deliberately; effect limited to SQLite rewriting the header on a file that SQLite then validates).
+
+### Not verified
+Untested residuals listed by the delivery (journal that is a symbolic link, zero-length main file plus non-empty journal, non-POSIX file system); no unprivileged user (ran as root); no power loss; `clean verify` not re-run by me (not needed for this check). Public advisory databases not re-queried (no dependency change in the diff).
+
+### Verdict: PASS
+C-1 and C-2 closed on evidence. SC-32 and SC-39: VERIFIED (conditions lifted). No CRITICAL, HIGH, MEDIUM or LOW finding open from this task; SEC-F-186 remainder and SEC-F-191 stay LOW as before. Next step: Sponsor gate for Task 34b.
