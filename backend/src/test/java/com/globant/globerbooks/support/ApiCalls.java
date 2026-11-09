@@ -27,6 +27,7 @@ public final class ApiCalls {
     private final HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
     private final JsonMapper json = JsonMapper.builder().build();
     private final String base;
+    private final int port;
 
     /**
      * Creates a client for one loopback port.
@@ -34,7 +35,17 @@ public final class ApiCalls {
      * @param port the port of the application under test
      */
     public ApiCalls(int port) {
+        this.port = port;
         this.base = "http://127.0.0.1:" + port;
+    }
+
+    /**
+     * Returns the port this client talks to.
+     *
+     * @return the loopback port
+     */
+    public int port() {
+        return port;
     }
 
     /** One answer: status, error code (empty when the body has none) and the raw body. */
