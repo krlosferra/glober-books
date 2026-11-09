@@ -39,6 +39,8 @@ public final class SqliteDataSourceProvider {
     private static final String SCHEMA_RESOURCE = "schema.sql";
     private static final int BUSY_TIMEOUT_MILLIS = 5000;
     private static final String SQL_TRUSTED_SCHEMA_OFF = "PRAGMA trusted_schema = OFF";
+    private static final String SQL_QUERY_ONLY_ON = "PRAGMA query_only = ON";
+    private static final String SQL_QUERY_ONLY_OFF = "PRAGMA query_only = OFF";
     private static final String SQL_CLAIM_BEGIN = "BEGIN EXCLUSIVE";
     private static final String SQL_CLAIM_COMMIT = "COMMIT";
     private static final String SQL_JOURNAL_MODE = "PRAGMA journal_mode";
@@ -101,17 +103,20 @@ public final class SqliteDataSourceProvider {
         Path absoluteFile = guarded.databaseFile();
         String fileName = String.valueOf(absoluteFile.getFileName());
         System.setProperty(TMPDIR_PROPERTY, guarded.nativeDirectory().toString());
+        StoredLibraryHeader.check(absoluteFile);
         HikariDataSource pool;
         try {
             pool = openPool(absoluteFile, fileName);
         } catch (IllegalStateException failure) {
             throw new DataDirectoryGuard.Refusal(DataDirectoryGuard.Reason.DATABASE_UNAVAILABLE);
+        } finally {
+            NativeDirectoryModes.narrow(guarded.nativeDirectory());
         }
-        NativeDirectoryModes.narrow(guarded.nativeDirectory());
         try {
             guarded.requireSameFile();
+            validateStoredLibrary(pool, absoluteFile);
             applySchema(pool);
-        } catch (DataDirectoryGuard.Refusal refusal) {
+        } catch (DataDirectoryGuard.Refusal | StoredLibraryValidator.Refusal refusal) {
             pool.close();
             throw refusal;
         } catch (SQLException | RuntimeException failure) {
@@ -119,6 +124,25 @@ public final class SqliteDataSourceProvider {
             throw new DataDirectoryGuard.Refusal(DataDirectoryGuard.Reason.DATABASE_UNAVAILABLE);
         }
         return pool;
+    }
+
+    private static void validateStoredLibrary(HikariDataSource pool, Path absoluteFile)
+            throws SQLException {
+        try {
+            if (Files.size(absoluteFile) == 0) {
+                return;
+            }
+        } catch (IOException failure) {
+            throw new DataDirectoryGuard.Refusal(DataDirectoryGuard.Reason.DATABASE_UNAVAILABLE);
+        }
+        try (Connection connection = pool.getConnection(); Statement statement = connection.createStatement()) {
+            statement.execute(SQL_QUERY_ONLY_ON);
+            try {
+                StoredLibraryValidator.validate(connection);
+            } finally {
+                statement.execute(SQL_QUERY_ONLY_OFF);
+            }
+        }
     }
 
     private static HikariDataSource openPool(Path absoluteFile, String fileName) {
