@@ -7,6 +7,7 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
@@ -37,6 +38,7 @@ final class StoredLibraryHeader {
      * @throws DataDirectoryGuard.Refusal with the unavailable reason when another process holds the file
      */
     static boolean check(Path databaseFile) {
+        requireNoWalFiles(databaseFile);
         try (FileChannel channel = FileChannel.open(databaseFile, StandardOpenOption.READ)) {
             long size = channel.size();
             if (size == 0) {
@@ -77,8 +79,25 @@ final class StoredLibraryHeader {
         }
         long pageCount = fields.getInt(28) & 0xFFFFFFFFL;
         boolean countIsValid = pageCount != 0 && fields.getInt(24) == fields.getInt(92);
-        if (!journalPresent && countIsValid && size != pageSize * pageCount) {
+        if (!journalPresent && !countIsValid) {
             throw new StoredLibraryValidator.Refusal(StoredLibraryValidator.Reason.DAMAGED);
+        }
+        if (!journalPresent && size != pageSize * pageCount) {
+            throw new StoredLibraryValidator.Refusal(StoredLibraryValidator.Reason.DAMAGED);
+        }
+    }
+
+    /**
+     * Refuses a {@code -wal} or {@code -shm} file beside the database, whatever the journal state, links
+     * included (SEC-F-189): the application never creates them (rollback journal only), and a planted
+     * journal could turn the file into a WAL database after the header was read.
+     */
+    private static void requireNoWalFiles(Path databaseFile) {
+        for (String suffix : new String[] {"-wal", "-shm"}) {
+            if (Files.exists(databaseFile.resolveSibling(databaseFile.getFileName() + suffix),
+                    LinkOption.NOFOLLOW_LINKS)) {
+                throw new StoredLibraryValidator.Refusal(StoredLibraryValidator.Reason.WAL_MARKED);
+            }
         }
     }
 

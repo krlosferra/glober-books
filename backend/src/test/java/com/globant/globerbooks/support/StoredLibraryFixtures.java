@@ -2,6 +2,7 @@ package com.globant.globerbooks.support;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +11,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 /**
  * Builds database files for the stored-library tests with plain JDBC (never through the application). The
@@ -168,5 +170,55 @@ public final class StoredLibraryFixtures {
             }
         }
         return java.util.HexFormat.of().formatHex(digest.digest());
+    }
+
+    /**
+     * Produces a genuine {@code -wal} file: a copy of the library is switched to write-ahead logging with
+     * automatic checkpoints off, a table {@code evil} is created, and while that connection is still open the
+     * {@code -wal} file is copied to the target.
+     *
+     * @param library an existing library file
+     * @param scratch an existing empty directory for the working copy
+     * @param target where the copy of the {@code -wal} file goes
+     * @throws Exception when the database cannot be written
+     */
+    public static void genuineWal(Path library, Path scratch, Path target) throws Exception {
+        Path work = scratch.resolve("work.db");
+        Files.copy(library, work);
+        try (Connection connection = open(work, false); Statement statement = connection.createStatement()) {
+            statement.execute("PRAGMA journal_mode = WAL");
+            statement.execute("PRAGMA wal_autocheckpoint = 0");
+            statement.execute("CREATE TABLE evil (x TEXT)");
+            statement.execute("INSERT INTO evil VALUES ('planted')");
+            Files.copy(scratch.resolve("work.db-wal"), target);
+        }
+    }
+
+    /**
+     * Writes a hand-built, valid rollback journal for the file whose only record is page 1 with its WAL
+     * marker (bytes 18 and 19 equal to 2). Bytes 18 and 19 lie outside the journal checksum sample, so the
+     * checksum is the normal one. Rolling it back turns a rollback-journal file into a WAL-marked one.
+     *
+     * @param file the database file (4,096-byte pages)
+     * @param journal the journal file to write
+     * @throws Exception when the file cannot be read or the journal written
+     */
+    public static void journalWithWalMarkedPageOne(Path file, Path journal) throws Exception {
+        byte[] bytes = Files.readAllBytes(file);
+        int pageSize = 4096;
+        byte[] page = Arrays.copyOf(bytes, pageSize);
+        page[18] = 2;
+        page[19] = 2;
+        int nonce = 0x1234ABCD;
+        int checksum = nonce;
+        for (int index = pageSize - 200; index > 0; index -= 200) {
+            checksum += page[index] & 0xFF;
+        }
+        ByteBuffer out = ByteBuffer.allocate(512 + 4 + pageSize + 4);
+        out.put(new byte[] {(byte) 0xd9, (byte) 0xd5, 0x05, (byte) 0xf9, 0x20, (byte) 0xa1, 0x63, (byte) 0xd7});
+        out.putInt(1).putInt(nonce).putInt(bytes.length / pageSize).putInt(512).putInt(pageSize);
+        out.position(512);
+        out.putInt(1).put(page).putInt(checksum);
+        Files.write(journal, out.array());
     }
 }
