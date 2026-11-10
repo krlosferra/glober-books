@@ -1,8 +1,8 @@
 # Project Constitution: GloberBooks
 
 - Owner: Sponsor
-- Version: 1.6
-- Last updated: 2026-11-06
+- Version: 1.7
+- Last updated: 2026-11-10
 - Status: Approved by the Sponsor on 2026-10-30 (Phase 1 gate: Liaison round 3 APPROVED WITH CHANGES, Security round 3 PASS WITH CONDITIONS)
 
 This document is the highest authority in the repository. If `spec.md`, `plan.md`, `tasks.md` or code conflict with it, the constitution wins until the Sponsor amends it.
@@ -274,6 +274,18 @@ Status codes: 200 success with data; 201 created; 400 validation, malformed requ
 - Commits use the human contributor's own identity and contain no AI attribution (see NEVER and `git-workflow.md`).
 - Every phase gate needs a Liaison verdict, a Security verdict and Sponsor approval (see `agent-protocol.md`). Task-level review follows "Security review cadence" in the Security Standards.
 
+## Token optimization and direct dispatch (amendment 1.7)
+
+Approved by the Sponsor on 2026-11-10 from the optimization analysis of the whole process (agents re-read about 46,000 tokens of `security.md`, 32,000 of `spec.md` and 30,000 of `tasks.md` on every call, and old handoffs on top). The rules:
+
+1. **Direct dispatch.** A task of `tasks.md` that meets the Definition of Ready is dispatched by the orchestrator to the coding agent as a compact brief made of three parts: the task block verbatim, the open items of `docs/sdd/active-conditions.md` whose target is that task, and the few documents and sections the task needs by ID. The Spec Liaison writes a brief (Mode E) only to resolve an explicit ambiguity or an active `CLARIFICATION`; it audits deliveries (Modes F and G).
+2. **Active conditions ledger.** `docs/sdd/active-conditions.md` is the single living list of what is open (Sponsor decisions, conditions assigned to a task, standing rules, accepted limits, hardening, PM debt). Reviewers and implementers read it instead of old handoffs and instead of the historical findings log. Whoever closes an item deletes its row in the same change and notes it under "Closed since the ledger was created". Security adds new findings to `docs/sdd/security-log.md` and to the ledger in the same change. When a historical row and the ledger disagree on open or closed, the ledger wins.
+3. **Reading rule.** Nobody reads a handoff that the task, the ledger or the report they audit does not cite. `docs/sdd/security-log.md` (every finding and the changelog of `security.md`) is looked up by ID, not read. Handoffs stay where they are (no archive directory, because their numbers are cited across the documents).
+4. **Compact delivery.** A `TASK_DELIVERY` holds: the task and branch, the files created or changed, a table that maps every acceptance criterion to a named test, deviations with their reason, the build summary line (tests, failures, skipped, coverage, exit code), the measured figures the task asks for, and a Resume point. It does not paste raw terminal output, the diff statistics or the author log (the orchestrator checks both with one command). Long evidence goes in a table, never in a log dump.
+5. **Review cadence.** Unchanged from 1.3 to 1.6 for protected-surface and backend tasks. For a frontend task whose change is only layout, styling or static text, with no handling of user data, no network call and no change of the CSP or of an `SC-NN` control, the PM may mark the header `Security: increment`; such tasks are audited by the Liaison and covered by the Security review of the increment. A task that renders data that came from the API or the user, builds URLs, calls the API, or touches the guard fixture stays `Security: per task`.
+6. **Role boundaries.** The PM specifies WHAT and WHY: stories, business rules in Given-When-Then, acceptance criteria and domain error codes. The PM does not specify container settings, thread pools, socket behaviour or framework class design; those belong to the plan and to `security.md`. The existing transport rows of Appendix D stay; no new ones are added by the PM. Implementers read the dispatched brief and the code they touch, not the governance history or the course modules.
+7. **Contract summary.** If the frontend needs it, a compact contract summary derived from Appendix A and checked against the backend tests may be added under `docs/sdd/`. A machine-readable schema format and its validation tools are new tooling and need the Sponsor's approval (ASK FIRST).
+
 ## Amendment Procedure
 1. Anyone proposes a change by handoff; the owner of a referenced document proposes a rule change, never applies it; the Liaison and the Security reviewer review it; the Sponsor approves it.
 2. The orchestrator applies it on a `spec/` branch, bumps the version and adds a changelog line below. Approved amendments are folded into the relevant section; there is no separate amendments section.
@@ -302,3 +314,4 @@ Status codes: 200 success with data; 201 created; 400 validation, malformed requ
 - 0.1 (2026-10-29): First draft.
 - 1.5 (2026-11-05): Sponsor-approved delegation of LOW and INFO residual risks to the Security reviewer with limits (Security Standards) and a standing rule for container-first responses (Error Handling Standards); both reduce per-case Sponsor decisions without touching MEDIUM and above.
 - 1.6 (2026-11-06): Sponsor-approved review chunks: non-protected tasks may be reviewed in chunks of 2 to 4 related tasks with one Liaison audit and one Security review per chunk and one pull request; protected-surface tasks stay per task; every increment ends with a full review.
+- 1.7 (2026-11-10): Sponsor-approved token optimization: direct dispatch, the active conditions ledger, the reading rule, compact deliveries, the frontend increment cadence for pure layout and styling, role boundaries, and the contract summary rule. `security.md` findings log and changelog moved to `security-log.md`.

@@ -111,7 +111,7 @@ Use the 7-section template from the brief: Overview, User Stories, Business Rule
 - Cover **unhappy paths**: invalid input, missing fields, unknown IDs, duplicates, empty states, boundaries, reverse state transitions and their side effects on dependent fields (e.g. rating and completion date when a completed book changes back).
 - Every UI behavior needs a matching API mechanism (a confirmation dialog implies a way to confirm).
 - The API contract is business-level but exact: paths, request and response bodies, status and error codes consistent with the Constitution.
-- Write HOW-free: no frameworks, classes or SQL.
+- Write HOW-free: no frameworks, classes or SQL. Role boundary (constitution 1.7): you do not specify container settings (Tomcat valves, thread pools), socket or connector behaviour, parser limits or framework class design; those belong to `plan.md` and `security.md`. Keep error specifications to domain codes. The transport rows already in Appendix D stay; do not add new ones on your own: if a transport rule is needed, raise it to the Liaison and Security and let the plan carry it.
 - Every item traceable to a BRD requirement or a logged decision.
 
 ### 4.4 Backlog organization (`tasks.md`)
@@ -156,17 +156,9 @@ You verify **business acceptance** of delivered features against the spec's acce
 
 ---
 
-## 7. Known open points to resolve (do not assume)
+## 7. Open points
 
-Treat these as your first analysis agenda and raise each as a question, with options and a recommendation:
-1. Storage: BRD says local or in-memory; the Constitution mandates SQLite.
-2. Duplicate handling: the confirm-and-add flow has no API mechanism (the contract only defines `409`).
-3. Missing capabilities: no way to update status (FR2); get-by-id and delete are implied by "CRUD" but unspecified.
-4. Status regression: effect on `rating` and `date_completed`.
-5. Error codes vs HTTP codes: `INVALID_RATING` and `RATING_NOT_ALLOWED` vs a single 400 in the contract.
-6. Frontend: in scope, but without stories or acceptance criteria.
-7. Author bio (FR4): shared per author implies an author concept; the Constitution requires approval for a new entity; how authors are matched; bio length and nullability.
-8. Time budget: the exercise phases add up to more than the stated 6-8 hours.
+The first round of open points (storage, duplicate override, missing operations, status regression, error codes, frontend stories, time budget) was decided and recorded in the Decision Log of `spec.md`. Do not raise them again. The author bio (FR4) is handled through change control when its phase comes. Your current agenda is section 6 of `docs/sdd/active-conditions.md` (debt for the PM) and any item the Liaison or Security hands to you; before you raise a question, search the Decision Log and the ledger.
 
 ---
 

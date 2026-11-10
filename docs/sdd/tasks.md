@@ -1,8 +1,8 @@
 # GloberBooks Task Backlog
 
 - Owner: PM (`sdd-product-manager`)
-- Version: 0.6.5 (changelog: 0.6.5, 2026-11-06, Task 34a split into 34a-1 (complete `DataDirectoryGuard` plus file identity, unit-proved, not wired) and 34a-2 (wiring, `StartupFailureAnalyzer`, jar-level proofs) with the cut recommended by the Liaison (handoff 146 (d)) and agreed by Security (handoff 147, SEC-F-178), replacing the cut proposed in the 0.6.4 size note; dependencies, traceability, tier register, totals and ceiling list updated; tier sentence and extra support files for Tasks 32 and 33; 0.6.4, 2026-11-06, Task 33 criterion 3 narrowed to "modes stay no wider" with a pre-created 0700/0600 location; creation of the directory and file with these modes, wiring of `SqliteDataSourceProvider`/`DataDirectoryGuard` in the packaged jar and the clean failure on an uncreatable directory moved to Task 34a, criteria 4 and 5 and a split proposal; dependencies of 34a and 34b updated; handoff 145)
-- Last updated: 2026-11-06
+- Version: 0.6.6 (changelog: 0.6.6, 2026-11-10, constitution 1.7 rule 5: Tasks 46 (styles polish) and 52 (measurements and responsive layout) move from `Security: per task` to `Security: increment` because they are layout and styling only; the Security ruling of handoff 087 predates 1.7 and the Sponsor decided otherwise for this narrow case; Security may upgrade either task at any time; Tasks 47, 48 and 53 stay per task. 0.6.5, 2026-11-06, Task 34a split into 34a-1 (complete `DataDirectoryGuard` plus file identity, unit-proved, not wired) and 34a-2 (wiring, `StartupFailureAnalyzer`, jar-level proofs) with the cut recommended by the Liaison (handoff 146 (d)) and agreed by Security (handoff 147, SEC-F-178), replacing the cut proposed in the 0.6.4 size note; dependencies, traceability, tier register, totals and ceiling list updated; tier sentence and extra support files for Tasks 32 and 33; 0.6.4, 2026-11-06, Task 33 criterion 3 narrowed to "modes stay no wider" with a pre-created 0700/0600 location; creation of the directory and file with these modes, wiring of `SqliteDataSourceProvider`/`DataDirectoryGuard` in the packaged jar and the clean failure on an uncreatable directory moved to Task 34a, criteria 4 and 5 and a split proposal; dependencies of 34a and 34b updated; handoff 145)
+- Last updated: 2026-11-10
 - Status: Draft (Phase 3, round 3 of 3, final edits). Round 1 findings (handoffs 025, 026) were resolved in 0.4 and the round 2 findings (handoffs 031, 032) in 0.5; the answers by finding number are in handoff 027 (sections 2 and "Round 3"). Definitions only: task state lives in `status.md`.
 - Inputs: `delivery-strategy.md` v1.0, `spec.md` v0.4.3 (draft change requests CR-1 to CR-9 on top of the approved 0.4.1), `constitution.md` 1.1, `security.md`, `plan.md` and `plan-appendix.md` 0.2, handoff 022 (lean backend plan, tasks B01 to B27) and handoff 021 (frontend plan, candidates F0.1 to F4.3).
 - Sponsor decisions applied. 2026-10-30: spec frozen except change requests; Increment 4 is P1 hardening; Increment 0 is a thin walking skeleton; SQLite uses the default rollback journal with exclusive locking (no WAL) and the schema of the plan; static content by our own controller; `TRACE` answered by the container with a pre-application `405`. 2026-11-02: the full P0 scope is accepted against the indicative 6 to 8 h (the figure accepted was about 32 h of task time; section 1 shows the figure after the splits of round 2 and asks the Sponsor to confirm it); Increment 0 is split into 0a (Tasks 01 to 08) and 0b (Tasks 09 to 14), with tag `v0.1` after Task 08 and `v0.2` after Task 14; Tasks 49 and 50 run before the release tag; the accessibility checker runs in tests only and the application CSP is never relaxed; change requests CR-1 to CR-9 go to review.
@@ -616,7 +616,7 @@ Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-0
 - Traces: US-014.6 to .8, SC-09, SC-38.
 
 ### Task 46: Styles polish
-- Source: F3.4 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 45 | Security: per task | Branch: `feature/task-46-styles-polish`
+- Source: F3.4 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 45 | Security: increment | Branch: `feature/task-46-styles-polish`
 - Description: Finish the stylesheet: colour tokens, visible focus ring, containment rules and reduced motion, with a test that reads the stylesheet.
 - Production: (1) `frontend/css/styles.css`. Tests: `frontend/css/tokens.test.js`.
 - Acceptance criteria:
@@ -677,7 +677,7 @@ Task 49+50 (merged from Tasks 49 and 50 in 0.6) is made of P1 rows that run befo
 - Traces: C-13, S-08, S-09, M-2, DEC-020.
 
 ### Task 52: Measurements and responsive layout - after the tag
-- Source: F3.5 + F4.1 | Layer: frontend | Tier: P1 | Estimate: 45 | Depends on: 47 | Security: per task | Branch: `chore/task-52-measurements-responsive`
+- Source: F3.5 + F4.1 | Layer: frontend | Tier: P1 | Estimate: 45 | Depends on: 47 | Security: increment | Branch: `chore/task-52-measurements-responsive`
 - Description: Add the cut-list measurements, the mobile project and the layout checks.
 - Production: (1) `e2e/playwright.config.ts` (edit). Tests: `measurements.spec.ts`, `us-014-accessibility.spec.ts` (edit).
 - Acceptance criteria:

@@ -53,10 +53,11 @@ Read `docs/sdd/agent-protocol.md`, `docs/sdd/orchestration.md` and `docs/sdd/git
 
 ## 2. Read before every task
 
-1. The task brief and its entry in `docs/sdd/tasks.md`
-2. `docs/sdd/constitution.md`, `docs/sdd/spec.md` (user stories, business rules, API contract, error codes), `docs/sdd/plan.md` (frontend structure)
-3. Existing files in `frontend/` that the task touches
-4. `docs/sdd/progress.md`
+1. The dispatched brief: the task block of `docs/sdd/tasks.md` verbatim, the open items of `docs/sdd/active-conditions.md` whose target is your task, and the documents and sections it names by ID (constitution 1.7)
+2. Only the sections of `docs/sdd/constitution.md`, `docs/sdd/spec.md` (user stories, business rules, API contract, error codes) and `docs/sdd/plan.md` (frontend structure) that the brief names; search by ID and read the surrounding section
+3. Existing files in `frontend/` and `e2e/` that the task touches
+
+Do NOT load the governance history: old handoffs, `docs/sdd/security-log.md`, `docs/sdd/progress.md` in full, the course modules, or spec sections the brief does not cite.
 
 Missing or contradictory inputs: **stop** and raise a CLARIFICATION. Never guess.
 
@@ -127,7 +128,7 @@ The complete, authoritative process is `docs/sdd/frontend-testing.md`; read it b
 
 ## 7. TASK_DELIVERY report (required)
 
-`docs/sdd/handoffs/NNN-frontend-to-liaison-task-NN-delivery.md` with: task, branch, commits; files created or modified (and a statement nothing else changed); each acceptance criterion → code location → Playwright test title; test specification and results (the `npx playwright test` command and real output, traces or screenshots for fixed failures, exploration notes from the MCP); accessibility checks performed (keyboard, labels, contrast, `aria-live`); responsive checks; deviations from the plan; risks and open questions.
+`docs/sdd/handoffs/NNN-frontend-to-liaison-task-NN-delivery.md` with, kept compact (constitution 1.7): task, branch, commits; files created or modified (and a statement nothing else changed); each acceptance criterion → code location → Playwright test title, as one table; the test command and the summary line of the result (passed, failed, skipped, exit code), not the raw log; traces or screenshots only for a fixed failure; exploration notes from the MCP; accessibility checks performed (keyboard, labels, contrast, `aria-live`); responsive checks; deviations from the plan; risks and open questions; a "Resume point" (done / next). Do not paste `git diff --stat` or the author log: the orchestrator checks them.
 
 ---
 
