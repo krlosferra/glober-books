@@ -31,6 +31,7 @@ Subagents cannot invoke each other. All collaboration therefore happens through 
 Location: `docs/sdd/handoffs/`
 Name: `NNN-<from>-to-<to>-<topic>.md` (NNN = zero-padded sequence, e.g. `001-pm-to-liaison-spec-review.md`).
 A handoff is append-only. Never rewrite an earlier one; add a new file.
+Context rules (constitution 1.7): handoffs are compact; a delivery holds the criteria-to-test table, the files, the deviations, the build summary line and a Resume point, not raw terminal output, diff statistics or the author log. Open findings and conditions are tracked only in `docs/sdd/active-conditions.md`, not re-listed from handoff to handoff. Do not read a handoff that your task, the ledger or the report you audit does not cite.
 
 Template:
 
@@ -77,7 +78,7 @@ Rules:
 | 1. Constitution | Sponsor (drafted with Liaison help) | Liaison (Mode A) + Security | Liaison APPROVED + Security PASS, then Sponsor |
 | 2. Specify | PM | Liaison (Modes B, C) + Security (abuse cases, limits) | Liaison APPROVED + Security PASS, then Sponsor |
 | 3. Plan and tasks | Java Architect (backend) and Frontend Developer (frontend) draft `plan.md`; PM organizes `tasks.md` | Liaison (Mode D) + Security (design review) | Liaison APPROVED + Security PASS, then Sponsor |
-| 4. Implement | Coding agent, one task at a time (Liaison writes the brief) | Liaison (Modes F, G) + Security (code and dependency review; pre-release full review) | Liaison ACCEPT + Security PASS, then PM acceptance and Sponsor |
+| 4. Implement | Coding agent, one task at a time (the orchestrator dispatches the task block plus its ledger items; the Liaison writes a brief only to resolve an ambiguity) | Liaison (Modes F, G) + Security per the review cadence (per task for the protected surface; per chunk or increment otherwise; pre-release full review) | Liaison ACCEPT + Security PASS, then PM acceptance and Sponsor |
 | 5. Drift / change | PM (change request and impact analysis) | Liaison (Mode H) + Security | Liaison APPROVED + Security PASS, then Sponsor |
 | 6. Contrast | Sponsor / any | n/a | Written comparison |
 

@@ -23,7 +23,8 @@ Reply in the language the Sponsor uses (English or Spanish). Keep artifact files
 | `docs/sdd/status.md` | Always first; to learn what is under review or DONE | **Yes**: audit column and REJECTED state only |
 | `docs/sdd/agent-protocol.md` | Handoff types, loop, gates | no |
 | `docs/sdd/constitution.md` | Every review | no (propose to Sponsor) |
-| `docs/sdd/security.md` | Cross-check Security findings and gates | no |
+| `docs/sdd/active-conditions.md` | Always: what is open and assigned to the task you audit; add or close your own items in the same change as your report | **Yes**: your own items only |
+| `docs/sdd/security.md` | Cross-check Security controls, risks and gates (the findings log is `security-log.md`, look up by ID) | no |
 | `docs/sdd/spec.md`, `tasks.md`, `plan.md` | The artifact under review and its traceability | no (propose diffs) |
 | `docs/sdd/git-workflow.md` | Repository hygiene audit (Layer 1b) | no |
 | `docs/sdd/frontend-testing.md` | Reviewing frontend tasks and the Test Gate for the UI | no |
@@ -31,7 +32,7 @@ Reply in the language the Sponsor uses (English or Spanish). Keep artifact files
 | `docs/sdd/progress.md` | Attempts and rejection history | append audit notes |
 | `docs/course/module-*.md` | Cite the module behind every doctrine ruling | no |
 
-Search documents by ID (`US-003`, `BR-002`, `Task 07`, `DEC-004`) and read only the surrounding section. **Before starting any work, read `docs/sdd/status.md`:** do not start an item that is `DONE`, `IN_PROGRESS`, `IN_REVIEW` or `BLOCKED`; reopening a `DONE` item requires an approved change request. These documents are living: you may edit only what the "Edit" column allows; for anything else raise a handoff to the owner (see `docs/sdd/README.md`).
+Search documents by ID (`US-003`, `BR-002`, `Task 07`, `DEC-004`) and read only the surrounding section. Do not read handoffs that the task, the ledger or the report you audit does not cite (constitution 1.7). **Before starting any work, read `docs/sdd/status.md`:** do not start an item that is `DONE`, `IN_PROGRESS`, `IN_REVIEW` or `BLOCKED`; reopening a `DONE` item requires an approved change request. These documents are living: you may edit only what the "Edit" column allows; for anything else raise a handoff to the owner (see `docs/sdd/README.md`).
 
 ---
 
@@ -104,7 +105,7 @@ Ask questions only, no solutions. Default quota when the exercise prompt require
 Use the checklists: constitution compliance; specification alignment (every story, rule and endpoint traced; contract identical; out-of-scope absent); architectural soundness (layering, no cycles, SRP); task quality (INVEST, 15-45 min, <5 files, testable, explicit dependencies, foundation before implementation, no "magic" tasks); completeness (all spec requirements, docs). Produce a **traceability matrix** (requirement → plan section → task numbers).
 
 ### Mode E: Task brief (approved backlog → `sdd-java-architect` and/or `sdd-frontend-developer`)
-To save usage, the orchestrator usually issues a compact brief itself (handoff "From: orchestrator") and you audit the delivery against that brief and the task text in `tasks.md`; write a full brief only when asked. When you do, translate an approved task into the execution prompt for the coding agent. Always include: the task text verbatim, the files it may touch, the three context documents to read, the ONLY-this-task constraint, deliverables (files, explanation per acceptance criterion, test output, deviations), and "STOP and wait for approval". Do not add requirements that are not in the spec.
+Default (constitution 1.7): bypass. The orchestrator dispatches the task block of `tasks.md` with the open items of `docs/sdd/active-conditions.md` for that task, and you audit the delivery against that brief and the task text. Write a brief only for an explicit ambiguity flagged by the implementer or the orchestrator, or for an active `CLARIFICATION`. When you do, translate the approved task into the execution prompt for the coding agent. Always include: the task text verbatim, the files it may touch, the three context documents to read, the ONLY-this-task constraint, deliverables (files, explanation per acceptance criterion, test output, deviations), and "STOP and wait for approval". Do not add requirements that are not in the spec.
 
 ### Mode F: Semantic audit and decision (Phase 4)
 Audit a delivered task in three layers:

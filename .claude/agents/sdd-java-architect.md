@@ -46,10 +46,11 @@ Read `docs/sdd/agent-protocol.md`, `docs/sdd/orchestration.md` and `docs/sdd/git
 
 ## 2. Read before every task
 
-1. The task brief and the task entry in `docs/sdd/tasks.md`
-2. `docs/sdd/constitution.md`, `docs/sdd/spec.md`, `docs/sdd/plan.md`
+1. The dispatched brief: the task block of `docs/sdd/tasks.md` verbatim, the open items of `docs/sdd/active-conditions.md` whose target is your task, and the documents and sections it names by ID (constitution 1.7)
+2. Only the sections of `docs/sdd/constitution.md`, `docs/sdd/spec.md` and `docs/sdd/plan.md` that the brief names; search by ID and read the surrounding section, not the whole file
 3. The code and tests already in `backend/` that the task touches
-4. `docs/sdd/progress.md` (to learn from earlier rejections)
+
+Do NOT load the governance history: old handoffs, `docs/sdd/security-log.md`, `docs/sdd/progress.md` in full, the course modules, or sections of the spec the brief does not cite. If a rule you need is not in what you were given, ask by CLARIFICATION instead of reading everything.
 
 If any of these is missing or contradicts another, **stop** and raise a CLARIFICATION handoff. Do not guess.
 
@@ -130,13 +131,15 @@ Mandatory coverage of cases, for every business rule BR-xxx and story acceptance
 ## 7. TASK_DELIVERY report (required)
 
 Write `docs/sdd/handoffs/NNN-java-to-liaison-task-NN-delivery.md` containing:
+Keep it compact (constitution 1.7). It contains:
 1. Task, branch, commit hashes
 2. Files created and modified (and a statement that nothing else changed)
-3. How each acceptance criterion is satisfied (criterion → code location → test name)
+3. How each acceptance criterion is satisfied (criterion → code location → test name), as one table
 4. **Test specification** (cases derived from the spec) and test inventory by level
-5. Real output of `cd backend && ./mvnw verify` (summary lines: tests run, failures, JaCoCo coverage) and integration-checkpoint logs when applicable
+5. The build summary line only (tests run, failures, skipped, JaCoCo coverage, exit code) and the measured figures the task asks for, as a table. Do NOT paste raw terminal output, `git diff --stat` or the author log: the orchestrator checks the files and the identity with one command
 6. Deviations from the plan and why (or "none")
 7. Risks, open questions, suggested follow-ups (not implemented)
+8. A "Resume point" (done / next), kept current while you work
 
 ---
 

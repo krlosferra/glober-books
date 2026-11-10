@@ -13,6 +13,8 @@ Single entry point to the project's living documents. **Read this first, then `s
 | `tasks.md` | Backlog definitions: description, files, criteria, dependencies | PM | Read. **State lives in `status.md`, not here.** |
 | `progress.md` | Exercise log: time spent, attempts, rejection log, insights | Orchestrator | Liaison may append audit notes |
 | `handoffs/` | Append-only message trail between agents | The sender of each handoff | Read |
+| `active-conditions.md` | The single living list of open conditions: Sponsor decisions, conditions assigned to a task, standing rules, accepted limits, hardening, PM debt. **Read this instead of old handoffs.** | Orchestrator (writes); Liaison and Security (add and close their items in the same change) | Read |
+| `security-log.md` | Every finding `SEC-F-NNN` and the changelog of `security.md` (historical; look up by ID, do not read by default) | Security Reviewer (append-only) | Read |
 | `security.md` | Threat model, security controls (`SC-NN`), standard checks, risk register, open proposals | Security Reviewer (the Sponsor alone changes the risk-acceptance column) | Read; propose through handoffs |
 | `frontend-testing.md` | Process for UI end-to-end testing with Playwright | Frontend Developer (after Liaison review) | Read |
 | `git-workflow.md` | Branches, commits, PRs, no AI attribution | Sponsor | Read |
@@ -30,9 +32,9 @@ An agent that finds an error in a document it does not own **does not fix it**: 
 |---|---|---|
 | PM | `status.md`, `exercise-brief.md`, `constitution.md` | `spec.md` (own), `tasks.md` (own), `plan.md` for coverage, latest handoffs addressed to `pm` |
 | Liaison | `status.md`, `agent-protocol.md` | Artifact under review, `constitution.md`, course module cited by the finding |
-| Java Architect | `status.md`, the task brief, the task in `tasks.md` | `constitution.md` (Tech Stack, Testing, API sections), `spec.md` sections cited by the task, `plan.md` backend section, `git-workflow.md` |
-| Frontend Developer | `status.md`, the task brief, the task in `tasks.md` | `spec.md` (stories and API contract), `plan.md` frontend section, `frontend-testing.md`, `constitution.md` (Security, API sections) |
-| Security Reviewer | `status.md`, `security.md` | The artifact under review, `constitution.md` (security sections), `spec.md` (limits and abuse cases), `plan.md`, the delivery handoff, the code diff |
+| Java Architect | the dispatched brief (task block and its ledger items), `status.md` row of the task | `constitution.md` (Tech Stack, Testing, API sections), `spec.md` sections cited by the task, `plan.md` backend section, `git-workflow.md` |
+| Frontend Developer | the dispatched brief (task block and its ledger items), `status.md` row of the task | `spec.md` (stories and API contract), `plan.md` frontend section, `frontend-testing.md`, `constitution.md` (Security, API sections) |
+| Security Reviewer | `status.md`, `active-conditions.md`, `security.md` (controls and risks; the findings log is `security-log.md`, by ID) | The artifact under review, `constitution.md` (security sections), `spec.md` (limits and abuse cases), `plan.md`, the delivery handoff, the code diff |
 | Orchestrator | `status.md`, `orchestration.md` | Everything else as routing requires |
 
 ## 3. Keeping documents organic (living)

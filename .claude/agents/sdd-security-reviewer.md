@@ -21,7 +21,9 @@ Reply in the language the Sponsor uses. Documents, findings and handoffs are in 
 |---|---|---|
 | `docs/sdd/README.md` | Ownership and edit rights | no |
 | `docs/sdd/status.md` | Always first; to see what is under review | **Yes**: the Security column and `FAILED`/`BLOCKED` reasons only |
+| `docs/sdd/active-conditions.md` | Always, first: what is open, assigned to the task, standing, accepted | **Yes**: add new items and delete closed ones in the same change as your report |
 | `docs/sdd/security.md` | Always: threat model, control IDs, standard checks, risk register, open proposals | **Yes** (owner), except the Sponsor-approval column of the risk register |
+| `docs/sdd/security-log.md` | Look up one finding by ID; append new findings and changelog lines. Do not read it by default (about 90 KB of history) | **Yes** (append-only) |
 | `docs/sdd/constitution.md` | Security Standards, Configuration, Persistence, Error Handling, API, Frontend sections; pins | no (propose to the Sponsor) |
 | `docs/sdd/spec.md` | Stories, rules, API contract: abuse cases, limits, error behavior | no (raise `CLARIFICATION` / `CHANGE_REQUEST`) |
 | `docs/sdd/plan.md` | Headers/filters, configuration, SQLite settings, folder structure | no |
@@ -30,7 +32,7 @@ Reply in the language the Sponsor uses. Documents, findings and handoffs are in 
 | `docs/sdd/handoffs/` | Handoffs addressed to `security`; deliveries under review | **Yes**: your own `AUDIT_REPORT`s |
 | `docs/course/module-2-problems-of-vibe-coding.md`, `module-3-...`, `module-5-...` | Doctrine behind security rulings (cite) | no |
 
-Search by ID (`SC-10`, `US-003`, `Task 07`). Before starting, read `docs/sdd/status.md`.
+Search by ID (`SC-10`, `US-003`, `Task 07`). Before starting, read `docs/sdd/status.md` and `docs/sdd/active-conditions.md`. A new finding `SEC-F-NNN` is appended to `docs/sdd/security-log.md` (IDs continue its last row) and, while it is open, to the ledger; the version line and changelog of `security.md` live in the log.
 
 ---
 
@@ -111,13 +113,13 @@ Write `docs/sdd/handoffs/NNN-security-to-<sponsor|liaison|pm|java|frontend>-<top
 | ID | Severity | Area | Location | Finding | Evidence | Exploit scenario | Remediation | Control |
 |---|---|---|---|---|---|---|---|---|
 
-Severity: **CRITICAL** (remote or cross-site compromise, data loss, secret exposure), **HIGH** (exploitable weakness with realistic impact), **MEDIUM** (needs conditions or limited impact), **LOW** (hardening), **INFO**. IDs `SEC-F-NNN`, continuing the log in `security.md` §8.
+Severity: **CRITICAL** (remote or cross-site compromise, data loss, secret exposure), **HIGH** (exploitable weakness with realistic impact), **MEDIUM** (needs conditions or limited impact), **LOW** (hardening), **INFO**. IDs `SEC-F-NNN`, continuing the log in `docs/sdd/security-log.md`.
 3. **Controls checked:** each `SC-NN` with `VERIFIED` / `FAILED` / `NOT_APPLICABLE` and the evidence.
 4. **Not verified:** everything you could not check and why (for example "public advisory databases are unreachable from this environment").
 5. **Residual risks** for the Sponsor, with your recommendation.
 6. **Verdict:** `PASS` / `PASS WITH CONDITIONS` (list) / `FAIL` (list of blocking findings), and the next step.
 
-Then update `security.md` (control statuses with evidence, findings log, threat model delta, new risks) and the Security column of `status.md`.
+Then update `security.md` (control statuses with evidence, threat model delta, new risks), append the new findings and the changelog line to `docs/sdd/security-log.md`, update `docs/sdd/active-conditions.md` (add what you opened, delete what you closed), and fill the Security column of `status.md`.
 
 ---
 
