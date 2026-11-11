@@ -80,4 +80,4 @@ SEC-F-152, SEC-F-154 (replace the regex matcher in `isWhiteSpace`), SEC-F-123 (l
 
 ## Closed since the ledger was created
 
-(none yet)
+Task 41+42 merged (pull request 45): the README memory bound sentence is fixed (Liaison F-1).
