@@ -22,7 +22,8 @@
 
 | ID | Severity | Target | Condition |
 |---|---|---|---|
-| Task 41+42 review | n/a | review | Branch `test/task-41-42-capacity-performance` is implemented and pushed (handoff 161), NOT yet reviewed. It needs the Liaison and Security reviews, the PR, and the merge. Cold figures (SEC-F-166) and the 50 concurrent adds (SEC-F-167, longest 7.05 s of the whole exchange) are in the delivery. |
+| Task 41+42 Security close-out | n/a | 49+50 (Security) | Liaison ACCEPT WITH FOLLOW-UPS (handoff 162). Security closes SEC-F-166 (cold figures: first add 392 ms, first duplicate 428 to 488 ms, all under 2 s) and SEC-F-167 (50 concurrent adds all 201; longest whole exchange 7.05 s, not the pool wait) from the figures, decides whether slow readers (S-6) go to the release notes, and takes the sweep results as pre-release evidence. The Liaison sees no protected surface touched (tests only), so this can ride on the 49+50 review. |
+| Slow-reader test | LOW | any later backend test change | Assert that the eight slow readers got `HTTP/1.1 200` and more than zero bytes (Liaison F-3 of handoff 162). |
 | SEC-F-151, SEC-F-128, SEC-F-172 | LOW, INFO | 49+50 | Raw-socket tests that pin the Tomcat-first pages (`/%2e%2e/`, `/..;/`, `%2f`, `%00`, `/WEB-INF/web.xml`, `/META-INF/x`, `TRACE`, oversized request line): status 400 or 404, no product, version or echo, the next request is served. |
 | SEC-F-147 (R-24) | MEDIUM, accepted | 49+50 | Re-check the drip clients (connector minimum data rate, upload timeout, small `maxSwallowSize`): any connector change is ASK FIRST. |
 | SEC-F-153 | INFO | 49+50 | Optional: timing row for the NFC cost at the cap (8,000 marks took 166 ms). |

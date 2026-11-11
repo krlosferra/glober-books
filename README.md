@@ -28,7 +28,7 @@ This runs the tests and builds `backend/target/globerbooks.jar`.
 ## Run
 The database lives in `backend/data/`. The application creates that directory (mode 0700) and the database file (mode 0600) on the first start; nothing needs to be created by hand. It refuses to start, with a fixed reason and without changing any existing file, when the directory or the file is a symbolic link, belongs to another user, is accessible to group or others, or is linked twice. An existing database file is validated before anything writes to it: a file that is not a database of this application (damaged, write-ahead logging, other tables, views, triggers, invalid books, more than 5,000 books) stops the start with a fixed reason and is left unchanged (the one exception is SQLite's own rollback of an unfinished transaction left in a journal file by a killed instance, which is applied first and judged before the file is accepted). To use another location, pass its real path (`--spring.datasource.url=jdbc:sqlite:<real path>/library.db`): a path that goes through a symbolic link is refused on purpose.
 
-Start the application in one of two ways (the memory bound is confirmed or changed later in the project):
+Start the application in one of two ways (the memory bound of 512 MB was measured with 5,000 books of maximum size: peak heap 205 to 229 MB under 50 concurrent adds with 50 concurrent lists and eight slow readers):
 ```
 cd backend && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m
 ```

@@ -71,9 +71,26 @@ public final class AppProcess {
      */
     public static AppProcess start(String dataUrl, String umask, Path workDir, Path consoleFile)
             throws Exception {
+        return start(dataUrl, umask, workDir, consoleFile, List.of());
+    }
+
+    /**
+     * Starts the packaged jar like {@link #start(String, String, Path, Path)} and adds JVM options after the
+     * fixed {@code -Xmx512m} (for example a garbage-collector log of the child, Task 41+42).
+     *
+     * @param dataUrl the value of {@code --spring.datasource.url}, or null to use the shipped default
+     * @param umask the umask the child runs under, or null for the inherited one
+     * @param workDir the working directory of the child, or null for the current one
+     * @param consoleFile the file that receives standard output and error
+     * @param jvmOptions extra JVM options
+     * @return the running process
+     * @throws Exception when the process cannot start or does not become ready
+     */
+    public static AppProcess start(String dataUrl, String umask, Path workDir, Path consoleFile,
+            List<String> jvmOptions) throws Exception {
         int port = freePort();
         long begin = System.nanoTime();
-        Process process = launch(dataUrl, umask, workDir, consoleFile, port);
+        Process process = launch(dataUrl, umask, workDir, consoleFile, port, jvmOptions);
         AppProcess app = new AppProcess(process, port, consoleFile, 0);
         try {
             app.awaitReady();
@@ -95,7 +112,7 @@ public final class AppProcess {
      * @throws Exception when the process cannot start or is still running after the deadline
      */
     public static int runToExit(String dataUrl, String umask, Path workDir, Path consoleFile) throws Exception {
-        Process process = launch(dataUrl, umask, workDir, consoleFile, freePort());
+        Process process = launch(dataUrl, umask, workDir, consoleFile, freePort(), List.of());
         if (!process.waitFor(READY_SECONDS, TimeUnit.SECONDS)) {
             process.destroyForcibly().waitFor(STOP_SECONDS, TimeUnit.SECONDS);
             LIVE.remove(process);
@@ -105,8 +122,8 @@ public final class AppProcess {
         return process.exitValue();
     }
 
-    private static Process launch(String dataUrl, String umask, Path workDir, Path consoleFile, int port)
-            throws IOException {
+    private static Process launch(String dataUrl, String umask, Path workDir, Path consoleFile, int port,
+            List<String> jvmOptions) throws IOException {
         Path jar = Path.of("target", "globerbooks.jar").toAbsolutePath();
         if (!Files.isRegularFile(jar)) {
             throw new IllegalStateException("The packaged jar is missing: " + jar);
@@ -115,8 +132,9 @@ public final class AppProcess {
         if (umask != null) {
             command.addAll(List.of("sh", "-c", "umask \"$1\" && shift && exec \"$@\"", "sh", umask));
         }
-        command.addAll(List.of(Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx512m",
-                "-jar", jar.toString(), "--server.address=127.0.0.1", "--server.port=" + port));
+        command.addAll(List.of(Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx512m"));
+        command.addAll(jvmOptions);
+        command.addAll(List.of("-jar", jar.toString(), "--server.address=127.0.0.1", "--server.port=" + port));
         if (dataUrl != null) {
             command.add("--spring.datasource.url=" + dataUrl);
         }
@@ -167,6 +185,15 @@ public final class AppProcess {
      */
     public ApiCalls api() {
         return new ApiCalls(port);
+    }
+
+    /**
+     * Returns the operating-system process id.
+     *
+     * @return the pid
+     */
+    public long pid() {
+        return process.pid();
     }
 
     /**
