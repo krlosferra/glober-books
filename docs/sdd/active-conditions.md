@@ -15,9 +15,6 @@
 | S-3 | Confirm DEC-035, DEC-036 and DEC-037 of `spec.md` at the next gate | Clarifications with no behaviour change, written by the PM, waiting for confirmation. DEC-036: an invalid body at 5,000 books answers 400, not 409. |
 | S-4 | Decide SEC-F-126: remove `static-locations` or keep it | Production edit outside Task 41+42; the board says Task 42 decides. |
 | S-5 | Platform protection (SEC-F-003, SEC-F-005): protected `main`, `hygiene` as a required check, credential scoping | Repository side done; platform settings are the Sponsor's. |
-| S-6 | Slow readers: accept, no write timeout needed (Security recommends accept) | Handoff 166 (SEC-F-194): the server does cut a non-reading or trickle reader at about 5 s (Tomcat's blocking-write timeout); eight reconnecting non-readers delay every request by 4.5 to 5 s, no memory growth. Same class as R-24. Not the "never cut" reading of Task 41+42. |
-| S-8 | Renew R-24 (slow-sending clients) for the release, with the figures of handoff 166 (SEC-F-147 update) | The acceptance ran "for Tasks 16 to 48" and is MEDIUM, so only the Sponsor can renew it. 8 body drips with reconnect delay every request 2 to 8 s; 130 request-line drips deny the service while held (100 s tried). No connector property exists for the line or header time; loopback only. Security recommends renewing and putting it in the release notes. |
-| S-9 | Decide R-26 and E-37 row 1: amend the spec row (recommended) or accept the deviation | `GET  /  HTTP/1.1` is served 200; the row asks for a pre-application 400. Tomcat cannot be set to refuse it (handoff 166, SEC-F-193). Security impact none in this topology. |
 | S-7 | Delete the leftovers in the container root: `/x` and `/run1.log` | Created by review probes; the environment blocked their removal. Not part of the repository. |
 
 ## 2. Conditions assigned to a task
@@ -52,7 +49,9 @@
 | ID | Limit |
 |---|---|
 | R-25 | Race between the guard check and the database open: detected after the open, not prevented (accepted by the Sponsor 2026-11-06). |
-| R-24 | Slow-sending (drip) clients hold worker threads beyond the 5 s timer (accepted for Tasks 16 to 48; renewal for the release is S-8). Figures of handoff 166: 8 body drips delay every request 2 to 8 s; 130 request-line drips deny the service while held. |
+| R-26 (E-37 row 1) | `GET  /  HTTP/1.1` (repeated spaces, also a tab, a leading CRLF or a bare LF line end) is served as if it had one separator; Tomcat 11.0.27 cannot be set to refuse it and a filter cannot see the raw line; no gate versus container disagreement was found (accepted by the Sponsor 2026-11-12; the PM amends the spec row). |
+| Slow readers (SEC-F-194) | A non-reading or trickle reader is cut at about 5 s by Tomcat; eight reconnecting non-readers delay each request by 4.5 to 5 s; no response-write timeout (accepted by the Sponsor 2026-11-12 with R-24; mention it in the release notes). |
+| R-24 | Slow-sending (drip) clients hold worker threads beyond the 5 s timer (accepted for Tasks 16 to 48; renewed by the Sponsor 2026-11-12 for the release). Figures of handoff 166: 8 body drips delay every request 2 to 8 s; 130 request-line drips deny the service while held. |
 | R-13, R-23 family | Tomcat-first pages (SEC-F-151, SEC-F-128, SEC-F-172): HTML 400, 404 or 405 without the security headers, no product, version or echo; pinned by `PreApplicationIntegrationTest` (Accepted by Security under constitution 1.5, 1 of 5 this phase). |
 | SEC-F-186 | A kill between the extraction of the driver's native library and its narrowing leaves a 0644 file inside the 0700 `tmp` until the next start. |
 | SEC-F-184 b, c | The owner is compared by name, not by numeric uid; modes with set-uid or ACLs are invisible to the guard. |
@@ -80,6 +79,6 @@ SEC-F-152, SEC-F-154 (replace the regex matcher in `isWhiteSpace`), SEC-F-123 (l
 
 ## Closed since the ledger was created
 
-Task 41+42 merged (pull request 45): the README memory bound sentence is fixed (Liaison F-1).
+Task 41+42 merged (pull request 45): the README memory bound sentence is fixed (Liaison F-1). Sponsor decisions S-6, S-8 and S-9 accepted on 2026-11-12 (moved to the accepted limits).
 
 Handoff 166 (Task 49+50 Security review): closed SEC-F-151, SEC-F-128, SEC-F-172 (moved to accepted limits), SEC-F-153, SEC-F-105, SEC-F-166, SEC-F-167 and the Task 41+42 Security close-out; SEC-F-147 moved to S-8 (renewal); SEC-F-106 kept; SEC-F-148 corrected.
