@@ -106,7 +106,7 @@ Security findings are written as handoffs in `docs/sdd/handoffs/` (Type `AUDIT_R
 | SEC-F-094 | LOW | `sources.test.js` regex gate misses template-literal keys, array join, `Reflect.get`, `window.open`, `location`, `DOMParser`, `createContextualFragment`, `setAttribute` | OPEN: extend the rules in a later hardening change (Task 45 or earlier); the E2E XSS test is the real control | 050 |
 | SEC-F-095 | LOW | `fields[].message` passed through unmodified by the client; Task 12 must render it with `textContent` only | OPEN: condition on Task 12 | 050 |
 | SEC-F-096 | INFO | Timeout and abort verified (race, timer cleared, listener removed) | CLOSED | 050 |
-| SEC-F-097 | INFO | DELETE and PATCH wrappers absent; the non-GET Content-Type rule covers them; re-verify when added (Task 35) | OPEN | 050 |
+| SEC-F-097 | INFO | DELETE and PATCH wrappers absent; the non-GET Content-Type rule covers them; re-verify when added (Task 35) | CLOSED (handoff 186: wrappers added, rule verified) | 050 |
 | SEC-F-098 | MEDIUM | Provider follows symlinks for the data directory and database file; existing entries accepted untouched | CLOSED 2026-11-06 (Task 34a-2, handoff 155): the guard runs before the provider in the only DataSource bean; on the jar a symlinked `data`, `tmp`, file, dangling link and a link in a parent component are refused with a byte-identical tree. Residual: R-25 (accepted) | 052, 147, 155 |
 | SEC-F-099 | LOW | Stat-only rule (SEC-F-069 b) has no automated guard | CLOSED 2026-11-02 (056); was OPEN, proposal: source-scan test | 052 |
 | SEC-F-100 | LOW | ClockConfig suppression and test match the file name in any package | CLOSED 2026-11-02 (056); was OPEN, anchor to `config/ClockConfig.java` (with the next task that touches `backend/config`) | 052 |
