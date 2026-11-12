@@ -295,3 +295,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 
 - Branch: `test/task-29-e2e-add-and-duplicate`; delivery handoff 180. New `e2e/support/pages.ts` (form and dialog locators, POST tracking, held and failed adds with real headers, Messages-area update counter) and three specs (`us-011-add-book`, `us-011-add-failures`, `us-011-duplicate`); smoke test 4 added to `us-010-library-view.spec.ts`. 69 E2E tests pass (full run); no production change. One finding: Shift+Tab after a click on non-interactive dialog text leaves the two buttons (pinned with `test.fail()`, awaiting a decision).
 - F-29-1 fixed (Task 27 follow-up): focus trap in the duplicate dialog now keeps Tab and Shift+Tab on the two buttons via pure `nextTabTarget`; `test.fail()` removed; 91 unit and 69 E2E tests pass.
+
+## Task 35: Client endpoints for status, rating, clear and delete (IN_REVIEW)
+
+- Branch: `feature/task-35-client-endpoints`; delivery handoff 184. `booksApi.js` gains `getBook`, `setStatus`, `setRating`, `clearRating`, `deleteBook` (ids only through `bookPath`; invalid id, status or rating rejects with TypeError before any request; DELETE carries Content-Type and no body). 99 frontend unit tests pass. SEC-F-097 asserted in tests.

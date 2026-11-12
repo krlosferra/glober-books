@@ -1,4 +1,5 @@
 import { requestJson } from './http.js';
+import { bookPath } from '../logic/ids.js';
 
 const BOOKS_PATH = '/api/v1/books';
 const FILTERS = new Set(['unread', 'reading', 'completed']);
@@ -71,4 +72,69 @@ export function addBook(input, allowDuplicate = false, deps = {}) {
   return requestJson({
     ...deps, method: 'POST', path: BOOKS_PATH, body, parseSuccess: toBook, mapBook: toBook,
   });
+}
+
+function bookRequest(id, method, suffix, body, deps) {
+  const path = bookPath(id) + suffix;
+  return requestJson({
+    ...deps, method, path, body, parseSuccess: toBook, mapBook: toBook,
+  });
+}
+
+/**
+ * Get one book. An invalid id rejects with a TypeError before any request.
+ * @param {string} id lower-case UUID
+ * @param {object} [deps] fetchImpl, signal, setTimer, clearTimer
+ * @returns {Promise<object>} result with data the book
+ */
+export async function getBook(id, deps = {}) {
+  return bookRequest(id, 'GET', '', undefined, deps);
+}
+
+/**
+ * Change the status. Invalid id or status rejects with a TypeError before any request.
+ * @param {string} id lower-case UUID
+ * @param {string} status unread, reading or completed
+ * @param {object} [deps] fetchImpl, signal, setTimer, clearTimer
+ * @returns {Promise<object>} result with data the book after the change
+ */
+export async function setStatus(id, status, deps = {}) {
+  if (!STATUSES.has(status)) {
+    throw new TypeError('invalid status');
+  }
+  return bookRequest(id, 'PUT', '/status', { status }, deps);
+}
+
+/**
+ * Set or replace the rating. Invalid id or rating rejects with a TypeError before any request.
+ * @param {string} id lower-case UUID
+ * @param {number} rating integer 1 to 5
+ * @param {object} [deps] fetchImpl, signal, setTimer, clearTimer
+ * @returns {Promise<object>} result with data the book
+ */
+export async function setRating(id, rating, deps = {}) {
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    throw new TypeError('invalid rating');
+  }
+  return bookRequest(id, 'PUT', '/rating', { rating }, deps);
+}
+
+/**
+ * Remove the rating (DELETE, no body). Invalid id rejects with a TypeError before any request.
+ * @param {string} id lower-case UUID
+ * @param {object} [deps] fetchImpl, signal, setTimer, clearTimer
+ * @returns {Promise<object>} result with data the book with a null rating
+ */
+export async function clearRating(id, deps = {}) {
+  return bookRequest(id, 'DELETE', '/rating', undefined, deps);
+}
+
+/**
+ * Delete a book (DELETE, no body). Invalid id rejects with a TypeError before any request.
+ * @param {string} id lower-case UUID
+ * @param {object} [deps] fetchImpl, signal, setTimer, clearTimer
+ * @returns {Promise<object>} result with data the deleted book
+ */
+export async function deleteBook(id, deps = {}) {
+  return bookRequest(id, 'DELETE', '', undefined, deps);
 }
