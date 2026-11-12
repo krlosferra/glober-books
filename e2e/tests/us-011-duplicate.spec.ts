@@ -164,11 +164,7 @@ test('US-014.2 CR-6: after a click on the dialog text, repeated Tab stays inside
   await expect(duplicate(page).dialog).toBeVisible();
 });
 
-// FINDING (Task 29): focus leaves the two buttons (the active element is not a dialog button) on
-// Shift+Tab after a click on non-interactive dialog text; the Tab-only trap wraps only from a button.
-// test.fail() keeps the strict assertion and turns red when the production defect is fixed.
 test('US-014.2 CR-6: after a click on the dialog text, Shift+Tab stays inside the two buttons', async ({ page, library }) => {
-  test.fail();
   const title = uniqueTitle('Trap back');
   await library.create({ title, author: 'Trap Author' });
   await openDialog(page, title, 'Trap Author');

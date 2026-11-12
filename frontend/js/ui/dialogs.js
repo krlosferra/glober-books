@@ -1,5 +1,6 @@
 import { byId, setText } from './dom.js';
 import { ADDED_PREFIX } from '../logic/copy.js';
+import { nextTabTarget } from '../logic/focusTrap.js';
 import { statusLabel, localDate } from '../logic/format.js';
 
 const CONFIRMED = 'confirm';
@@ -8,17 +9,17 @@ function isText(value) {
   return typeof value === 'string';
 }
 
-/** Keep Tab and Shift+Tab inside the dialog (US-014.2, CR-6): wrap between the two buttons. */
+/** Keep Tab and Shift+Tab on the two buttons (US-014.2, CR-6), also when focus is on neither. */
 function trapTab(event, first, last) {
   if (event.key !== 'Tab') {
     return;
   }
-  if (event.shiftKey && document.activeElement === first) {
+  const active = document.activeElement;
+  const current = active === first ? 'first' : active === last ? 'last' : 'other';
+  const target = nextTabTarget(event.shiftKey, current);
+  if (target !== null) {
     event.preventDefault();
-    last.focus();
-  } else if (!event.shiftKey && document.activeElement === last) {
-    event.preventDefault();
-    first.focus();
+    (target === 'first' ? first : last).focus();
   }
 }
 

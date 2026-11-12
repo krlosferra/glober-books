@@ -43,3 +43,8 @@ Created: `e2e/support/pages.ts`, `e2e/tests/us-011-add-book.spec.ts`, `e2e/tests
 
 ## Risks
 `countMessageUpdates` counts mutation records of `#messages`; a future change to how the area is written (for example adding an element) changes the count.
+
+## F-29-1 fix
+- Commit: `fix(frontend): keep dialog focus on the two buttons [Task-27]` (hash in `git log` and progress.md).
+- Change: new pure `frontend/js/logic/focusTrap.js` (`nextTabTarget`) with `focusTrap.test.js` (5 tests); `trapTab` in `frontend/js/ui/dialogs.js` uses it, so with focus on neither button Shift+Tab goes to the last button and Tab to the first (preventDefault). `test.fail()` removed from the Shift+Tab test in `e2e/tests/us-011-duplicate.spec.ts`.
+- Results: `node --test "frontend/**/*.test.js"`: 91 tests, 91 pass, 0 fail (sources.test.js green). Jar rebuilt (`mvn -o package -DskipTests` in `backend/`, no errors). Full E2E: 69 passed, 0 failed (the Shift+Tab test now passes normally).
