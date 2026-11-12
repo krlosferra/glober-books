@@ -1,6 +1,7 @@
 /** Pure page-state model of the list (plan AP-7.1). No DOM; every event returns a new state. */
 import { describeFailure } from './failures.js';
 import { matchesFilter } from './format.js';
+import { SERVER_FAILED_TEXT } from './copy.js';
 
 const FILTERS = ['all', 'unread', 'reading', 'completed'];
 
@@ -66,8 +67,10 @@ export function loadFailed(state, seq, failure) {
   if (seq !== state.latestRequest) {
     return state;
   }
+  const { text } = describeFailure(failure);
+  const failureText = typeof text === 'string' && text !== '' ? text : SERVER_FAILED_TEXT;
   return {
-    ...state, phase: 'failed', entries: [], count: 0, failureText: describeFailure(failure).text,
+    ...state, phase: 'failed', entries: [], count: 0, failureText,
   };
 }
 

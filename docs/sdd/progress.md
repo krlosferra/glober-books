@@ -286,3 +286,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Task 26 and 27: Add form errors and duplicate dialog (IN_REVIEW)
 
 - Branch: `feature/task-24-text-failure-logic` (chunk branch); delivery handoff 172. Task 26: `ui/addForm.js` (client checks, field messages with `aria-describedby`, in-flight guard, failure handling), new `ui/messages.js` and pure `logic/addCheck.js` with tests, copy strings, field error slots in `index.html`, `css/styles.css`; minimal `api/http.js` fix keeping a `status` detail without a message. Task 27: new `ui/dialogs.js` (native modal `<dialog>`, Cancel first focus, Escape cancels, Tab wrap), `addForm.js` resend with `allow_duplicate: true`. 85 frontend unit tests pass; smoke 3 of 3 pass (against the jar's baked-in frontend, see handoff); scripted exploration recorded in handoff 172.
+
+## Task 28: E2E library view, filter and states (IN_REVIEW)
+
+- Branch: `test/task-28-e2e-library-view`; delivery handoff 176. New `e2e/support/stubs.ts` (held, failed and fixed list answers) and `view.ts`, `library.ts` edit, two specs for US-010; SEC-F-197 fixed in `logic/listState.js` with a unit test. 86 frontend unit tests and 27 E2E tests pass. SEC-F-198 measured: 5,000 maximum-size entries re-render in about 1.7 s; `content-visibility` did not help and was reverted (left to Task 48).

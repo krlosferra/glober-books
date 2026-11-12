@@ -33,6 +33,34 @@ export class Library {
     return response.json();
   }
 
+  /** Changes the status of a book (PUT .../status) and returns the updated book. */
+  async setStatus(id: string, status: string): Promise<ApiBook> {
+    const response = await this.request.put(`/api/v1/books/${encodeURIComponent(id)}/status`,
+      { headers: JSON_HEADERS, data: { status } });
+    if (response.status() !== 200) throw new Error(`status change failed: ${response.status()}`);
+    return response.json();
+  }
+
+  /** Rates a completed book (PUT .../rating) and returns the updated book. */
+  async rate(id: string, rating: number): Promise<ApiBook> {
+    const response = await this.request.put(`/api/v1/books/${encodeURIComponent(id)}/rating`,
+      { headers: JSON_HEADERS, data: { rating } });
+    if (response.status() !== 200) throw new Error(`rating failed: ${response.status()}`);
+    return response.json();
+  }
+
+  /**
+   * Creates `count` books of maximum size (title 500 and author 200 code points), each unique.
+   * @param count how many books to create
+   * @param from first sequence number (keeps titles unique across calls)
+   */
+  async createMaxSize(count: number, from = 0): Promise<void> {
+    for (let i = from; i < from + count; i += 1) {
+      const tag = `${String(i).padStart(5, '0')} `;
+      await this.create({ title: tag + 'T'.repeat(500 - tag.length), author: 'A'.repeat(200) });
+    }
+  }
+
   /** Deletes one book by id. */
   async remove(id: string): Promise<void> {
     const response = await this.request.delete(`/api/v1/books/${encodeURIComponent(id)}`, { headers: JSON_HEADERS });

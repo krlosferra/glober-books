@@ -115,3 +115,14 @@ test('AP-7.1: replaced or removed on a cleared entry changes nothing, still anno
   assert.deepEqual(bookRemoved(f, '1').state, f);
   assert.equal(bookRemoved(f, '1').reload, true);
 });
+
+test('a list failure without a text uses the fixed generic text (SEC-F-197)', () => {
+  const s = loadStarted(initialState(), 'all');
+  for (const code of ['VALIDATION_ERROR', 'DUPLICATE_BOOK', 'INVALID_STATUS']) {
+    const f = loadFailed(s, s.latestRequest, { kind: 'api', code, fields: [] });
+    assert.equal(typeof f.failureText, 'string');
+    assert.notEqual(f.failureText, '');
+  }
+  const dup = loadFailed(s, s.latestRequest, { kind: 'api', code: 'DUPLICATE_BOOK', fields: [] });
+  assert.equal(dup.failureText, copy.SERVER_FAILED_TEXT);
+});
