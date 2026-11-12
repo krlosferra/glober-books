@@ -1,14 +1,21 @@
 import { byId, setText, setVisible } from './dom.js';
-import { ADDED_PREFIX, COMPLETED_PREFIX, LOADING_TEXT } from '../logic/copy.js';
+import {
+  ADDED_PREFIX, COMPLETED_PREFIX, LOADING_TEXT, EMPTY_LIBRARY_TEXT, EMPTY_FILTER_TEXT,
+} from '../logic/copy.js';
 import { statusLabel, localDate, countText, ratingText } from '../logic/format.js';
+import { viewOf } from '../logic/listState.js';
+import { isBookId } from '../logic/ids.js';
 
 function fillOptional(element, text) {
   setText(element, text);
   setVisible(element, text !== '');
 }
 
-function renderEntry(template, book) {
+function renderEntry(template, { book }) {
   const item = template.content.firstElementChild.cloneNode(true);
+  if (isBookId(book.id)) {
+    item.dataset.bookId = book.id;
+  }
   setText(item.querySelector('.entry-title'), book.title);
   setText(item.querySelector('.entry-author'), book.author);
   setText(item.querySelector('.entry-status'), statusLabel(book.status));
@@ -20,50 +27,48 @@ function renderEntry(template, book) {
   return item;
 }
 
+/** Text of the list status region for a view, and which button it offers. */
+function statusFor(view, state) {
+  switch (view) {
+    case 'loading':
+      return { text: LOADING_TEXT, button: null };
+    case 'failed':
+      return { text: state.failureText, button: 'try-again' };
+    case 'empty':
+      return { text: EMPTY_LIBRARY_TEXT, button: null };
+    case 'filterEmpty':
+      return { text: EMPTY_FILTER_TEXT, button: 'show-all' };
+    default:
+      return { text: '', button: null };
+  }
+}
+
 /**
- * Create the list view over the page shell.
- * @returns {object} showLoading(), showBooks(books, total), prepend(book)
+ * Create the list view: it only renders a state of logic/listState.js.
+ * @returns {{render: function(object): void}} the view
  */
 export function createListView() {
   const list = byId('book-list');
   const count = byId('count');
-  const loading = byId('loading');
+  const status = byId('list-status');
   const template = byId('entry-template');
-  let total = 0;
-
-  function showCount(n) {
-    total = n;
-    setText(count, countText(n));
-    setVisible(count, true);
-  }
+  const buttons = { 'try-again': byId('try-again'), 'show-all': byId('show-all') };
 
   return {
-    /** Remove entries and count; show only the loading text. */
-    showLoading() {
-      list.replaceChildren();
-      setVisible(list, false);
-      setVisible(count, false);
-      setText(loading, LOADING_TEXT);
-    },
     /**
-     * Show a loaded list in API order.
-     * @param {object[]} books books as mapped by the API client
-     * @param {number} listTotal the total of the response
+     * Render a page state.
+     * @param {object} state the state of the list model
      */
-    showBooks(books, listTotal) {
-      setText(loading, '');
-      list.replaceChildren(...books.map((book) => renderEntry(template, book)));
-      setVisible(list, books.length > 0);
-      showCount(listTotal);
-    },
-    /**
-     * Insert a new book at the top and update the count.
-     * @param {object} book the created book
-     */
-    prepend(book) {
-      list.prepend(renderEntry(template, book));
-      setVisible(list, true);
-      showCount(total + 1);
+    render(state) {
+      const view = viewOf(state);
+      const { text, button } = statusFor(view, state);
+      list.replaceChildren(...state.entries.map((entry) => renderEntry(template, entry)));
+      setVisible(list, view === 'list');
+      setText(count, view === 'list' || view === 'empty' || view === 'filterEmpty'
+        ? countText(state.count) : '');
+      setVisible(count, view !== 'loading' && view !== 'failed');
+      setText(status, text);
+      Object.entries(buttons).forEach(([name, element]) => setVisible(element, name === button));
     },
   };
 }

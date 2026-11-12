@@ -274,3 +274,15 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Task 49+50: Raw-socket run, grammar corners, hidden-channel repeat and log hygiene (IN_REVIEW)
 
 - Branch: `test/task-49-50-raw-socket-release`; delivery handoff 164. Tests only: `PreApplicationIntegrationTest`, `GrammarCornersIntegrationTest`, `TextAndParserIntegrationTest`, `LogHygieneIntegrationTest`, `DripAndCostIntegrationTest` and support `FreshApp`, `RawRules`, `DripClient`. All five classes passed inside the full failsafe run; the 9-minute cap ended the full build before its end (no coverage figure). Findings: E-37 two-space request line answered 200 (spec: 400); E-28 FOO without content type answered 415 (spec: 405 or pre-application). Drip clients (30 and 60 s windows) not cut on request line and headers; 12 held connections did not stop the service; NFC at 8,000 marks 170 to 205 ms.
+
+## Task 24: Frontend text and failure logic (IN_REVIEW)
+
+- Branch: `feature/task-24-text-failure-logic`; delivery handoff 168. New `frontend/js/logic/text.js` (trim by White_Space, NFC, code-point length) and `failures.js` (Section 5.9 table), exact texts added to `copy.js`, unit tests next to each; 69 frontend unit tests pass. Two findings for the Liaison (title/author field message vs fixed-text-only wording; http text split for the source gate), see the handoff.
+
+## Task 25: List state, filter and list states (IN_REVIEW)
+
+- Branch: `feature/task-24-text-failure-logic` (chunk branch); delivery handoff 170. New pure model `frontend/js/logic/listState.js` with tests, list texts in `copy.js`; filter radio group, loading, empty, filter-empty and failed states, count arithmetic and stale-response discarding in `app.js`, `listView.js`, `index.html`, `styles.css`. 79 frontend unit tests pass. Exploration was a scripted run (no MCP tool server).
+
+## Task 26 and 27: Add form errors and duplicate dialog (IN_REVIEW)
+
+- Branch: `feature/task-24-text-failure-logic` (chunk branch); delivery handoff 172. Task 26: `ui/addForm.js` (client checks, field messages with `aria-describedby`, in-flight guard, failure handling), new `ui/messages.js` and pure `logic/addCheck.js` with tests, copy strings, field error slots in `index.html`, `css/styles.css`; minimal `api/http.js` fix keeping a `status` detail without a message. Task 27: new `ui/dialogs.js` (native modal `<dialog>`, Cancel first focus, Escape cancels, Tab wrap), `addForm.js` resend with `allow_duplicate: true`. 85 frontend unit tests pass; smoke 3 of 3 pass (against the jar's baked-in frontend, see handoff); scripted exploration recorded in handoff 172.

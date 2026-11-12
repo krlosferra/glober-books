@@ -17,10 +17,12 @@
     <div class="field">
       <label for="title">Title</label>
       <input id="title" name="title" type="text" autocomplete="off" autofocus>
+      <p id="title-error" class="field-error" hidden></p>
     </div>
     <div class="field">
       <label for="author">Author</label>
       <input id="author" name="author" type="text" autocomplete="off">
+      <p id="author-error" class="field-error" hidden></p>
     </div>
     <div class="field">
       <label for="status">Status</label>
@@ -29,14 +31,24 @@
         <option value="reading">Reading</option>
         <option value="completed">Completed</option>
       </select>
+      <p id="status-error" class="field-error" hidden></p>
     </div>
     <button type="submit" id="add-button">Add book</button>
   </form>
 
   <section aria-labelledby="books-heading">
     <h2 id="books-heading" tabindex="-1">Your books</h2>
+    <fieldset id="filter" class="filter">
+      <legend>Filter by status</legend>
+      <label><input type="radio" name="filter" value="all" checked> All</label>
+      <label><input type="radio" name="filter" value="unread"> Unread</label>
+      <label><input type="radio" name="filter" value="reading"> Reading</label>
+      <label><input type="radio" name="filter" value="completed"> Completed</label>
+    </fieldset>
     <p id="count" class="count" hidden></p>
-    <p id="loading" role="status"></p>
+    <p id="list-status" role="status"></p>
+    <button type="button" id="show-all" hidden>Show all books</button>
+    <button type="button" id="try-again" hidden>Try again</button>
     <ul id="book-list" aria-label="Books" hidden></ul>
   </section>
 </main>
@@ -51,5 +63,17 @@
     <p class="entry-rating" hidden></p>
   </li>
 </template>
+<dialog id="duplicate-dialog" aria-labelledby="duplicate-heading" aria-describedby="duplicate-text">
+  <h2 id="duplicate-heading">Possible duplicate</h2>
+  <p id="duplicate-text">This book may already exist. Add anyway?</p>
+  <p id="duplicate-title" class="dialog-title"></p>
+  <p id="duplicate-author"></p>
+  <p id="duplicate-status"></p>
+  <p id="duplicate-added"></p>
+  <div class="dialog-actions">
+    <button type="button" id="duplicate-cancel" autofocus>Cancel</button>
+    <button type="button" id="duplicate-confirm">Add anyway</button>
+  </div>
+</dialog>
 </body>
 </html>

@@ -1,30 +1,54 @@
-import { byId, announce, setText } from './dom.js';
+import { byId, announce } from './dom.js';
 import { createListView } from './listView.js';
 import { initAddForm } from './addForm.js';
 import { listBooks } from '../api/booksApi.js';
 import { BOOK_ADDED_PREFIX } from '../logic/copy.js';
+import {
+  initialState, loadStarted, loadSucceeded, loadFailed, bookAdded,
+} from '../logic/listState.js';
 
-/** Start the page: load the list and wire the add form. */
+function checkedFilter() {
+  const checked = document.querySelector('input[name="filter"]:checked');
+  return checked === null ? 'all' : checked.value;
+}
+
+/** Start the page: load the list and wire the filter, the retry and the add form. */
 export async function startApp() {
   const view = createListView();
   const messages = byId('messages');
-  let loaded = false;
+  let state = initialState();
+
+  function update(next) {
+    state = next;
+    view.render(state);
+  }
+
+  async function load(filter) {
+    update(loadStarted(state, filter));
+    const seq = state.latestRequest;
+    const result = await listBooks(state.filter);
+    update(result.ok
+      ? loadSucceeded(state, seq, result.data)
+      : loadFailed(state, seq, result.failure));
+  }
 
   initAddForm({
     onAdded(book) {
       announce(messages, `${BOOK_ADDED_PREFIX}${book.title}`);
-      if (loaded) {
-        view.prepend(book);
-      }
+      update(bookAdded(state, book));
     },
   });
 
-  view.showLoading();
-  const result = await listBooks('all');
-  if (result.ok) {
-    loaded = true;
-    view.showBooks(result.data.books, result.data.total);
-  } else {
-    setText(byId('loading'), '');
-  }
+  byId('filter').addEventListener('change', () => load(checkedFilter()));
+  byId('try-again').addEventListener('click', () => {
+    byId('books-heading').focus();
+    load(state.filter);
+  });
+  byId('show-all').addEventListener('click', () => {
+    document.querySelector('input[name="filter"][value="all"]').checked = true;
+    byId('books-heading').focus();
+    load('all');
+  });
+
+  await load('all');
 }

@@ -48,6 +48,11 @@ test('details of the wrong shape give no fields and no throw', async () => {
   }
 });
 
+test('a status entry without a string message stays usable (CR-7)', async () => {
+  const r = await call(reply(400, envelope('VALIDATION_ERROR', [{ field: 'status' }, { field: 'title', message: 5 }])));
+  assert.deepEqual(r.failure.fields, [{ field: 'status', message: '' }]);
+});
+
 test('400 INVALID_STATUS', async () => {
   const details = [{ field: 'status', message: 'must be one of: unread, reading, completed' }];
   const r = await call(reply(400, envelope('INVALID_STATUS', details)));

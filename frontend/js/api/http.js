@@ -21,8 +21,9 @@ function parseFields(details) {
     return [];
   }
   return details
-    .filter((d) => isObject(d) && typeof d.field === 'string' && typeof d.message === 'string')
-    .map((d) => ({ field: d.field, message: d.message }));
+    .filter((d) => isObject(d) && typeof d.field === 'string'
+      && (typeof d.message === 'string' || d.field === 'status'))
+    .map((d) => ({ field: d.field, message: typeof d.message === 'string' ? d.message : '' }));
 }
 
 function apiFailure(status, body, mapBook) {
