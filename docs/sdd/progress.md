@@ -282,3 +282,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Task 25: List state, filter and list states (IN_REVIEW)
 
 - Branch: `feature/task-24-text-failure-logic` (chunk branch); delivery handoff 170. New pure model `frontend/js/logic/listState.js` with tests, list texts in `copy.js`; filter radio group, loading, empty, filter-empty and failed states, count arithmetic and stale-response discarding in `app.js`, `listView.js`, `index.html`, `styles.css`. 79 frontend unit tests pass. Exploration was a scripted run (no MCP tool server).
+
+## Task 26 and 27: Add form errors and duplicate dialog (IN_REVIEW)
+
+- Branch: `feature/task-24-text-failure-logic` (chunk branch); delivery handoff 172. Task 26: `ui/addForm.js` (client checks, field messages with `aria-describedby`, in-flight guard, failure handling), new `ui/messages.js` and pure `logic/addCheck.js` with tests, copy strings, field error slots in `index.html`, `css/styles.css`; minimal `api/http.js` fix keeping a `status` detail without a message. Task 27: new `ui/dialogs.js` (native modal `<dialog>`, Cancel first focus, Escape cancels, Tab wrap), `addForm.js` resend with `allow_duplicate: true`. 85 frontend unit tests pass; smoke 3 of 3 pass (against the jar's baked-in frontend, see handoff); scripted exploration recorded in handoff 172.
