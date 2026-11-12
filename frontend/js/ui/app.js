@@ -1,6 +1,7 @@
 import { byId, announce } from './dom.js';
 import { createListView } from './listView.js';
 import { initAddForm } from './addForm.js';
+import { initEntryActions } from './entryActions.js';
 import { listBooks } from '../api/booksApi.js';
 import { BOOK_ADDED_PREFIX } from '../logic/copy.js';
 import {
@@ -18,9 +19,11 @@ export async function startApp() {
   const messages = byId('messages');
   let state = initialState();
 
+  let uiOf;
+
   function update(next) {
     state = next;
-    view.render(state);
+    view.render(state, uiOf);
   }
 
   async function load(filter) {
@@ -31,6 +34,16 @@ export async function startApp() {
       ? loadSucceeded(state, seq, result.data)
       : loadFailed(state, seq, result.failure));
   }
+
+  ({ uiOf } = initEntryActions({
+    getState: () => state,
+    setState(next) {
+      state = next;
+    },
+    update,
+    announce: (text) => announce(messages, text),
+    reload: () => load(state.filter),
+  }));
 
   initAddForm({
     onAdded(book) {

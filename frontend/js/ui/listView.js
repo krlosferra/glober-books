@@ -1,31 +1,8 @@
 import { byId, setText, setVisible } from './dom.js';
-import {
-  ADDED_PREFIX, COMPLETED_PREFIX, LOADING_TEXT, EMPTY_LIBRARY_TEXT, EMPTY_FILTER_TEXT,
-} from '../logic/copy.js';
-import { statusLabel, localDate, countText, ratingText } from '../logic/format.js';
+import { LOADING_TEXT, EMPTY_LIBRARY_TEXT, EMPTY_FILTER_TEXT } from '../logic/copy.js';
+import { countText } from '../logic/format.js';
 import { viewOf } from '../logic/listState.js';
-import { isBookId } from '../logic/ids.js';
-
-function fillOptional(element, text) {
-  setText(element, text);
-  setVisible(element, text !== '');
-}
-
-function renderEntry(template, { book }) {
-  const item = template.content.firstElementChild.cloneNode(true);
-  if (isBookId(book.id)) {
-    item.dataset.bookId = book.id;
-  }
-  setText(item.querySelector('.entry-title'), book.title);
-  setText(item.querySelector('.entry-author'), book.author);
-  setText(item.querySelector('.entry-status'), statusLabel(book.status));
-  setText(item.querySelector('.entry-added'), `${ADDED_PREFIX}${localDate(book.dateAdded)}`);
-  const completed = book.dateCompleted === null ? ''
-    : `${COMPLETED_PREFIX}${localDate(book.dateCompleted)}`;
-  fillOptional(item.querySelector('.entry-completed'), completed);
-  fillOptional(item.querySelector('.entry-rating'), ratingText(book));
-  return item;
-}
+import { renderEntry, IDLE } from './entryView.js';
 
 /** Text of the list status region for a view, and which button it offers. */
 function statusFor(view, state) {
@@ -58,11 +35,12 @@ export function createListView() {
     /**
      * Render a page state.
      * @param {object} state the state of the list model
+     * @param {function(string): {busy: boolean, message: string}} [uiOf] per-entry view state by book id
      */
-    render(state) {
+    render(state, uiOf = () => IDLE) {
       const view = viewOf(state);
       const { text, button } = statusFor(view, state);
-      list.replaceChildren(...state.entries.map((entry) => renderEntry(template, entry)));
+      list.replaceChildren(...state.entries.map((entry) => renderEntry(template, entry, uiOf(entry.book.id))));
       setVisible(list, view === 'list');
       setText(count, view === 'list' || view === 'empty' || view === 'filterEmpty'
         ? countText(state.count) : '');

@@ -299,3 +299,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Task 35: Client endpoints for status, rating, clear and delete (IN_REVIEW)
 
 - Branch: `feature/task-35-client-endpoints`; delivery handoff 184. `booksApi.js` gains `getBook`, `setStatus`, `setRating`, `clearRating`, `deleteBook` (ids only through `bookPath`; invalid id, status or rating rejects with TypeError before any request; DELETE carries Content-Type and no body). 99 frontend unit tests pass. SEC-F-097 asserted in tests.
+
+## Task 36: Entry view, status control and confirmation (IN_REVIEW)
+
+- Branch: `feature/task-36-entry-status`; delivery handoff 188. New `ui/entryView.js` (entry from the template, updated in place, status select, mismatch note, rating mount point), `ui/entryActions.js` (delegated change listener, one request per entry, confirmation, failures beside the entry, 404 removal), `logic/statusChange.js` with tests, copy strings, a second `<dialog>` served by a shared `runDialog` in `ui/dialogs.js`. 107 unit tests and the 4 smoke tests pass. Exploration was a scripted run (Playwright browser tools not exposed). Deviation: the control is a `select` (plan AP-8), not a radio group as the brief says.

@@ -61,6 +61,17 @@
     <p class="entry-added"></p>
     <p class="entry-completed" hidden></p>
     <p class="entry-rating" hidden></p>
+    <p class="entry-mismatch" hidden></p>
+    <div class="entry-controls">
+      <select class="entry-status-select">
+        <option value="unread">Unread</option>
+        <option value="reading">Reading</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+    <!-- Task 37 mounts the rating group in this element; it is shown only on completed entries. -->
+    <div class="entry-rating-mount" hidden></div>
+    <p class="entry-message" role="status"></p>
   </li>
 </template>
 <dialog id="duplicate-dialog" aria-labelledby="duplicate-heading" aria-describedby="duplicate-text">
@@ -73,6 +84,14 @@
   <div class="dialog-actions">
     <button type="button" id="duplicate-cancel" autofocus>Cancel</button>
     <button type="button" id="duplicate-confirm">Add anyway</button>
+  </div>
+</dialog>
+<dialog id="status-dialog" aria-labelledby="status-heading" aria-describedby="status-text">
+  <h2 id="status-heading">Confirm status change</h2>
+  <p id="status-text"></p>
+  <div class="dialog-actions">
+    <button type="button" id="status-cancel" autofocus>Cancel</button>
+    <button type="button" id="status-confirm">Continue</button>
   </div>
 </dialog>
 </body>

@@ -48,3 +48,20 @@ export const DUPLICATE_HEADING = 'Possible duplicate';
 export const DUPLICATE_TEXT = 'This book may already exist. Add anyway?';
 export const CANCEL_LABEL = 'Cancel';
 export const ADD_ANYWAY_LABEL = 'Add anyway';
+
+/** Entry status control and its confirmation dialog (US-012.1, .3, .8, verbatim). */
+export const STATUS_OF_PREFIX = 'Status of ';
+export const NO_LONGER_MATCHES_TEXT = 'No longer matches this filter';
+export const CONFIRM_STATUS_HEADING = 'Confirm status change';
+export const CONTINUE_LABEL = 'Continue';
+const CONFIRM_STATUS_TAIL = ' removes its rating and completion date.';
+
+/**
+ * Text of the status confirmation (US-012.3).
+ * @param {string} title the book title, rendered with textContent only
+ * @param {string} targetLabel Unread or Reading
+ * @returns {string} the dialog text
+ */
+export function confirmStatusText(title, targetLabel) {
+  return `Moving ${title} back to ${targetLabel}${CONFIRM_STATUS_TAIL}`;
+}
