@@ -9,3 +9,16 @@ test('copy holds the exact strings fixed by US-010.3', () => {
   assert.equal(RATING_PREFIX, 'Rating: ');
   assert.equal(NOT_RATED, 'Not rated');
 });
+
+test('copy holds the failure texts of 5.9 and US-011 to US-013 verbatim', async () => {
+  const c = await import('./copy.js');
+  assert.equal(c.STATUS_CHOICE_TEXT, 'Choose Unread, Reading or Completed.');
+  assert.equal(c.RATING_CHOICE_TEXT, 'Choose a rating from 1 to 5.');
+  assert.equal(c.RATING_NOT_ALLOWED_TEXT, 'Only completed books can be rated.');
+  assert.equal(c.LIBRARY_FULL_TEXT, 'Your library is full (5,000 books). Delete a book to add another.');
+  assert.equal(c.BOOK_GONE_TEXT, 'This book no longer exists.');
+  assert.equal(c.REQUEST_FAILED_TEXT, 'The request could not be processed. Reload the page and try again.');
+  assert.equal(c.HOST_TEXT, 'This page cannot talk to the server from this address. Open GloberBooks from http://localhost or http://127.0.0.1.');
+  assert.equal(c.SERVER_FAILED_TEXT, 'Something went wrong on our side. Try again.');
+  assert.equal(c.NO_RESPONSE_TEXT, 'Cannot reach the server. Check that GloberBooks is running, then try again.');
+});
