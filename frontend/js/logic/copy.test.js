@@ -22,3 +22,16 @@ test('copy holds the failure texts of 5.9 and US-011 to US-013 verbatim', async 
   assert.equal(c.SERVER_FAILED_TEXT, 'Something went wrong on our side. Try again.');
   assert.equal(c.NO_RESPONSE_TEXT, 'Cannot reach the server. Check that GloberBooks is running, then try again.');
 });
+
+test('copy holds the add form and duplicate dialog texts', async () => {
+  const c = await import('./copy.js');
+  assert.equal(c.DUPLICATE_HEADING, 'Possible duplicate');
+  assert.equal(c.DUPLICATE_TEXT, 'This book may already exist. Add anyway?');
+  assert.equal(c.CANCEL_LABEL, 'Cancel');
+  assert.equal(c.ADD_ANYWAY_LABEL, 'Add anyway');
+  assert.equal(c.LIBRARY_FULL_TEXT, 'Your library is full (5,000 books). Delete a book to add another.');
+  for (const key of ['TITLE_EMPTY_TEXT', 'TITLE_LENGTH_TEXT', 'AUTHOR_EMPTY_TEXT', 'AUTHOR_LENGTH_TEXT']) {
+    assert.equal(typeof c[key], 'string');
+    assert.ok(c[key].length > 0);
+  }
+});

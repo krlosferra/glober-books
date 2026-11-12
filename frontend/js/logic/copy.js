@@ -36,3 +36,15 @@ export const EMPTY_LIBRARY_TEXT = 'Your reading list is empty. Add your first bo
 export const EMPTY_FILTER_TEXT = 'No books with this status.';
 export const SHOW_ALL_LABEL = 'Show all books';
 export const TRY_AGAIN_LABEL = 'Try again';
+
+/** Inline client-check messages of the add form (informative wording, CR-3). */
+export const TITLE_EMPTY_TEXT = 'Enter a title.';
+export const TITLE_LENGTH_TEXT = 'The title can have at most 500 characters.';
+export const AUTHOR_EMPTY_TEXT = 'Enter an author.';
+export const AUTHOR_LENGTH_TEXT = 'The author can have at most 200 characters.';
+
+/** Duplicate dialog (US-011.7, verbatim). */
+export const DUPLICATE_HEADING = 'Possible duplicate';
+export const DUPLICATE_TEXT = 'This book may already exist. Add anyway?';
+export const CANCEL_LABEL = 'Cancel';
+export const ADD_ANYWAY_LABEL = 'Add anyway';

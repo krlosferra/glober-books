@@ -167,3 +167,22 @@ ul[hidden], p[hidden] {
 button[hidden] {
   display: none;
 }
+
+p.field-error[hidden] {
+  display: none;
+}
+
+.field-error {
+  margin: 0;
+  color: #9b1c1c;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.field-error::before {
+  content: "Error: ";
+}
+
+[aria-invalid="true"] {
+  border-color: #9b1c1c;
+}

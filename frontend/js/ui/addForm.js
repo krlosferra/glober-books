@@ -1,5 +1,10 @@
-import { byId } from './dom.js';
+import { byId, setText, setVisible } from './dom.js';
 import { addBook } from '../api/booksApi.js';
+import { createMessages } from './messages.js';
+import { checkAddForm } from '../logic/addCheck.js';
+import { describeFailure } from '../logic/failures.js';
+
+const FIELD_NAMES = ['title', 'author', 'status'];
 
 /**
  * Wire the add form.
@@ -7,10 +12,9 @@ import { addBook } from '../api/booksApi.js';
  */
 export function initAddForm({ onAdded }) {
   const form = byId('add-form');
-  const title = byId('title');
-  const author = byId('author');
-  const status = byId('status');
   const button = byId('add-button');
+  const messages = createMessages();
+  const inputs = Object.fromEntries(FIELD_NAMES.map((name) => [name, byId(name)]));
   let inFlight = false;
 
   function setBusy(busy) {
@@ -18,21 +22,73 @@ export function initAddForm({ onAdded }) {
     button.disabled = busy;
   }
 
+  function clearFieldErrors() {
+    for (const name of FIELD_NAMES) {
+      setText(byId(`${name}-error`), '');
+      setVisible(byId(`${name}-error`), false);
+      inputs[name].removeAttribute('aria-describedby');
+      inputs[name].removeAttribute('aria-invalid');
+    }
+  }
+
+  function showFieldError(name, text) {
+    const slot = byId(`${name}-error`);
+    setText(slot, text);
+    setVisible(slot, true);
+    inputs[name].setAttribute('aria-describedby', slot.id);
+    inputs[name].setAttribute('aria-invalid', 'true');
+  }
+
+  function showFields(entries) {
+    for (const entry of entries) {
+      showFieldError(entry.field, entry.text);
+    }
+    inputs[entries[0].field].focus();
+  }
+
+  /** Show the outcome of a failed request; keeps every typed value. */
+  function handleFailure(failure) {
+    const decision = describeFailure(failure);
+    if (decision.action === 'field-errors') {
+      showFields(decision.fields);
+    } else if (decision.action === 'status-error') {
+      showFields([{ field: 'status', text: decision.text }]);
+    } else {
+      if (typeof decision.text === 'string') {
+        messages.show(decision.text);
+      }
+      inputs.title.focus();
+    }
+  }
+
+  async function send() {
+    setBusy(true);
+    const result = await addBook({
+      title: inputs.title.value, author: inputs.author.value, status: inputs.status.value,
+    });
+    setBusy(false);
+    if (result.ok) {
+      form.reset();
+      onAdded(result.data);
+      inputs.title.focus();
+    } else {
+      handleFailure(result.failure);
+    }
+  }
+
   async function submit(event) {
     event.preventDefault();
     if (inFlight) {
       return;
     }
-    setBusy(true);
-    const result = await addBook({
-      title: title.value, author: author.value, status: status.value,
-    });
-    if (result.ok) {
-      form.reset();
-      onAdded(result.data);
+    messages.clear();
+    clearFieldErrors();
+    const problems = checkAddForm({ title: inputs.title.value, author: inputs.author.value });
+    if (problems.length > 0) {
+      showFields(problems);
+      return;
     }
-    setBusy(false);
-    title.focus();
+    await send();
   }
 
   form.addEventListener('submit', submit);

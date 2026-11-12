@@ -17,10 +17,12 @@
     <div class="field">
       <label for="title">Title</label>
       <input id="title" name="title" type="text" autocomplete="off" autofocus>
+      <p id="title-error" class="field-error" hidden></p>
     </div>
     <div class="field">
       <label for="author">Author</label>
       <input id="author" name="author" type="text" autocomplete="off">
+      <p id="author-error" class="field-error" hidden></p>
     </div>
     <div class="field">
       <label for="status">Status</label>
@@ -29,6 +31,7 @@
         <option value="reading">Reading</option>
         <option value="completed">Completed</option>
       </select>
+      <p id="status-error" class="field-error" hidden></p>
     </div>
     <button type="submit" id="add-button">Add book</button>
   </form>
