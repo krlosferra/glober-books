@@ -35,8 +35,17 @@
 
   <section aria-labelledby="books-heading">
     <h2 id="books-heading" tabindex="-1">Your books</h2>
+    <fieldset id="filter" class="filter">
+      <legend>Filter by status</legend>
+      <label><input type="radio" name="filter" value="all" checked> All</label>
+      <label><input type="radio" name="filter" value="unread"> Unread</label>
+      <label><input type="radio" name="filter" value="reading"> Reading</label>
+      <label><input type="radio" name="filter" value="completed"> Completed</label>
+    </fieldset>
     <p id="count" class="count" hidden></p>
-    <p id="loading" role="status"></p>
+    <p id="list-status" role="status"></p>
+    <button type="button" id="show-all" hidden>Show all books</button>
+    <button type="button" id="try-again" hidden>Try again</button>
     <ul id="book-list" aria-label="Books" hidden></ul>
   </section>
 </main>
