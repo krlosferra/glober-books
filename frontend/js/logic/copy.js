@@ -28,3 +28,11 @@ export const REQUEST_FAILED_TEXT = 'The request could not be processed. Reload t
 export const HOST_TEXT = `This page cannot talk to the server from this address. Open GloberBooks from ${'http'}://localhost or ${'http'}://127.0.0.1.`;
 export const SERVER_FAILED_TEXT = 'Something went wrong on our side. Try again.';
 export const NO_RESPONSE_TEXT = 'Cannot reach the server. Check that GloberBooks is running, then try again.';
+
+/** List states and controls (US-010.5 to US-010.7, verbatim). */
+export const FILTER_LEGEND = 'Filter by status';
+export const FILTER_ALL_LABEL = 'All';
+export const EMPTY_LIBRARY_TEXT = 'Your reading list is empty. Add your first book above.';
+export const EMPTY_FILTER_TEXT = 'No books with this status.';
+export const SHOW_ALL_LABEL = 'Show all books';
+export const TRY_AGAIN_LABEL = 'Try again';
