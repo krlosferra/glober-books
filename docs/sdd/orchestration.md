@@ -21,6 +21,7 @@ The main Claude Code session is the **orchestrator** of the whole analysis, deve
 5. Own repository hygiene: correct branch, no AI attribution (git-workflow section 1), no forbidden operations.
 6. Run builds and tests independently to verify evidence; never accept claims without output.
 7. Maintain a visible task list for the current phase (what is in progress, blocked, waiting for the Sponsor).
+8. Apply the path rule of `README.md` section 5 before every file-system action: list the directory (`Glob` or `ls`) before opening, running or editing a path not created or read in this session; never read a file that a still-running command or agent will create.
 
 The orchestrator does not decide business questions, does not override a Liaison verdict and does not write production code.
 

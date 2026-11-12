@@ -56,3 +56,17 @@ An agent that finds an error in a document it does not own **does not fix it**: 
   - Only `READY` can be taken, and only by the orchestrator dispatching it.
 - The orchestrator additionally lists remote branches (`git ls-remote --heads origin '*/task-*'`) before dispatch: a branch named after the task is a visible claim.
 - Behavior that already exists on `main` and is covered by a `DONE` row must not be re-implemented, "improved" or duplicated. If an agent believes it is wrong, it raises a finding; it does not rewrite it.
+
+## 5. Where code and files live (path map)
+
+| Area | Path | Notes |
+|---|---|---|
+| Backend sources | `backend/src/main/java/com/globant/globerbooks/{config,controller,domain,dto,error,repository,service}` | Maven project root is `backend/` (`pom.xml`, `mvnw`); build from `backend/`, never from the repo root |
+| Backend resources | `backend/src/main/resources/{application.yml,schema.sql,META-INF}` | |
+| Backend tests | `backend/src/test/java/com/globant/globerbooks/` | Same package layout as the sources |
+| Frontend | `frontend/index.html`, `frontend/css/styles.css`, `frontend/js/{api,logic,ui}/`, `frontend/js/main.js` | Unit tests sit next to the module (`*.test.js`); `frontend/js/sources.test.js` holds the source gates |
+| End-to-end tests | `e2e/tests/*.spec.ts`, `e2e/support/*.ts` (+ `start-server.mjs`), `e2e/playwright.config.ts` | Run from `e2e/`; the harness serves the packaged jar on 127.0.0.1:18080 |
+| Documents | `docs/sdd/*.md`, `docs/sdd/handoffs/NNN-<from>-to-<to>-<topic>.md`, `docs/course/` | Handoff numbers are sequential; the next number is the last file plus one |
+| Repository rules | `.claude/agents/`, `.githooks/`, `.github/`, `CLAUDE.md` | Protected paths (see the PR template) |
+
+**Path rule (before any file-system action):** a path that this session did not create or read in the same session is verified first with `Glob` or `ls` on its directory. Never run, open, `cat` or pass to a script a file whose name was guessed: list the directory, then use the exact name. A file that a command will create (a handoff, a log, a build output) is not read until the command has finished and the file is listed. This map shows the layout by area; it is not a list of files, so it does not need updating when a file is added, only when a directory moves.
