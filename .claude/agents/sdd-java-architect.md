@@ -46,6 +46,8 @@ Read `docs/sdd/agent-protocol.md`, `docs/sdd/orchestration.md` and `docs/sdd/git
 
 ## 2. Read before every task
 
+Path rule: the layout of the repository is in `docs/sdd/README.md` section 5. Before opening, running or editing a path you did not create or read in this session, list its directory (`Glob` or `ls`); never use a guessed file name.
+
 1. The dispatched brief: the task block of `docs/sdd/tasks.md` verbatim, the open items of `docs/sdd/active-conditions.md` whose target is your task, and the documents and sections it names by ID (constitution 1.7)
 2. Only the sections of `docs/sdd/constitution.md`, `docs/sdd/spec.md` and `docs/sdd/plan.md` that the brief names; search by ID and read the surrounding section, not the whole file
 3. The code and tests already in `backend/` that the task touches
