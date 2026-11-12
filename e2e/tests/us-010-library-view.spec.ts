@@ -62,6 +62,24 @@ test('US-014.6 T-12: <script>alert(1)</script> as a title is rendered as inert t
   // The guard fixture asserts no CSP violation, console error or page error at the end.
 });
 
+test('US-011.7 and .8, smoke 4: a duplicate add asks first, and Add anyway lists a second book @smoke', async ({ page, library }) => {
+  const title = uniqueTitle('Smoke dup');
+  await library.create({ title, author: 'Smoke Author' });
+  await page.goto('/');
+  await expect(entries(page)).toHaveCount(1);
+  await page.getByLabel('Title').fill(title);
+  await page.getByLabel('Author').fill('Smoke Author');
+  await page.getByRole('button', { name: 'Add book' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Possible duplicate' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText('This book may already exist. Add anyway?', { exact: true })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+  await dialog.getByRole('button', { name: 'Add anyway' }).click();
+  await expect(entries(page)).toHaveCount(2);
+  await expect(page.getByText('2 books', { exact: true })).toBeVisible();
+  expect((await library.list()).total).toBe(2);
+});
+
 const FAR_ZONES = [
   { zone: 'Pacific/Kiritimati', added: '2026-03-15', completed: '2026-03-16' },
   { zone: 'Pacific/Pago_Pago', added: '2026-03-14', completed: '2026-03-14' },
