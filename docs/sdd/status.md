@@ -88,7 +88,7 @@ Governance in force: constitution 1.7 (direct dispatch, compact deliveries, ledg
 | 34a-2 | Wire the packaged application to the guard and prove it on the jar | backend | DONE | sdd-java-architect | `feature/task-34a2-wire-guard` | 1 |  | ACCEPT WITH FOLLOW-UPS (154) | PASS WITH CONDITIONS (155) |  | PR 41 |
 | 34b | Stored-library validation, hot journal and second instance | backend | DONE | sdd-java-architect | `feature/task-34b-stored-library-validation` | 1 |  | ACCEPT WITH FOLLOW-UPS (158) | PASS (159)* |  | PR 42 |
 | 41+42 | Capacity and performance at maximum size, and backend release sweep (merged task) | backend | DONE | sdd-java-architect | `test/task-41-42-capacity-performance` | 1 | | ACCEPT WITH FOLLOW-UPS (162) | rides on 49+50 (ledger) | | brief 160, delivery 161; Liaison audited; Security close-out in active-conditions.md |
-| 49+50 | Raw-socket run, grammar corners, hidden-channel repeat and log hygiene (merged task, before the tag) | backend | IN_REVIEW | sdd-java-architect | `test/task-49-50-raw-socket-release` | 1 | | | | | brief 163, delivery 164 (full verify not completed in 9 min; findings 1 and 2) |
+| 49+50 | Raw-socket run, grammar corners, hidden-channel repeat and log hygiene (merged task, before the tag) | backend | IN_REVIEW | sdd-java-architect | `test/task-49-50-raw-socket-release` | 1 | | ACCEPT WITH FOLLOW-UPS (165) | PASS WITH CONDITIONS (166) | | brief 163, delivery 164 (full verify not completed in 9 min; findings 1 and 2) |
 
 ## Spec coverage
 
