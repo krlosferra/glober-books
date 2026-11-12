@@ -27,10 +27,12 @@
 | T-33 wording, E-28 prelude | INFO | PM (see section 6) | SEC-F-195: Tomcat's first parse error logs one INFO line with the bad header or target. E-28: `FOO` without `Content-Type` gives 415, the Appendix D prelude sends JSON so the row is met. |
 | SEC-F-174 | INFO | 51 | Pin one cold-start run for nested JSON (first request of a JVM took 200 to 306 ms; T-31 bound is 300 ms; the PM words T-31 "after the first request of the JVM"). |
 | SEC-F-094 | LOW | 45 or earlier (frontend) | Extend the `sources.test.js` rules (template literals, array join, `Reflect.get`, `window.open`, `location`); the E2E XSS test is the real control. |
-| SEC-F-095, SEC-F-132 | LOW | 26 (frontend) | Render `fields[].message` with `textContent` only when the error display is built. |
+| SEC-F-197 | LOW | 28 (frontend) | `listState.loadFailed` must use the fixed generic text when `describeFailure` returns no string text (list GET answered with `VALIDATION_ERROR` or `DUPLICATE_BOOK` shows an empty failure text). |
+| SEC-F-198 | LOW | 28 or 48 (frontend) | Re-rendering 5,000 entries takes 5 s with maximum-size text (1 s typical); measure in E2E and consider `content-visibility: auto` or inserting only the new entry on add. |
 | SEC-F-097 | INFO | 35 (frontend) | Re-verify the non-GET `Content-Type` rule when the DELETE and PUT wrappers are added. |
 | SEC-F-138 | LOW | a later E2E task | `Set-Cookie` and `Location` absence assertions in the guard; the foreign-origin check sees http(s) only. |
 | SEC-F-133, SEC-F-134, SEC-F-135 | LOW | backlog | E2E launcher: assert mode 0700 and the owner of its temp dir; remove the empty temp dir when its own check fails; SIGHUP is not forwarded and a SIGKILL of the launcher orphans the java process. |
+| Liaison F-1 to F-3 of handoff 173 | LOW | 28 and 29 (frontend) | Use `#list-status`; assert against the real page the single request in flight and the number of updates of the "Messages" area (zero for a field-level failure); test Tab and Shift+Tab after a click on the dialog text; the dialog has no `max-height` (a very short viewport could clip the buttons): the containment test covers it; take expected strings from the spec, not from `copy.js`; assert the XSS payloads, zero CSP violations and one POST on repeated submit on the jar (Security, handoff 174). |
 
 ## 3. Standing rules (no task; every reviewer keeps them in mind)
 
@@ -76,9 +78,12 @@ SEC-F-152, SEC-F-154 (replace the regex matcher in `isWhiteSpace`), SEC-F-123 (l
 | Plan amendments: logging keys, `GlobalExceptionHandler` takes `RouteTable`, encoding key and `onRead`, the 6-minute full `verify` time | `plan.md` |
 | Resolver, `StatusDeserializer`, projection and `discard` plan notes are DONE (plan.md of 2026-11-06) | |
 | `HeaderPolicyTest` exact equality; `library.reset()` first use at the first DELETE task | tests |
+| Spec lines (handoff 173): the focus target after "Try again" and "Show all books" (the "Your books" heading, as the delete target of US-012.5); field-level failures write nothing to the "Messages" area (US-013.4, CR-5); the model field `everLoaded` is dead (Task 28 or later) | `spec.md`, `tasks.md` |
 
 ## Closed since the ledger was created
 
 Task 41+42 merged (pull request 45): the README memory bound sentence is fixed (Liaison F-1). Sponsor decisions S-6, S-8 and S-9 accepted on 2026-11-12 (moved to the accepted limits).
+
+Handoff 174 (chunk 24 to 27 Security review): closed SEC-F-095 and SEC-F-132 (field messages are rendered with `textContent`, proved on the real page); SEC-F-094 kept; SEC-F-197, SEC-F-198 opened.
 
 Handoff 166 (Task 49+50 Security review): closed SEC-F-151, SEC-F-128, SEC-F-172 (moved to accepted limits), SEC-F-153, SEC-F-105, SEC-F-166, SEC-F-167 and the Task 41+42 Security close-out; SEC-F-147 moved to S-8 (renewal); SEC-F-106 kept; SEC-F-148 corrected.
