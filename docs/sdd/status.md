@@ -94,7 +94,8 @@ Governance in force: constitution 1.7 (direct dispatch, compact deliveries, ledg
 | 26 | Add form errors and in-flight guard | frontend | DONE | sdd-frontend-developer | PR 47 (merged) | 1 | | ACCEPT WITH FOLLOW-UPS (173) | PASS WITH CONDITIONS (174) | | brief 171; delivery 172 |
 | 27 | Duplicate dialog | frontend | DONE | sdd-frontend-developer | PR 47 (merged) | 1 | | ACCEPT WITH FOLLOW-UPS (173) | PASS WITH CONDITIONS (174) | | brief 171; delivery 172 |
 | 28 | E2E library view, filter and states | frontend | DONE | sdd-frontend-developer | PR 48 (merged) | 1 | | ACCEPT WITH FOLLOW-UPS (177) | PASS (178) | | brief 175; delivery 176 |
-| 29 | E2E add, validation and duplicate flows | frontend | IN_REVIEW (PR) | sdd-frontend-developer | `test/task-29-e2e-add-and-duplicate` | 1 | | ACCEPT (181) | PASS (182) | | brief 179 |
+| 29 | E2E add, validation and duplicate flows | frontend | DONE | sdd-frontend-developer | PR 49 (merged) | 1 | | ACCEPT (181) | PASS (182) | | brief 179 |
+| 35 | Client endpoints for status, rating, clear and delete | frontend | IN_PROGRESS | sdd-frontend-developer | `feature/task-35-client-endpoints` | 2 | | | | | brief 183 |
 
 ## Spec coverage
 
