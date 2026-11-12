@@ -93,7 +93,8 @@ Governance in force: constitution 1.7 (direct dispatch, compact deliveries, ledg
 | 25 | List state, filter and list states | frontend | DONE | sdd-frontend-developer | PR 47 (merged) | 1 | | ACCEPT WITH FOLLOW-UPS (173) | PASS WITH CONDITIONS (174) | | brief 169; delivery 170 |
 | 26 | Add form errors and in-flight guard | frontend | DONE | sdd-frontend-developer | PR 47 (merged) | 1 | | ACCEPT WITH FOLLOW-UPS (173) | PASS WITH CONDITIONS (174) | | brief 171; delivery 172 |
 | 27 | Duplicate dialog | frontend | DONE | sdd-frontend-developer | PR 47 (merged) | 1 | | ACCEPT WITH FOLLOW-UPS (173) | PASS WITH CONDITIONS (174) | | brief 171; delivery 172 |
-| 28 | E2E library view, filter and states | frontend | IN_REVIEW | sdd-frontend-developer | `test/task-28-e2e-library-view` | 1 | | ACCEPT WITH FOLLOW-UPS (177) | PASS (178) | | brief 175; delivery 176 |
+| 28 | E2E library view, filter and states | frontend | IN_REVIEW (PR 48) | sdd-frontend-developer | `test/task-28-e2e-library-view` | 1 | | ACCEPT WITH FOLLOW-UPS (177) | PASS (178) | | brief 175; delivery 176 |
+| 29 | E2E add, validation and duplicate flows | frontend | IN_PROGRESS | sdd-frontend-developer | `test/task-29-e2e-add-and-duplicate` (stacked on Task 28 until PR 48 merges) | 1 | | | | | brief 179 |
 
 ## Spec coverage
 
