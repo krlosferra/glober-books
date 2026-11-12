@@ -63,5 +63,17 @@
     <p class="entry-rating" hidden></p>
   </li>
 </template>
+<dialog id="duplicate-dialog" aria-labelledby="duplicate-heading" aria-describedby="duplicate-text">
+  <h2 id="duplicate-heading">Possible duplicate</h2>
+  <p id="duplicate-text">This book may already exist. Add anyway?</p>
+  <p id="duplicate-title" class="dialog-title"></p>
+  <p id="duplicate-author"></p>
+  <p id="duplicate-status"></p>
+  <p id="duplicate-added"></p>
+  <div class="dialog-actions">
+    <button type="button" id="duplicate-cancel" autofocus>Cancel</button>
+    <button type="button" id="duplicate-confirm">Add anyway</button>
+  </div>
+</dialog>
 </body>
 </html>

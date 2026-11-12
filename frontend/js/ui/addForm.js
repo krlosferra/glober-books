@@ -1,6 +1,7 @@
 import { byId, setText, setVisible } from './dom.js';
 import { addBook } from '../api/booksApi.js';
 import { createMessages } from './messages.js';
+import { confirmDuplicate } from './dialogs.js';
 import { checkAddForm } from '../logic/addCheck.js';
 import { describeFailure } from '../logic/failures.js';
 
@@ -61,18 +62,33 @@ export function initAddForm({ onAdded }) {
     }
   }
 
-  async function send() {
+  /** Send the add request; `allowDuplicate` is true only after "Add anyway" (CR-1). */
+  async function send(allowDuplicate) {
     setBusy(true);
     const result = await addBook({
       title: inputs.title.value, author: inputs.author.value, status: inputs.status.value,
-    });
-    setBusy(false);
+    }, allowDuplicate);
     if (result.ok) {
+      setBusy(false);
       form.reset();
       onAdded(result.data);
       inputs.title.focus();
+    } else if (describeFailure(result.failure).action === 'duplicate-dialog') {
+      await askDuplicate(result.failure.existingBook);
     } else {
+      setBusy(false);
       handleFailure(result.failure);
+    }
+  }
+
+  /** The button stays disabled while the modal dialog is open (US-011.8). */
+  async function askDuplicate(existing) {
+    const confirmed = await confirmDuplicate(existing);
+    if (confirmed) {
+      await send(true);
+    } else {
+      setBusy(false);
+      inputs.title.focus();
     }
   }
 
@@ -88,7 +104,7 @@ export function initAddForm({ onAdded }) {
       showFields(problems);
       return;
     }
-    await send();
+    await send(false);
   }
 
   form.addEventListener('submit', submit);
