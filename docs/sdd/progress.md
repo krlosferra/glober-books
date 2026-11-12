@@ -290,3 +290,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Task 28: E2E library view, filter and states (IN_REVIEW)
 
 - Branch: `test/task-28-e2e-library-view`; delivery handoff 176. New `e2e/support/stubs.ts` (held, failed and fixed list answers) and `view.ts`, `library.ts` edit, two specs for US-010; SEC-F-197 fixed in `logic/listState.js` with a unit test. 86 frontend unit tests and 27 E2E tests pass. SEC-F-198 measured: 5,000 maximum-size entries re-render in about 1.7 s; `content-visibility` did not help and was reverted (left to Task 48).
+
+## Task 29: E2E add, validation and duplicate flows (IN_REVIEW)
+
+- Branch: `test/task-29-e2e-add-and-duplicate`; delivery handoff 180. New `e2e/support/pages.ts` (form and dialog locators, POST tracking, held and failed adds with real headers, Messages-area update counter) and three specs (`us-011-add-book`, `us-011-add-failures`, `us-011-duplicate`); smoke test 4 added to `us-010-library-view.spec.ts`. 69 E2E tests pass (full run); no production change. One finding: Shift+Tab after a click on non-interactive dialog text leaves the two buttons (pinned with `test.fail()`, awaiting a decision).
