@@ -28,9 +28,10 @@
 | SEC-F-174 | INFO | 51 | Pin one cold-start run for nested JSON (first request of a JVM took 200 to 306 ms; T-31 bound is 300 ms; the PM words T-31 "after the first request of the JVM"). |
 | SEC-F-094 | LOW | 45 or earlier (frontend) | Extend the `sources.test.js` rules (template literals, array join, `Reflect.get`, `window.open`, `location`); the E2E XSS test is the real control. |
 | SEC-F-097 | INFO | 35 (frontend) | Re-verify the non-GET `Content-Type` rule when the DELETE and PUT wrappers are added. |
-| SEC-F-138 | LOW | a later E2E task | `Set-Cookie` and `Location` absence assertions in the guard; the foreign-origin check sees http(s) only. |
+| SEC-F-138 | LOW | a later E2E task | `Set-Cookie` and `Location` absence assertions in the guard; the foreign-origin check sees http(s) only; also assert empty local, session storage and cookies after the add flows (not asserted in Task 29; checked once in handoff 174). |
 | SEC-F-133, SEC-F-134, SEC-F-135 | LOW | backlog | E2E launcher: assert mode 0700 and the owner of its temp dir; remove the empty temp dir when its own check fails; SIGHUP is not forwarded and a SIGKILL of the launcher orphans the java process. |
-| Liaison F-1 to F-3 of handoff 173 | LOW | 29 (frontend); Task 28 part done (handoff 177) | Remaining for Task 29: the number of updates of the "Messages" area (zero for a field-level failure) and one POST on repeated submit; test Tab and Shift+Tab after a click on the dialog text; the dialog has no `max-height` (a very short viewport could clip the buttons): the containment test covers it; take expected strings from the spec, not from `copy.js`; assert the XSS payloads, zero CSP violations and one POST on repeated submit on the jar (Security, handoff 174). |
+| Liaison F-29-2 (handoff 181) | LOW | PM (backlog) | At 320x90 the duplicate dialog (UA `max-height`, `overflow: hidden`) hides its heading and question; buttons stay reachable. Decide whether a minimum height (for example 320x256, WCAG 1.4.10 reflow) is a requirement; if yes add one E2E assertion that heading and question are visible there. Any CSS change touches the US-014.6 containment rules: PM line first. |
+| Liaison F-1 to F-3 of handoff 173 | closed by handoff 181 (Task 29) | none | Messages-update counts, one POST on repeated submit, Tab and Shift+Tab after a text click, spec literals, hostile strings and CSP are asserted; the short-viewport remainder is F-29-2. |
 
 ## 3. Standing rules (no task; every reviewer keeps them in mind)
 
@@ -81,6 +82,8 @@ SEC-F-152, SEC-F-154 (replace the regex matcher in `isWhiteSpace`), SEC-F-123 (l
 ## Closed since the ledger was created
 
 Task 41+42 merged (pull request 45): the README memory bound sentence is fixed (Liaison F-1). Sponsor decisions S-6, S-8 and S-9 accepted on 2026-11-12 (moved to the accepted limits).
+
+Handoff 182 (Task 29 Security review, PASS): no new finding; SEC-F-094 and SEC-F-138 kept; the F-29-1 focus-trap fix accepted.
 
 Handoff 178 (Task 28 Security review, PASS): closed SEC-F-197 (fix verified) and SEC-F-198 (accepted LOW, register row R-27); SEC-F-094 and SEC-F-138 kept.
 
