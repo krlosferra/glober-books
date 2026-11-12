@@ -278,3 +278,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Task 24: Frontend text and failure logic (IN_REVIEW)
 
 - Branch: `feature/task-24-text-failure-logic`; delivery handoff 168. New `frontend/js/logic/text.js` (trim by White_Space, NFC, code-point length) and `failures.js` (Section 5.9 table), exact texts added to `copy.js`, unit tests next to each; 69 frontend unit tests pass. Two findings for the Liaison (title/author field message vs fixed-text-only wording; http text split for the source gate), see the handoff.
+
+## Task 25: List state, filter and list states (IN_REVIEW)
+
+- Branch: `feature/task-24-text-failure-logic` (chunk branch); delivery handoff 170. New pure model `frontend/js/logic/listState.js` with tests, list texts in `copy.js`; filter radio group, loading, empty, filter-empty and failed states, count arithmetic and stale-response discarding in `app.js`, `listView.js`, `index.html`, `styles.css`. 79 frontend unit tests pass. Exploration was a scripted run (no MCP tool server).
