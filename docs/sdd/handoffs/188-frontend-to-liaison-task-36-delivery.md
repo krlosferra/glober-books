@@ -22,7 +22,7 @@ Edited: `frontend/index.html` (template: select, mismatch note, rating mount, pe
 | Hostile and long titles | | `<img src=x onerror=alert(1)>` shown literally in names and dialog text (0 img elements); 500-character title: no horizontal scroll at 320 px; console showed only resource errors from stubbed responses, no CSP violation |
 
 ## Results
-- `node --test "frontend/**/*.test.js"`: tests 107, pass 107, fail 0 (exit 0).
+- `node --test "frontend/**/*.test.js"`: tests 103, pass 103, fail 0 (exit 0); the 4 smoke tests pass separately (107 was the sum).
 - `npx playwright test --grep @smoke` from `e2e/`: 4 tests, 4 passed, 0 failed, exit 0.
 
 ## Deviations
