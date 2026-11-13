@@ -315,3 +315,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Task 54: Focus after RATING_NOT_ALLOWED (IN_REVIEW)
 
 - Branch: `feature/task-54-focus-after-rating-not-allowed`; delivery handoff 200. Pure `focusKeyAfterReload` in `logic/entryOps.js`; `entryActions.js` applies it after the entry reload (focus falls back to the status select when the control used is hidden or gone). F-37-1 annotation replaced by an assertion. 110 unit and 95 E2E tests pass.
+
+## Task 55: Remove the inert static-locations property (IN_REVIEW)
+
+- Branch: `chore/task-55-remove-static-locations`; delivery handoff 204. Key removed from `application.yml` (`add-mappings: false` kept); the three tests no longer expect it (absent by default); catalog served from the literal classpath location, proven unchanged. Full build: 351 tests, 0 failures, 0 errors, 1 skipped, exit 0 (SEC-F-126).

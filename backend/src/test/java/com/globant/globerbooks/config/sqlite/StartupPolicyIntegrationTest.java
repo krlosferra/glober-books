@@ -83,7 +83,6 @@ class StartupPolicyIntegrationTest {
             expected.put("spring.mvc.hiddenmethod.filter.enabled", "false");
             expected.put("spring.mvc.formcontent.filter.enabled", "false");
             expected.put("spring.servlet.multipart.enabled", "false");
-            expected.put("spring.web.resources.static-locations", "classpath:/static/");
             expected.put("spring.mvc.log-request-details", "false");
             expected.put("server.tomcat.threads.max", "8");
             expected.put("server.tomcat.threads.min-spare", "2");
@@ -102,7 +101,7 @@ class StartupPolicyIntegrationTest {
         try (ConfigurableApplicationContext context = start("127.0.0.1", "jdbc:sqlite:" + tempDir.resolve("b.db"))) {
             ConfigurableEnvironment env = context.getEnvironment();
 
-            assertThat(env.getProperty("spring.web.resources.static-locations")).isEqualTo("classpath:/static/");
+            assertThat(env.getProperty("spring.web.resources.static-locations")).isNull();
             assertThat(env.getProperty("globerbooks.static.root")).isNull();
             assertThat(env.getProperty("spring.web.resources.add-mappings")).isEqualTo("false");
         }
