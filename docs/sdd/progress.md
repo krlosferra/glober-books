@@ -307,3 +307,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Tasks 37 and 38: Rating group, clear rating, delete with confirmation (IN_REVIEW)
 
 - Branch: `feature/task-37-rating-group` (chunk branch); delivery handoff 192. Rating group (five native radios in a `role="group"`), clear button, rating failure paths (`INVALID_RATING`, `RATING_NOT_ALLOWED` with entry reload, `BOOK_NOT_FOUND` removal), delete button with the "Delete book" dialog and the focus rules; new `logic/entryOps.js` with tests, copy strings. 109 unit tests and the 4 smoke tests pass. Exploration was a scripted run (Playwright browser tools not exposed). F-35-1, F-35-2 and SEC-F-200 handled.
+
+## Tasks 39 and 40: E2E status, rating and delete (IN_REVIEW)
+
+- Branch: `test/task-39-40-e2e-status-rating-delete` (stacked on the chunk 37+38 branch); delivery handoff 196. New `us-012-status-rating.spec.ts` and `us-012-delete.spec.ts`, helpers `support/requests.ts` and `support/storage.ts`, smoke tests 5 and 6, storage assertions in the add and delete flows (SEC-F-138). Two older locators repaired (add-form Status control, status label vs option) because the entry status select of Task 36 made them ambiguous. F-37-1 focus landing recorded: body. 109 unit and 95 E2E tests pass.
