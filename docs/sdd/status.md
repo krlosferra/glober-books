@@ -99,7 +99,9 @@ Governance in force: constitution 1.7 (direct dispatch, compact deliveries, ledg
 | 36 | Entry view, status control and confirmation | frontend | DONE | sdd-frontend-developer | PR 52 (merged) | 2 | | ACCEPT (189) | PASS (190) | | brief 187; delivery 188 |
 | 37 | Rating group and clear rating | frontend | DONE | sdd-frontend-developer | PR 53 (merged) | 2 | | ACCEPT WITH FOLLOW-UPS (193) | PASS (194) | | brief 191; chunk 37+38 (one review, one PR) |
 | 38 | Delete with confirmation | frontend | DONE | sdd-frontend-developer | PR 53 (merged) | 2 | | ACCEPT (193) | PASS (194) | | brief 191; chunk 37+38 |
-| 39+40 | E2E status, rating and delete | frontend | IN_REVIEW | sdd-frontend-developer | `test/task-39-40-e2e-status-rating-delete` | 2 | | ACCEPT (197) | PASS (reduced, orchestrator, 198) | | brief 195; delivery 196 |
+| 39+40 | E2E status, rating and delete | frontend | DONE | sdd-frontend-developer | PR 54 (merged) | 2 | | ACCEPT (197) | PASS (reduced, orchestrator, 198) | | brief 195; delivery 196 |
+| 54 | Focus after RATING_NOT_ALLOWED | frontend | READY | | | 2 | | | | | Sponsor decision 2026-11-13 (F-37-1) |
+| 55 | Remove the inert `static-locations` property | backend | READY | | | 3 | | | | | Sponsor decision 2026-11-13 (SEC-F-126); constitution 1.8 in the same PR |
 
 ## Spec coverage
 
