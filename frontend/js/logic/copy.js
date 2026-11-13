@@ -65,3 +65,20 @@ const CONFIRM_STATUS_TAIL = ' removes its rating and completion date.';
 export function confirmStatusText(title, targetLabel) {
   return `Moving ${title} back to ${targetLabel}${CONFIRM_STATUS_TAIL}`;
 }
+
+/** Rating group, clear button and delete (US-012.4, .5, verbatim). */
+export const RATING_OF_PREFIX = 'Rating of ';
+export const CLEAR_RATING_PREFIX = 'Clear rating of ';
+export const DELETE_PREFIX = 'Delete ';
+export const DELETE_HEADING = 'Delete book';
+export const DELETE_LABEL = 'Delete';
+export const BOOK_DELETED_PREFIX = 'Book deleted: ';
+
+/**
+ * Text of the delete confirmation (US-012.5).
+ * @param {string} title the book title, rendered with textContent only
+ * @returns {string} the dialog text
+ */
+export function deleteConfirmText(title) {
+  return `${DELETE_PREFIX}${title}? This cannot be undone.`;
+}

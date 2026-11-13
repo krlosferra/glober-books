@@ -35,3 +35,14 @@ test('copy holds the add form and duplicate dialog texts', async () => {
     assert.ok(c[key].length > 0);
   }
 });
+
+test('US-012.4 US-012.5: rating, clear and delete texts are verbatim', async () => {
+  const c = await import('./copy.js');
+  assert.equal(`${c.RATING_OF_PREFIX}Dune`, 'Rating of Dune');
+  assert.equal(`${c.CLEAR_RATING_PREFIX}Dune`, 'Clear rating of Dune');
+  assert.equal(`${c.DELETE_PREFIX}Dune`, 'Delete Dune');
+  assert.equal(c.DELETE_HEADING, 'Delete book');
+  assert.equal(c.DELETE_LABEL, 'Delete');
+  assert.equal(c.deleteConfirmText('Dune'), 'Delete Dune? This cannot be undone.');
+  assert.equal(`${c.BOOK_DELETED_PREFIX}Dune`, 'Book deleted: Dune');
+});

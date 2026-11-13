@@ -27,8 +27,7 @@
 | T-33 wording, E-28 prelude | INFO | PM (see section 6) | SEC-F-195: Tomcat's first parse error logs one INFO line with the bad header or target. E-28: `FOO` without `Content-Type` gives 415, the Appendix D prelude sends JSON so the row is met. |
 | SEC-F-174 | INFO | 51 | Pin one cold-start run for nested JSON (first request of a JVM took 200 to 306 ms; T-31 bound is 300 ms; the PM words T-31 "after the first request of the JVM"). |
 | SEC-F-094 | LOW | 45 or earlier (frontend) | Extend the `sources.test.js` rules (template literals, array join, `Reflect.get`, `window.open`, `location`); the E2E XSS test is the real control. |
-| Liaison F-35-1 (handoff 185) | MINOR | 37 only (frontend; met in Task 36, handoff 189: `send` awaits `setStatus` in try/catch and a rejection shows the generic text) | `setStatus`, `setRating`, `clearRating`, `deleteBook` reject with a TypeError on a refused id, status or rating (not a failure result). Callers pass only server-sourced ids and fixed control values; each action handler must still `await` them inside try/catch so a rejection can never leave controls disabled. No spec change. |
-| Liaison F-36-1 (handoff 189) | MINOR | 36 (progress.md) | `progress.md` and delivery 188 say 107 unit tests; `node --test "frontend/**/*.test.js"` gives 103 (107 is 103 plus the 4 smoke tests). Correct the sentence in the Task 36 entry of `progress.md`. |
+| Liaison F-37-1 (handoff 193) | MINOR | 39+40 (E2E) or a frontend fix task | After `RATING_NOT_ALLOWED` the reloaded entry is Reading, the rating group is hidden and the focus restored to a radio is lost to the page body (plan assumption, not asserted). Record in the E2E exploration and have the focus fall back to the status select, or accept it. |
 | SEC-F-138 | LOW | a later E2E task | `Set-Cookie` and `Location` absence assertions in the guard; the foreign-origin check sees http(s) only; also assert empty local, session storage and cookies after the add flows (not asserted in Task 29; checked once in handoff 174). |
 | SEC-F-133, SEC-F-134, SEC-F-135 | LOW | backlog | E2E launcher: assert mode 0700 and the owner of its temp dir; remove the empty temp dir when its own check fails; SIGHUP is not forwarded and a SIGKILL of the launcher orphans the java process. |
 | Liaison F-29-2 (handoff 181) | LOW | PM (backlog) | At 320x90 the duplicate dialog (UA `max-height`, `overflow: hidden`) hides its heading and question; buttons stay reachable. Decide whether a minimum height (for example 320x256, WCAG 1.4.10 reflow) is a requirement; if yes add one E2E assertion that heading and question are visible there. Any CSS change touches the US-014.6 containment rules: PM line first. |
@@ -81,6 +80,10 @@ SEC-F-152, SEC-F-154 (replace the regex matcher in `isWhiteSpace`), SEC-F-123 (l
 | Spec lines (handoff 173): the focus target after "Try again" and "Show all books" (the "Your books" heading, as the delete target of US-012.5); field-level failures write nothing to the "Messages" area (US-013.4, CR-5); the model field `everLoaded` is dead (Task 28 or later) | `spec.md`, `tasks.md` |
 
 ## Closed since the ledger was created
+
+Handoff 194 (chunk 37 and 38 Security review, PASS): closed SEC-F-200 (busy record of a removed entry) and confirmed F-35-1 on the jar; no new finding; SEC-F-094 kept (the rules of `sources.test.js` were not extended).
+
+Handoff 193 (chunk 37 and 38 audit): closed Liaison F-35-1 (setStatus, setRating, clearRating and deleteBook are awaited in one try/catch in `send`; verified in code) and F-35-2 (test added). Opened Liaison F-37-1 below. SEC-F-094 kept.
 
 Task 41+42 merged (pull request 45): the README memory bound sentence is fixed (Liaison F-1). Sponsor decisions S-6, S-8 and S-9 accepted on 2026-11-12 (moved to the accepted limits).
 

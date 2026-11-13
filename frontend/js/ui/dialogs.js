@@ -1,5 +1,5 @@
 import { byId, setText } from './dom.js';
-import { ADDED_PREFIX, confirmStatusText } from '../logic/copy.js';
+import { ADDED_PREFIX, confirmStatusText, deleteConfirmText } from '../logic/copy.js';
 import { nextTabTarget } from '../logic/focusTrap.js';
 import { statusLabel, localDate } from '../logic/format.js';
 
@@ -72,4 +72,15 @@ export function confirmDuplicate(existing) {
 export function confirmStatusChange(title, targetLabel) {
   setText(byId('status-text'), confirmStatusText(title, targetLabel));
   return runDialog(byId('status-dialog'), byId('status-cancel'), byId('status-confirm'));
+}
+
+/**
+ * Open the modal "Delete book" dialog (US-012.5) and wait for the choice.
+ * The title is shown with textContent only; initial focus is on Cancel.
+ * @param {string} title the book title
+ * @returns {Promise<boolean>} true for "Delete", false for Cancel or Escape
+ */
+export function confirmDelete(title) {
+  setText(byId('delete-text'), deleteConfirmText(title));
+  return runDialog(byId('delete-dialog'), byId('delete-cancel'), byId('delete-confirm'));
 }
