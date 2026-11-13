@@ -122,3 +122,10 @@ test('failures.js and the table use only exact copy strings (US-013.1)', () => {
     'MALFORMED_REQUEST', 'INVALID_HOST', 'INTERNAL_ERROR'].map((c) => describeFailure(api(c)).text);
   assert.deepEqual(texts, [STATUS, RATING, NOT_ALLOWED, FULL, GONE, MALFORMED, HOST, INTERNAL]);
 });
+
+test('F-35-2 US-012.7: INVALID_STATUS and INVALID_RATING ignore server text and details', () => {
+  const hostile = { kind: 'api', status: 400, code: 'INVALID_RATING', error: '<b>x</b>', fields: [{ field: 'rating', message: 'm' }] };
+  assert.deepEqual(describeFailure(hostile), { action: 'rating-error', text: RATING });
+  assert.deepEqual(describeFailure({ ...hostile, code: 'INVALID_STATUS' }),
+    { action: 'status-error', text: STATUS, restore: true });
+});

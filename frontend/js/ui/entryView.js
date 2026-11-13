@@ -3,6 +3,7 @@ import { ADDED_PREFIX, COMPLETED_PREFIX, NO_LONGER_MATCHES_TEXT } from '../logic
 import { statusLabel, localDate, ratingText } from '../logic/format.js';
 import { statusControlName } from '../logic/statusChange.js';
 import { isBookId } from '../logic/ids.js';
+import { ratingGroupName, clearRatingName, hasClearButton } from '../logic/entryOps.js';
 
 /** Per-entry view state that the list state does not hold. */
 export const IDLE = Object.freeze({ busy: false, message: '' });
@@ -10,6 +11,21 @@ export const IDLE = Object.freeze({ busy: false, message: '' });
 function fillOptional(element, text) {
   setText(element, text);
   setVisible(element, text !== '');
+}
+
+/** Rating group: exists only on completed entries; shows the server's last known value (US-012.2, .4). */
+function updateRating(item, book, ui) {
+  const completed = book.status === 'completed';
+  setVisible(item.querySelector('.entry-rating-mount'), completed);
+  item.querySelector('.entry-rating-group').setAttribute('aria-label', ratingGroupName(book.title));
+  item.querySelectorAll('.entry-rating-group input').forEach((radio) => {
+    radio.checked = completed && Number(radio.value) === book.rating;
+    radio.disabled = ui.busy;
+  });
+  const clear = item.querySelector('.entry-clear-rating');
+  setText(clear, clearRatingName(book.title));
+  setVisible(clear, hasClearButton(book));
+  clear.disabled = ui.busy;
 }
 
 /**
@@ -33,8 +49,7 @@ export function updateEntry(item, entry, ui) {
   select.setAttribute('aria-label', statusControlName(book.title));
   select.value = book.status;
   select.disabled = ui.busy;
-  // Task 37 mounts the rating group in this element; the rating control exists only on completed entries.
-  setVisible(item.querySelector('.entry-rating-mount'), book.status === 'completed');
+  updateRating(item, book, ui);
   setText(item.querySelector('.entry-message'), ui.message);
 }
 
@@ -49,6 +64,10 @@ export function renderEntry(template, entry, ui = IDLE) {
   const item = template.content.firstElementChild.cloneNode(true);
   if (isBookId(entry.book.id)) {
     item.dataset.bookId = entry.book.id;
+    // One radio group per entry: the name is made of the validated id only.
+    item.querySelectorAll('.entry-rating-group input').forEach((radio) => {
+      radio.setAttribute('name', `rating-${entry.book.id}`);
+    });
   }
   updateEntry(item, entry, ui);
   return item;

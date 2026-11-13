@@ -248,3 +248,39 @@ dialog p {
 div[hidden] {
   display: none;
 }
+
+.entry-rating-mount {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.entry-rating-mount[hidden] {
+  display: none;
+}
+
+.entry-rating-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+}
+
+.rating-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+}
+
+.rating-option input {
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+}
+
+.entry-clear-rating {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}

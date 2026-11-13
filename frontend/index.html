@@ -69,8 +69,16 @@
         <option value="completed">Completed</option>
       </select>
     </div>
-    <!-- Task 37 mounts the rating group in this element; it is shown only on completed entries. -->
-    <div class="entry-rating-mount" hidden></div>
+    <div class="entry-rating-mount" hidden>
+      <div class="entry-rating-group" role="group">
+        <label class="rating-option"><input type="radio" value="1"> 1</label>
+        <label class="rating-option"><input type="radio" value="2"> 2</label>
+        <label class="rating-option"><input type="radio" value="3"> 3</label>
+        <label class="rating-option"><input type="radio" value="4"> 4</label>
+        <label class="rating-option"><input type="radio" value="5"> 5</label>
+      </div>
+      <button type="button" class="entry-clear-rating" hidden></button>
+    </div>
     <p class="entry-message" role="status"></p>
   </li>
 </template>
