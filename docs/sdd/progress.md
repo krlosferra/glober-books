@@ -303,3 +303,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Task 36: Entry view, status control and confirmation (IN_REVIEW)
 
 - Branch: `feature/task-36-entry-status`; delivery handoff 188. New `ui/entryView.js` (entry from the template, updated in place, status select, mismatch note, rating mount point), `ui/entryActions.js` (delegated change listener, one request per entry, confirmation, failures beside the entry, 404 removal), `logic/statusChange.js` with tests, copy strings, a second `<dialog>` served by a shared `runDialog` in `ui/dialogs.js`. 103 unit tests and the 4 smoke tests pass. Exploration was a scripted run (Playwright browser tools not exposed). Deviation: the control is a `select` (plan AP-8), not a radio group as the brief says.
+
+## Tasks 37 and 38: Rating group, clear rating, delete with confirmation (IN_REVIEW)
+
+- Branch: `feature/task-37-rating-group` (chunk branch); delivery handoff 192. Rating group (five native radios in a `role="group"`), clear button, rating failure paths (`INVALID_RATING`, `RATING_NOT_ALLOWED` with entry reload, `BOOK_NOT_FOUND` removal), delete button with the "Delete book" dialog and the focus rules; new `logic/entryOps.js` with tests, copy strings. 109 unit tests and the 4 smoke tests pass. Exploration was a scripted run (Playwright browser tools not exposed). F-35-1, F-35-2 and SEC-F-200 handled.
