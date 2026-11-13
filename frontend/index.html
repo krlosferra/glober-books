@@ -68,6 +68,7 @@
         <option value="reading">Reading</option>
         <option value="completed">Completed</option>
       </select>
+      <button type="button" class="entry-delete"></button>
     </div>
     <div class="entry-rating-mount" hidden>
       <div class="entry-rating-group" role="group">
@@ -100,6 +101,14 @@
   <div class="dialog-actions">
     <button type="button" id="status-cancel" autofocus>Cancel</button>
     <button type="button" id="status-confirm">Continue</button>
+  </div>
+</dialog>
+<dialog id="delete-dialog" aria-labelledby="delete-heading" aria-describedby="delete-text">
+  <h2 id="delete-heading">Delete book</h2>
+  <p id="delete-text"></p>
+  <div class="dialog-actions">
+    <button type="button" id="delete-cancel" autofocus>Cancel</button>
+    <button type="button" id="delete-confirm">Delete</button>
   </div>
 </dialog>
 </body>

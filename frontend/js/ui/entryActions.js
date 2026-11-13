@@ -1,13 +1,13 @@
 import { byId } from './dom.js';
-import { confirmStatusChange } from './dialogs.js';
+import { confirmStatusChange, confirmDelete } from './dialogs.js';
 import { findEntryItem, updateEntry, IDLE } from './entryView.js';
-import { setStatus, setRating, clearRating, getBook } from '../api/booksApi.js';
+import { setStatus, setRating, clearRating, getBook, deleteBook } from '../api/booksApi.js';
 import { describeFailure } from '../logic/failures.js';
 import { bookReplaced, bookRemoved } from '../logic/listState.js';
 import { statusLabel } from '../logic/format.js';
 import { isBookId } from '../logic/ids.js';
 import { needsConfirmation, isChange } from '../logic/statusChange.js';
-import { parseRating, isRatingChange } from '../logic/entryOps.js';
+import { parseRating, isRatingChange, deletedText } from '../logic/entryOps.js';
 
 const entryOf = (ctx, id) => ctx.deps.getState().entries.find((e) => e.book.id === id) ?? null;
 const uiOf = (ctx, id) => ctx.ui.get(id) ?? IDLE;
@@ -22,6 +22,10 @@ function refresh(ctx, id) {
 }
 
 function setUi(ctx, id, next) {
+  if (entryOf(ctx, id) === null) {
+    ctx.ui.delete(id); // no busy record for an entry that is gone (SEC-F-200)
+    return;
+  }
   ctx.ui.set(id, { ...uiOf(ctx, id), ...next });
   refresh(ctx, id);
 }
@@ -32,6 +36,9 @@ function controlOf(item, key) {
     return item.querySelector(`.entry-rating-group input[value="${key}"]`);
   }
   const clear = item.querySelector('.entry-clear-rating');
+  if (key === 'delete') {
+    return item.querySelector('.entry-delete');
+  }
   if (key === 'clear') {
     return clear.hidden ? item.querySelector('.entry-rating-group input') : clear;
   }
@@ -47,13 +54,14 @@ function restoreFocus(ctx, id, key) {
   }
 }
 
-function removeGone(ctx, id, text) {
+/** Remove an entry, announce, focus the heading; reload the list only for the 404 path (US-010.10). */
+function removeGone(ctx, id, text, reloadList = true) {
   const removal = bookRemoved(ctx.deps.getState(), id);
   ctx.ui.delete(id);
   ctx.deps.update(removal.state);
   ctx.deps.announce(text);
   byId('books-heading').focus();
-  if (removal.reload) {
+  if (reloadList && removal.reload) {
     ctx.deps.reload();
   }
 }
@@ -88,6 +96,10 @@ function failed(ctx, id, failure, key) {
 }
 
 function succeeded(ctx, id, book, key) {
+  if (key === 'delete') {
+    removeGone(ctx, id, deletedText(entryOf(ctx, id)?.book.title ?? book.title), false);
+    return;
+  }
   const replaced = bookReplaced(ctx.deps.getState(), book);
   ctx.deps.setState(replaced.state);
   setUi(ctx, id, { busy: false, message: '' });
@@ -155,11 +167,28 @@ async function onChange(ctx, event) {
 }
 
 async function onClick(ctx, event) {
-  const button = event.target instanceof Element ? event.target.closest('.entry-clear-rating') : null;
-  const found = button === null ? null : entryOfEvent(ctx, button);
+  const target = event.target instanceof Element ? event.target : null;
+  const clear = target === null ? null : target.closest('.entry-clear-rating');
+  const remove = target === null ? null : target.closest('.entry-delete');
+  const found = clear === null ? null : entryOfEvent(ctx, clear);
   if (found !== null) {
     await send(ctx, found.id, () => clearRating(found.id), 'clear');
+  } else if (remove !== null) {
+    await onDelete(ctx, remove);
   }
+}
+
+async function onDelete(ctx, button) {
+  const found = entryOfEvent(ctx, button);
+  if (found === null) {
+    return;
+  }
+  const { id, entry } = found;
+  if (!(await confirmDelete(entry.book.title))) {
+    restoreFocus(ctx, id, 'delete');
+    return;
+  }
+  await send(ctx, id, () => deleteBook(id), 'delete');
 }
 
 /**

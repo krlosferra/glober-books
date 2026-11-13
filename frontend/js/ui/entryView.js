@@ -3,7 +3,7 @@ import { ADDED_PREFIX, COMPLETED_PREFIX, NO_LONGER_MATCHES_TEXT } from '../logic
 import { statusLabel, localDate, ratingText } from '../logic/format.js';
 import { statusControlName } from '../logic/statusChange.js';
 import { isBookId } from '../logic/ids.js';
-import { ratingGroupName, clearRatingName, hasClearButton } from '../logic/entryOps.js';
+import { ratingGroupName, clearRatingName, deleteName, hasClearButton } from '../logic/entryOps.js';
 
 /** Per-entry view state that the list state does not hold. */
 export const IDLE = Object.freeze({ busy: false, message: '' });
@@ -49,6 +49,9 @@ export function updateEntry(item, entry, ui) {
   select.setAttribute('aria-label', statusControlName(book.title));
   select.value = book.status;
   select.disabled = ui.busy;
+  const remove = item.querySelector('.entry-delete');
+  setText(remove, deleteName(book.title));
+  remove.disabled = ui.busy;
   updateRating(item, book, ui);
   setText(item.querySelector('.entry-message'), ui.message);
 }
