@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ratingGroupName, clearRatingName, deleteName, deletedText, parseRating, isRatingChange, hasClearButton,
+  ratingGroupName, clearRatingName, deleteName, deletedText, parseRating, isRatingChange, hasClearButton, focusKeyAfterReload,
 } from './entryOps.js';
 
 test('US-012.4 US-012.5: names and announcement are exact', () => {
@@ -25,6 +25,13 @@ test('US-012.4: a rating request is due only for a completed entry and a differe
   assert.equal(isRatingChange(done, null), false);
   assert.equal(isRatingChange({ status: 'completed', rating: null }, 3), true);
   assert.equal(isRatingChange({ status: 'reading', rating: null }, 3), false);
+});
+
+test('US-012.7: focus falls back to the status select only when the control is gone', () => {
+  assert.equal(focusKeyAfterReload('3', false), 'status');
+  assert.equal(focusKeyAfterReload('clear', false), 'status');
+  assert.equal(focusKeyAfterReload('3', true), '3');
+  assert.equal(focusKeyAfterReload('status', true), 'status');
 });
 
 test('US-012.4: the clear button exists only while a rating exists', () => {

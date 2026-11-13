@@ -311,3 +311,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Tasks 39 and 40: E2E status, rating and delete (IN_REVIEW)
 
 - Branch: `test/task-39-40-e2e-status-rating-delete` (stacked on the chunk 37+38 branch); delivery handoff 196. New `us-012-status-rating.spec.ts` and `us-012-delete.spec.ts`, helpers `support/requests.ts` and `support/storage.ts`, smoke tests 5 and 6, storage assertions in the add and delete flows (SEC-F-138). Two older locators repaired (add-form Status control, status label vs option) because the entry status select of Task 36 made them ambiguous. F-37-1 focus landing recorded: body. 109 unit and 95 E2E tests pass.
+
+## Task 54: Focus after RATING_NOT_ALLOWED (IN_REVIEW)
+
+- Branch: `feature/task-54-focus-after-rating-not-allowed`; delivery handoff 200. Pure `focusKeyAfterReload` in `logic/entryOps.js`; `entryActions.js` applies it after the entry reload (focus falls back to the status select when the control used is hidden or gone). F-37-1 annotation replaced by an assertion. 110 unit and 95 E2E tests pass.

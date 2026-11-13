@@ -219,7 +219,7 @@ test('US-012.3 and S-04, S-11: a same-state choice sends no request and changes 
   expect(await library.find(freshBook.id)).toMatchObject({ status: 'unread' });
 });
 
-test('US-012.7, S-01: rating a book changed behind the page shows the message and reloads the entry', async ({ page, library }, testInfo) => {
+test('US-012.7, S-01: rating a book changed behind the page shows the message and reloads the entry', async ({ page, library }) => {
   const title = `${SCRIPT_TITLE} ${uniqueTitle('Stale')}`;
   const book = await library.create({ title, author: 'A', status: 'completed' });
   const requests = trackRequests(page);
@@ -235,13 +235,8 @@ test('US-012.7, S-01: rating a book changed behind the page shows the message an
   expect(requests('PUT', RATING_PUT)).toHaveLength(1);
   expect(requests('GET', new RegExp(`/api/v1/books/${book.id}$`))).toHaveLength(1);
   expect(await library.find(book.id)).toMatchObject({ status: 'reading', rating: null });
-  // F-37-1: where focus lands is recorded, not asserted (no story names it).
-  const landed = await page.evaluate(() => {
-    const a = document.activeElement;
-    return a === null ? 'none' : `${a.tagName.toLowerCase()}${a.id ? `#${a.id}` : ''}${a.className ? `.${a.className}` : ''}`;
-  });
-  testInfo.annotations.push({ type: 'F-37-1 focus after RATING_NOT_ALLOWED', description: landed });
-  console.log(`F-37-1 focus after RATING_NOT_ALLOWED landed on: ${landed}`);
+  // F-37-1, P-F2: the rating radio is gone, so focus falls back to the status select.
+  await expect(page.getByLabel(`Status of ${title}`, { exact: true })).toBeFocused();
 });
 
 for (const action of ['status', 'rating', 'clear'] as const) {

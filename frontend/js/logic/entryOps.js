@@ -52,6 +52,14 @@ export function isRatingChange(book, rating) {
 }
 
 /**
+ * Where focus goes after a reload: the control used, or the status select when it no longer exists (US-012.7, P-F2).
+ * @param {string} key the control used ('1' to '5', 'clear', 'delete' or 'status')
+ * @param {boolean} exists whether that control still exists in the reloaded entry
+ * @returns {string} the key to focus: the same key, or 'status'
+ */
+export const focusKeyAfterReload = (key, exists) => (exists ? key : 'status');
+
+/**
  * Whether the clear button exists: only while a completed entry shows a rating.
  * @param {{status: string, rating: (number|null)}} book the entry's last known book
  * @returns {boolean} true when it is shown
