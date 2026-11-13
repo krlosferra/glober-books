@@ -1,8 +1,8 @@
 # Project Constitution: GloberBooks
 
 - Owner: Sponsor
-- Version: 1.7
-- Last updated: 2026-11-10
+- Version: 1.8
+- Last updated: 2026-11-13
 - Status: Approved by the Sponsor on 2026-10-30 (Phase 1 gate: Liaison round 3 APPROVED WITH CHANGES, Security round 3 PASS WITH CONDITIONS)
 
 This document is the highest authority in the repository. If `spec.md`, `plan.md`, `tasks.md` or code conflict with it, the constitution wins until the Sponsor amends it.
@@ -124,7 +124,7 @@ Task 1 (project scaffold) proves, with real output attached, what this constitut
 ## Configuration and Secrets
 - One configuration file: `backend/src/main/resources/application.yml`. Environment variables override it.
 - Database location: `spring.datasource.url` (env `SPRING_DATASOURCE_URL`), default `jdbc:sqlite:./data/globerbooks.db`. Server port: `server.port` (env `SERVER_PORT`), default 8080. Bind address: `server.address` (env `SERVER_ADDRESS`), default `127.0.0.1`.
-- Mandatory properties (each is proven effective by a Task 1 test; a key that Spring Boot 4 does not recognize is corrected there, never silently dropped): `spring.jpa.hibernate.ddl-auto: validate`; `spring.jpa.open-in-view: false`; `spring.jpa.show-sql: false`; `spring.sql.init.mode: always`; `spring.jackson.property-naming-strategy: SNAKE_CASE`; `spring.jackson.deserialization.fail-on-unknown-properties: true`; `spring.datasource.hikari.maximum-pool-size: 1`; `spring.datasource.hikari.connection-timeout: 5000`; `server.address: 127.0.0.1`; `server.forward-headers-strategy: none`; `server.max-http-request-header-size: 8KB`; `server.tomcat.connection-timeout: 5s`; `server.tomcat.accesslog.enabled: false`; `server.error.whitelabel.enabled: false` (and `ErrorMvcAutoConfiguration` excluded); `spring.mvc.hiddenmethod.filter.enabled: false`; `spring.mvc.formcontent.filter.enabled: false`; `spring.servlet.multipart.enabled: false`; `spring.web.resources.static-locations: classpath:/static/`; `spring.mvc.log-request-details: false`.
+- Mandatory properties (each is proven effective by a Task 1 test; a key that Spring Boot 4 does not recognize is corrected there, never silently dropped): `spring.jpa.hibernate.ddl-auto: validate`; `spring.jpa.open-in-view: false`; `spring.jpa.show-sql: false`; `spring.sql.init.mode: always`; `spring.jackson.property-naming-strategy: SNAKE_CASE`; `spring.jackson.deserialization.fail-on-unknown-properties: true`; `spring.datasource.hikari.maximum-pool-size: 1`; `spring.datasource.hikari.connection-timeout: 5000`; `server.address: 127.0.0.1`; `server.forward-headers-strategy: none`; `server.max-http-request-header-size: 8KB`; `server.tomcat.connection-timeout: 5s`; `server.tomcat.accesslog.enabled: false`; `server.error.whitelabel.enabled: false` (and `ErrorMvcAutoConfiguration` excluded); `spring.mvc.hiddenmethod.filter.enabled: false`; `spring.mvc.formcontent.filter.enabled: false`; `spring.servlet.multipart.enabled: false`; `spring.mvc.log-request-details: false`.
 - Jackson strictness (SC-31) is set in one configuration class and each switch has a contract test: trailing tokens after the JSON value fail; duplicate keys fail; no scalar or float-to-integer coercion; no numeric enums; no default typing; low read constraints (string and number length). DTO fields of type `Object`, `Map<String,Object>`, `JsonNode` or an interface are forbidden.
 - No secret, credential or token in source control. If one becomes necessary, ask the Sponsor first.
 - Local database files, `/data/`, `/backend/data/`, `.env*` (except `.env.example`) and local configuration overrides are git-ignored. A committed `e2e/.npmrc` is allowed only without tokens.
@@ -315,3 +315,4 @@ Approved by the Sponsor on 2026-11-10 from the optimization analysis of the whol
 - 1.5 (2026-11-05): Sponsor-approved delegation of LOW and INFO residual risks to the Security reviewer with limits (Security Standards) and a standing rule for container-first responses (Error Handling Standards); both reduce per-case Sponsor decisions without touching MEDIUM and above.
 - 1.6 (2026-11-06): Sponsor-approved review chunks: non-protected tasks may be reviewed in chunks of 2 to 4 related tasks with one Liaison audit and one Security review per chunk and one pull request; protected-surface tasks stay per task; every increment ends with a full review.
 - 1.7 (2026-11-10): Sponsor-approved token optimization: direct dispatch, the active conditions ledger, the reading rule, compact deliveries, the frontend increment cadence for pure layout and styling, role boundaries, and the contract summary rule. `security.md` findings log and changelog moved to `security-log.md`.
+- 1.8 (2026-11-13): Sponsor-approved removal of `spring.web.resources.static-locations` from the mandatory properties (SEC-F-126, Task 55): with `add-mappings: false` no resource handler is registered and the static catalog uses a literal classpath location, so the property is inert.
