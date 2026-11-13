@@ -14,7 +14,12 @@ const DELETE = /\/api\/v1\/books\/[^/]+$/;
 const LIST = /\/api\/v1\/books$/;
 const deleteDialog = (page: Page) => page.getByRole('dialog', { name: 'Delete book' });
 const heading = (page: Page) => page.getByRole('heading', { level: 2, name: 'Your books' });
-const longTitle = () => `${uniqueTitle('Long')} ${'L'.repeat(480)}`.slice(0, 500);
+const longTitle = () => {
+  const prefix = `${uniqueTitle('Long')} `;
+  const title = prefix + 'L'.repeat(500 - [...prefix].length);
+  if ([...title].length !== 500) throw new Error('long title must be exactly 500 code points');
+  return title;
+};
 
 const TITLES = [
   { name: 'a plain title', make: () => uniqueTitle('Plain') },
