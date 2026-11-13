@@ -1,5 +1,5 @@
 import { byId, setText } from './dom.js';
-import { ADDED_PREFIX } from '../logic/copy.js';
+import { ADDED_PREFIX, confirmStatusText } from '../logic/copy.js';
 import { nextTabTarget } from '../logic/focusTrap.js';
 import { statusLabel, localDate } from '../logic/format.js';
 
@@ -24,21 +24,10 @@ function trapTab(event, first, last) {
 }
 
 /**
- * Open the modal "Possible duplicate" dialog (US-011.7) and wait for the user's choice.
- * The existing book is shown with textContent only. Escape and Cancel both resolve false;
- * the native modal dialog has no other way to close (no outside click, no hidden path).
- * @param {{title: string, author: string, status: string, dateAdded: string}} existing a book mapped by the API layer
- * @returns {Promise<boolean>} true for "Add anyway", false for Cancel or Escape
+ * Show a modal dialog with two buttons and wait for the choice. Escape and Cancel both
+ * resolve false; the native modal dialog has no other way to close.
  */
-export function confirmDuplicate(existing) {
-  const dialog = byId('duplicate-dialog');
-  const cancel = byId('duplicate-cancel');
-  const confirm = byId('duplicate-confirm');
-  const shown = isText(existing.title) && isText(existing.author) && isText(existing.dateAdded);
-  setText(byId('duplicate-title'), shown ? existing.title : '');
-  setText(byId('duplicate-author'), shown ? existing.author : '');
-  setText(byId('duplicate-status'), shown ? statusLabel(existing.status) : '');
-  setText(byId('duplicate-added'), shown ? `${ADDED_PREFIX}${localDate(existing.dateAdded)}` : '');
+function runDialog(dialog, cancel, confirm) {
   dialog.returnValue = '';
   return new Promise((resolve) => {
     const onConfirm = () => dialog.close(CONFIRMED);
@@ -56,4 +45,31 @@ export function confirmDuplicate(existing) {
     dialog.showModal();
     cancel.focus();
   });
+}
+
+/**
+ * Open the modal "Possible duplicate" dialog (US-011.7) and wait for the user's choice.
+ * The existing book is shown with textContent only.
+ * @param {{title: string, author: string, status: string, dateAdded: string}} existing a book mapped by the API layer
+ * @returns {Promise<boolean>} true for "Add anyway", false for Cancel or Escape
+ */
+export function confirmDuplicate(existing) {
+  const shown = isText(existing.title) && isText(existing.author) && isText(existing.dateAdded);
+  setText(byId('duplicate-title'), shown ? existing.title : '');
+  setText(byId('duplicate-author'), shown ? existing.author : '');
+  setText(byId('duplicate-status'), shown ? statusLabel(existing.status) : '');
+  setText(byId('duplicate-added'), shown ? `${ADDED_PREFIX}${localDate(existing.dateAdded)}` : '');
+  return runDialog(byId('duplicate-dialog'), byId('duplicate-cancel'), byId('duplicate-confirm'));
+}
+
+/**
+ * Open the modal "Confirm status change" dialog (US-012.3) and wait for the choice.
+ * The title is shown with textContent only; initial focus is on Cancel.
+ * @param {string} title the book title
+ * @param {string} targetLabel Unread or Reading
+ * @returns {Promise<boolean>} true for "Continue", false for Cancel or Escape
+ */
+export function confirmStatusChange(title, targetLabel) {
+  setText(byId('status-text'), confirmStatusText(title, targetLabel));
+  return runDialog(byId('status-dialog'), byId('status-cancel'), byId('status-confirm'));
 }

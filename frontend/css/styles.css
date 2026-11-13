@@ -218,3 +218,33 @@ dialog p {
   gap: 0.5rem;
   margin-top: 1rem;
 }
+
+.entry-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.entry-controls select {
+  max-width: 100%;
+}
+
+.entry-mismatch {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.entry-message:not(:empty) {
+  margin-top: 0.5rem;
+  color: #9b1c1c;
+  font-weight: 600;
+}
+
+.entry-message:not(:empty)::before {
+  content: "Error: ";
+}
+
+div[hidden] {
+  display: none;
+}
