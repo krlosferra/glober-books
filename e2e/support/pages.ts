@@ -6,7 +6,7 @@ const ADD_URL = /\/api\/v1\/books$/;
 export const form = (page: Page) => ({
   title: page.getByLabel('Title'),
   author: page.getByLabel('Author'),
-  status: page.getByLabel('Status'),
+  status: page.getByRole('combobox', { name: 'Status', exact: true }),
   add: page.getByRole('button', { name: 'Add book' }),
 });
 

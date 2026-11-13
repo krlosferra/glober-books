@@ -1,6 +1,7 @@
 import { test, expect } from '../support/fixtures';
 import { SCRIPT_TITLE, uniqueTitle } from '../support/builders';
 import { entries, messages, choose } from '../support/view';
+import { expectNoBrowserStorage } from '../support/storage';
 import { form, fillBook, trackPosts, holdAdd, countMessageUpdates } from '../support/pages';
 
 // The error slot has a visual "Error: " prefix from the stylesheet; the description ends with the message.
@@ -114,6 +115,7 @@ test('US-011.5 AC-1: a 201 inserts the book on top, clears the form, resets Stat
   await expect(form(page).status).toHaveValue('unread');
   await expect(form(page).title).toBeFocused();
   await expect(form(page).add).toBeEnabled();
+  await expectNoBrowserStorage(page);
 });
 
 test('US-011.5 AC-2: a book outside the active filter is confirmed but not listed', async ({ page, library }) => {
