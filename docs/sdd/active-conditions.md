@@ -11,7 +11,6 @@
 | ID | Item | Why it is open |
 |---|---|---|
 | S-2 | Repository stays public for now (Sponsor 2026-11-13); the Sponsor decides later whether to make it private | `private: false`: all 188 documents, including the findings and accepted risks, are public. |
-| S-4 (decided 2026-11-13) | SEC-F-126: Sponsor said remove `static-locations` if it is not used | Scheduled as Task 55 (backend, protected surface, reviewed alone). The constitution (mandatory properties) is amended to 1.8 in the same pull request as the task; three backend tests pin the property (`StartupPolicyIntegrationTest`, `MandatoryPropertiesIntegrationTest`, `StaticContentIntegrationTest`). |
 | S-5 | Platform protection (SEC-F-003, SEC-F-005): protected `main`, `hygiene` as a required check, credential scoping | Repository side done; platform settings are the Sponsor's. |
 | S-7 | Delete the leftovers in the container root: `/x` and `/run1.log` | Created by review probes; the environment blocked their removal. Not part of the repository. |
 
@@ -81,6 +80,8 @@ SEC-F-152, SEC-F-154 (replace the regex matcher in `isWhiteSpace`), SEC-F-123 (l
 | Spec lines (handoff 173): the focus target after "Try again" and "Show all books" (the "Your books" heading, as the delete target of US-012.5); field-level failures write nothing to the "Messages" area (US-013.4, CR-5); the model field `everLoaded` is dead (Task 28 or later) | `spec.md`, `tasks.md` |
 
 ## Closed since the ledger was created
+
+S-4 closed (handoff 206, Task 55 Security review, PASS): SEC-F-126 closed; `static-locations` removed from application.yml and verified on the rebuilt jar (no resource handler, nothing served beyond the literal catalog).
 
 S-1 closed: the Sponsor created tag `v0.2` on 074b8a6 (verified on the remote, 2026-11-13).
 

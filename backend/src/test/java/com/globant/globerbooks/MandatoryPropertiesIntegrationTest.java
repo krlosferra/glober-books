@@ -20,7 +20,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.jpa.autoconfigure.JpaProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
@@ -207,12 +206,12 @@ class MandatoryPropertiesIntegrationTest {
     }
 
     @Test
-    void staticLocationsAndRequestDetailLoggingAreAsConfigured() {
-        WebProperties web = context.getBean(WebProperties.class);
+    void staticLocationsKeyIsAbsentAndRequestDetailLoggingIsOff() {
         WebMvcProperties mvc = context.getBean(WebMvcProperties.class);
-        proof("spring.web.resources.static-locations", String.join(",", web.getResources().getStaticLocations()));
+        proof("spring.web.resources.static-locations",
+                context.getEnvironment().getProperty("spring.web.resources.static-locations"));
         proof("spring.mvc.log-request-details", mvc.isLogRequestDetails());
-        assertThat(web.getResources().getStaticLocations()).containsExactly("classpath:/static/");
+        assertThat(context.getEnvironment().getProperty("spring.web.resources.static-locations")).isNull();
         assertThat(mvc.isLogRequestDetails()).isFalse();
     }
 
