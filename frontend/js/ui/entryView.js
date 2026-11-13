@@ -19,7 +19,9 @@ function updateRating(item, book, ui) {
   setVisible(item.querySelector('.entry-rating-mount'), completed);
   item.querySelector('.entry-rating-group').setAttribute('aria-label', ratingGroupName(book.title));
   item.querySelectorAll('.entry-rating-group input').forEach((radio) => {
-    radio.checked = completed && Number(radio.value) === book.rating;
+    if (!ui.busy) { // while a request runs the user's choice stays; the outcome sets the server's value
+      radio.checked = completed && Number(radio.value) === book.rating;
+    }
     radio.disabled = ui.busy;
   });
   const clear = item.querySelector('.entry-clear-rating');
