@@ -100,8 +100,8 @@ Governance in force: constitution 1.7 (direct dispatch, compact deliveries, ledg
 | 37 | Rating group and clear rating | frontend | DONE | sdd-frontend-developer | PR 53 (merged) | 2 | | ACCEPT WITH FOLLOW-UPS (193) | PASS (194) | | brief 191; chunk 37+38 (one review, one PR) |
 | 38 | Delete with confirmation | frontend | DONE | sdd-frontend-developer | PR 53 (merged) | 2 | | ACCEPT (193) | PASS (194) | | brief 191; chunk 37+38 |
 | 39+40 | E2E status, rating and delete | frontend | DONE | sdd-frontend-developer | PR 54 (merged) | 2 | | ACCEPT (197) | PASS (reduced, orchestrator, 198) | | brief 195; delivery 196 |
-| 54 | Focus after RATING_NOT_ALLOWED | frontend | IN_REVIEW | sdd-frontend-developer | `feature/task-54-focus-after-rating-not-allowed` | 2 | | ACCEPT (201) | PASS (202) | | Sponsor decision 2026-11-13 (F-37-1); brief 199; delivery 200 |
-| 55 | Remove the inert `static-locations` property | backend | IN_REVIEW | sdd-java-architect | `chore/task-55-remove-static-locations` | 3 | | ACCEPT (205) | PASS (206) | | Sponsor decision 2026-11-13 (SEC-F-126); constitution 1.8 in the same PR; brief 203; delivery 204 |
+| 54 | Focus after RATING_NOT_ALLOWED | frontend | DONE | sdd-frontend-developer | PR 56 (merged) | 2 | ce4843f | ACCEPT (201) | PASS (202) | | Sponsor decision 2026-11-13 (F-37-1); brief 199; delivery 200 |
+| 55 | Remove the inert `static-locations` property | backend | DONE | sdd-java-architect | PR 57 (merged) | 3 | 7b8b7f5 | ACCEPT (205) | PASS (206) | | Sponsor decision 2026-11-13 (SEC-F-126); constitution 1.8 in the same PR; brief 203; delivery 204 |
 
 ## Spec coverage
 
