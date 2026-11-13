@@ -96,7 +96,9 @@ Governance in force: constitution 1.7 (direct dispatch, compact deliveries, ledg
 | 28 | E2E library view, filter and states | frontend | DONE | sdd-frontend-developer | PR 48 (merged) | 1 | | ACCEPT WITH FOLLOW-UPS (177) | PASS (178) | | brief 175; delivery 176 |
 | 29 | E2E add, validation and duplicate flows | frontend | DONE | sdd-frontend-developer | PR 49 (merged) | 1 | | ACCEPT (181) | PASS (182) | | brief 179 |
 | 35 | Client endpoints for status, rating, clear and delete | frontend | DONE | sdd-frontend-developer | PR 51 (merged) | 2 | | ACCEPT (185) | PASS (186) | | brief 183 |
-| 36 | Entry view, status control and confirmation | frontend | IN_REVIEW | sdd-frontend-developer | `feature/task-36-entry-status` | 2 | | ACCEPT (189) | PASS (190) | | brief 187; delivery 188 |
+| 36 | Entry view, status control and confirmation | frontend | DONE | sdd-frontend-developer | PR 52 (merged) | 2 | | ACCEPT (189) | PASS (190) | | brief 187; delivery 188 |
+| 37 | Rating group and clear rating | frontend | IN_PROGRESS | sdd-frontend-developer | `feature/task-37-rating-group` (chunk branch) | 2 | | | | | brief 191; chunk 37+38 (one review, one PR) |
+| 38 | Delete with confirmation | frontend | IN_PROGRESS | sdd-frontend-developer | `feature/task-37-rating-group` (chunk branch) | 2 | | | | | brief 191; chunk 37+38 |
 
 ## Spec coverage
 
