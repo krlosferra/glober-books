@@ -319,3 +319,7 @@ Task 23b follow-up round (handoffs 130, 131): worst-case bound test added (`AddB
 ## Task 55: Remove the inert static-locations property (IN_REVIEW)
 
 - Branch: `chore/task-55-remove-static-locations`; delivery handoff 204. Key removed from `application.yml` (`add-mappings: false` kept); the three tests no longer expect it (absent by default); catalog served from the literal classpath location, proven unchanged. Full build: 351 tests, 0 failures, 0 errors, 1 skipped, exit 0 (SEC-F-126).
+
+## Task 43: Accessibility check (axe) and its pin (IN_REVIEW)
+
+- Branch: `chore/task-43-accessibility-check`; delivery handoff 208. `@axe-core/playwright` 4.14.0 pinned exactly in `e2e/` (criterion 1 record in the handoff; constitution table proposal for Task 48). New `us-014-accessibility.spec.ts`: five scans (data state, two field errors, three dialogs) with zero serious or critical violations on WCAG 2.1 A and AA, run under the application's own CSP with no bypass. 110 unit tests pass; new spec 15 of 15 with `--repeat-each=3`. Full E2E run: 6 failures in older specs, listed in the handoff (2 reproduce on rerun).
