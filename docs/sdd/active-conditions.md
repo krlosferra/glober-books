@@ -10,7 +10,6 @@
 
 | ID | Item | Why it is open |
 |---|---|---|
-| S-1 | Tag `v0.2` (Increment 0b) on `main` after trying the page | The platform does not let the orchestrator push tags. The security block (SEC-F-178) is lifted. |
 | S-2 | Repository stays public for now (Sponsor 2026-11-13); the Sponsor decides later whether to make it private | `private: false`: all 188 documents, including the findings and accepted risks, are public. |
 | S-4 (decided 2026-11-13) | SEC-F-126: Sponsor said remove `static-locations` if it is not used | Scheduled as Task 55 (backend, protected surface, reviewed alone). The constitution (mandatory properties) is amended to 1.8 in the same pull request as the task; three backend tests pin the property (`StartupPolicyIntegrationTest`, `MandatoryPropertiesIntegrationTest`, `StaticContentIntegrationTest`). |
 | S-5 | Platform protection (SEC-F-003, SEC-F-005): protected `main`, `hygiene` as a required check, credential scoping | Repository side done; platform settings are the Sponsor's. |
@@ -26,7 +25,7 @@
 | T-33 wording, E-28 prelude | INFO | PM (see section 6) | SEC-F-195: Tomcat's first parse error logs one INFO line with the bad header or target. E-28: `FOO` without `Content-Type` gives 415, the Appendix D prelude sends JSON so the row is met. |
 | SEC-F-174 | INFO | 51 | Pin one cold-start run for nested JSON (first request of a JVM took 200 to 306 ms; T-31 bound is 300 ms; the PM words T-31 "after the first request of the JVM"). |
 | SEC-F-094 | LOW | 45 or earlier (frontend) | Extend the `sources.test.js` rules (template literals, array join, `Reflect.get`, `window.open`, `location`); the E2E XSS test is the real control. |
-| Liaison F-37-1 (handoffs 193, 197) | MINOR | Task 54 (frontend, Sponsor decision 2026-11-13: take the Liaison recommendation) | After `RATING_NOT_ALLOWED` the focus lands on the page body; fix: focus falls back to the "Status of <title>" control, with one unit test and one E2E assertion. The PM notes the focus rule as a spec/plan line (plan assumption P-F2). |
+| Liaison F-37-1 (handoffs 193, 197, 201) | MINOR | F-37-1 CLOSED by handoff 201 (Task 54 accepted by the Liaison, commit 4bac369). OPEN: PM debt only | Fix delivered: focus falls back to the "Status of <title>" control, one unit test and one E2E assertion. Still open for the PM: a spec line and a plan line for the focus rule (plan assumption P-F2). |
 | SEC-F-138 | LOW | a later E2E task | `Set-Cookie` and `Location` absence assertions in the guard; the foreign-origin check sees http(s) only; also assert empty local, session storage and cookies after the add flows (not asserted in Task 29; checked once in handoff 174). |
 | SEC-F-133, SEC-F-134, SEC-F-135 | LOW | backlog | E2E launcher: assert mode 0700 and the owner of its temp dir; remove the empty temp dir when its own check fails; SIGHUP is not forwarded and a SIGKILL of the launcher orphans the java process. |
 | Liaison F-29-2 (handoff 181) | LOW | PM (backlog) | At 320x90 the duplicate dialog (UA `max-height`, `overflow: hidden`) hides its heading and question; buttons stay reachable. Decide whether a minimum height (for example 320x256, WCAG 1.4.10 reflow) is a requirement; if yes add one E2E assertion that heading and question are visible there. Any CSS change touches the US-014.6 containment rules: PM line first. |
@@ -82,6 +81,8 @@ SEC-F-152, SEC-F-154 (replace the regex matcher in `isWhiteSpace`), SEC-F-123 (l
 | Spec lines (handoff 173): the focus target after "Try again" and "Show all books" (the "Your books" heading, as the delete target of US-012.5); field-level failures write nothing to the "Messages" area (US-013.4, CR-5); the model field `everLoaded` is dead (Task 28 or later) | `spec.md`, `tasks.md` |
 
 ## Closed since the ledger was created
+
+S-1 closed: the Sponsor created tag `v0.2` on 074b8a6 (verified on the remote, 2026-11-13).
 
 Handoff 197 (Task 39+40 audit): F-39-1 fixed (commit 20f4801; `longTitle` builds 500 code points). Sponsor answers of 2026-11-13: S-3 confirmed (DEC-035, DEC-036, DEC-037: the PM marks them CONFIRMED in the Decision Log); R-27 stays accepted; F-29-2 stays a pending Sponsor decision (possibly a UI/UX review in the last phase).
 
