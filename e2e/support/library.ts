@@ -8,6 +8,7 @@ export interface ApiBook {
   author: string;
   status: string;
   rating: number | null;
+  date_completed: string | null;
 }
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -23,6 +24,14 @@ export class Library {
   async list(): Promise<{ books: ApiBook[]; total: number }> {
     const response = await this.request.get('/api/v1/books');
     if (response.status() !== 200) throw new Error(`list failed: ${response.status()}`);
+    return response.json();
+  }
+
+  /** Reads one book by id, or null when the API answers 404. */
+  async find(id: string): Promise<ApiBook | null> {
+    const response = await this.request.get(`/api/v1/books/${encodeURIComponent(id)}`);
+    if (response.status() === 404) return null;
+    if (response.status() !== 200) throw new Error(`get failed: ${response.status()}`);
     return response.json();
   }
 

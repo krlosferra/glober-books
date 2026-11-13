@@ -1,8 +1,8 @@
 # GloberBooks Task Backlog
 
 - Owner: PM (`sdd-product-manager`)
-- Version: 0.6.6 (changelog: 0.6.6, 2026-11-10, constitution 1.7 rule 5: Tasks 46 (styles polish) and 52 (measurements and responsive layout) move from `Security: per task` to `Security: increment` because they are layout and styling only; the Security ruling of handoff 087 predates 1.7 and the Sponsor decided otherwise for this narrow case; Security may upgrade either task at any time; Tasks 47, 48 and 53 stay per task. 0.6.5, 2026-11-06, Task 34a split into 34a-1 (complete `DataDirectoryGuard` plus file identity, unit-proved, not wired) and 34a-2 (wiring, `StartupFailureAnalyzer`, jar-level proofs) with the cut recommended by the Liaison (handoff 146 (d)) and agreed by Security (handoff 147, SEC-F-178), replacing the cut proposed in the 0.6.4 size note; dependencies, traceability, tier register, totals and ceiling list updated; tier sentence and extra support files for Tasks 32 and 33; 0.6.4, 2026-11-06, Task 33 criterion 3 narrowed to "modes stay no wider" with a pre-created 0700/0600 location; creation of the directory and file with these modes, wiring of `SqliteDataSourceProvider`/`DataDirectoryGuard` in the packaged jar and the clean failure on an uncreatable directory moved to Task 34a, criteria 4 and 5 and a split proposal; dependencies of 34a and 34b updated; handoff 145)
-- Last updated: 2026-11-10
+- Version: 0.6.7 (changelog: 0.6.7, 2026-11-13, Sponsor approval of 2026-11-13: test-only tasks (Production none, or test support files only) move from `Security: per task` to `Security: increment`: Tasks 39+40, 44, 45 and 47; Tasks 43 (dependency pin) and 48 (documents) stay per task; no other change. 0.6.6, 2026-11-10, constitution 1.7 rule 5: Tasks 46 (styles polish) and 52 (measurements and responsive layout) move from `Security: per task` to `Security: increment` because they are layout and styling only; the Security ruling of handoff 087 predates 1.7 and the Sponsor decided otherwise for this narrow case; Security may upgrade either task at any time; Tasks 47, 48 and 53 stay per task. 0.6.5, 2026-11-06, Task 34a split into 34a-1 (complete `DataDirectoryGuard` plus file identity, unit-proved, not wired) and 34a-2 (wiring, `StartupFailureAnalyzer`, jar-level proofs) with the cut recommended by the Liaison (handoff 146 (d)) and agreed by Security (handoff 147, SEC-F-178), replacing the cut proposed in the 0.6.4 size note; dependencies, traceability, tier register, totals and ceiling list updated; tier sentence and extra support files for Tasks 32 and 33; 0.6.4, 2026-11-06, Task 33 criterion 3 narrowed to "modes stay no wider" with a pre-created 0700/0600 location; creation of the directory and file with these modes, wiring of `SqliteDataSourceProvider`/`DataDirectoryGuard` in the packaged jar and the clean failure on an uncreatable directory moved to Task 34a, criteria 4 and 5 and a split proposal; dependencies of 34a and 34b updated; handoff 145)
+- Last updated: 2026-11-13
 - Status: Draft (Phase 3, round 3 of 3, final edits). Round 1 findings (handoffs 025, 026) were resolved in 0.4 and the round 2 findings (handoffs 031, 032) in 0.5; the answers by finding number are in handoff 027 (sections 2 and "Round 3"). Definitions only: task state lives in `status.md`.
 - Inputs: `delivery-strategy.md` v1.0, `spec.md` v0.4.3 (draft change requests CR-1 to CR-9 on top of the approved 0.4.1), `constitution.md` 1.1, `security.md`, `plan.md` and `plan-appendix.md` 0.2, handoff 022 (lean backend plan, tasks B01 to B27) and handoff 021 (frontend plan, candidates F0.1 to F4.3).
 - Sponsor decisions applied. 2026-10-30: spec frozen except change requests; Increment 4 is P1 hardening; Increment 0 is a thin walking skeleton; SQLite uses the default rollback journal with exclusive locking (no WAL) and the schema of the plan; static content by our own controller; `TRACE` answered by the container with a pre-application `405`. 2026-11-02: the full P0 scope is accepted against the indicative 6 to 8 h (the figure accepted was about 32 h of task time; section 1 shows the figure after the splits of round 2 and asks the Sponsor to confirm it); Increment 0 is split into 0a (Tasks 01 to 08) and 0b (Tasks 09 to 14), with tag `v0.1` after Task 08 and `v0.2` after Task 14; Tasks 49 and 50 run before the release tag; the accessibility checker runs in tests only and the application CSP is never relaxed; change requests CR-1 to CR-9 go to review.
@@ -548,7 +548,7 @@ Gate rows (P0): S-01 to S-07, S-08 and S-09 (20 iterations), S-10, S-11, T-15, T
 - Traces: US-012.5, .9, US-010.4, .6.
 
 ### Task 39+40: E2E status, rating and delete
-- Merged 2026-11-05 (Sponsor, option B of section 9) from Task 39 (Source: F2.5) and Task 40 (Source: F2.6) | Layer: frontend | Tier: P0 | Security: per task | Estimate: 70 (40 + 30, long task; the 45-minute limit is waived; if it overruns it is split back into 39 and 40) | Depends on: 37, 38, 31a, 31b, 14 | Branch: `test/task-39-40-e2e-status-rating-delete`
+- Merged 2026-11-05 (Sponsor, option B of section 9) from Task 39 (Source: F2.5) and Task 40 (Source: F2.6) | Layer: frontend | Tier: P0 | Security: increment | Estimate: 70 (40 + 30, long task; the 45-minute limit is waived; if it overruns it is split back into 39 and 40) | Depends on: 37, 38, 31a, 31b, 14 | Branch: `test/task-39-40-e2e-status-rating-delete`
 - Description: Test status changes, clearing of rating and date, rating set, replace and clear, the stale-state failures, delete and the stale 404; add smoke tests 5 and 6. Build order: criteria 1 to 4 (status and rating) first, then 5 to 8 (delete).
 - Production: none. Tests: `us-012-status-rating.spec.ts`, `us-012-delete.spec.ts`.
 - Acceptance criteria (1 to 4 from Task 39, 5 to 8 from Task 40):
@@ -594,7 +594,7 @@ Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-0
 - Traces: US-014.1, .2, DEC-026, SC-10, SC-21, SC-38.
 
 ### Task 44: Error matrix
-- Source: F3.2 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39+40, 26, 28 | Security: per task | Branch: `test/task-44-error-matrix`
+- Source: F3.2 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39+40, 26, 28 | Security: increment | Branch: `test/task-44-error-matrix`
 - Description: Test every error code and the non-envelope cases with stubbed responses, the timeout and the live-region update count.
 - Production: none. Tests: `us-013-errors.spec.ts`.
 - Acceptance criteria:
@@ -605,7 +605,7 @@ Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-0
 - Traces: US-013, 5.9, E-21 page text.
 
 ### Task 45: Safe rendering
-- Source: F3.3 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39+40, 27, 38 | Security: per task | Branch: `test/task-45-safe-rendering`
+- Source: F3.3 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39+40, 27, 38 | Security: increment | Branch: `test/task-45-safe-rendering`
 - Description: Test that hostile and worst-case texts are inert everywhere, including every dialog, and that the page reads and stores nothing it should not.
 - Production: none. Tests: `us-014-safe-rendering.spec.ts`, `frontend/js/sources.test.js` (edit).
 - Acceptance criteria:
@@ -627,7 +627,7 @@ Gate rows (P0): C-05 size bound, C-08, C-11 (c) assertions, US-013.1 to .6, US-0
 - Traces: US-014.2, .3, .5, .6.
 
 ### Task 47: Keyboard and focus rules
-- Source: F3.6 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39+40, 27, 38 | Security: per task | Branch: `test/task-47-keyboard-focus`
+- Source: F3.6 | Layer: frontend | Tier: P0 | Estimate: 40 | Depends on: 39+40, 27, 38 | Security: increment | Branch: `test/task-47-keyboard-focus`
 - Description: Test keyboard-only operation, the focus return table and the testable reading of focus trapping for every dialog.
 - Production: none. Tests: edits to `us-011-add-book.spec.ts`, `us-012-status-rating.spec.ts`, `us-014-accessibility.spec.ts`.
 - Acceptance criteria:

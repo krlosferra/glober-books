@@ -97,8 +97,9 @@ Governance in force: constitution 1.7 (direct dispatch, compact deliveries, ledg
 | 29 | E2E add, validation and duplicate flows | frontend | DONE | sdd-frontend-developer | PR 49 (merged) | 1 | | ACCEPT (181) | PASS (182) | | brief 179 |
 | 35 | Client endpoints for status, rating, clear and delete | frontend | DONE | sdd-frontend-developer | PR 51 (merged) | 2 | | ACCEPT (185) | PASS (186) | | brief 183 |
 | 36 | Entry view, status control and confirmation | frontend | DONE | sdd-frontend-developer | PR 52 (merged) | 2 | | ACCEPT (189) | PASS (190) | | brief 187; delivery 188 |
-| 37 | Rating group and clear rating | frontend | IN_REVIEW | sdd-frontend-developer | `feature/task-37-rating-group` (chunk branch) | 2 | | ACCEPT WITH FOLLOW-UPS (193) | PASS (194) | | brief 191; chunk 37+38 (one review, one PR) |
-| 38 | Delete with confirmation | frontend | IN_REVIEW | sdd-frontend-developer | `feature/task-37-rating-group` (chunk branch) | 2 | | ACCEPT (193) | PASS (194) | | brief 191; chunk 37+38 |
+| 37 | Rating group and clear rating | frontend | DONE | sdd-frontend-developer | PR 53 (merged) | 2 | | ACCEPT WITH FOLLOW-UPS (193) | PASS (194) | | brief 191; chunk 37+38 (one review, one PR) |
+| 38 | Delete with confirmation | frontend | DONE | sdd-frontend-developer | PR 53 (merged) | 2 | | ACCEPT (193) | PASS (194) | | brief 191; chunk 37+38 |
+| 39+40 | E2E status, rating and delete | frontend | IN_REVIEW | sdd-frontend-developer | `test/task-39-40-e2e-status-rating-delete` | 2 | | ACCEPT (197) | PASS (reduced, orchestrator, 198) | | brief 195; delivery 196 |
 
 ## Spec coverage
 

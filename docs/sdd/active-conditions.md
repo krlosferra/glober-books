@@ -11,9 +11,8 @@
 | ID | Item | Why it is open |
 |---|---|---|
 | S-1 | Tag `v0.2` (Increment 0b) on `main` after trying the page | The platform does not let the orchestrator push tags. The security block (SEC-F-178) is lifted. |
-| S-2 | Make the GitHub repository private, or accept that it is public | `private: false`: all 188 documents, including the findings and accepted risks, are public. |
-| S-3 | Confirm DEC-035, DEC-036 and DEC-037 of `spec.md` at the next gate | Clarifications with no behaviour change, written by the PM, waiting for confirmation. DEC-036: an invalid body at 5,000 books answers 400, not 409. |
-| S-4 | Decide SEC-F-126: remove `static-locations` or keep it | Production edit outside Task 41+42; the board says Task 42 decides. |
+| S-2 | Repository stays public for now (Sponsor 2026-11-13); the Sponsor decides later whether to make it private | `private: false`: all 188 documents, including the findings and accepted risks, are public. |
+| S-4 (decided 2026-11-13) | SEC-F-126: Sponsor said remove `static-locations` if it is not used | It is inert (`add-mappings: false`; the static catalog uses a literal location), but the constitution (Tech Stack, mandatory properties) lists it and three backend tests pin it (`StartupPolicyIntegrationTest`, `MandatoryPropertiesIntegrationTest`, `StaticContentIntegrationTest`). Removal needs a constitution amendment (applied by the orchestrator under the Sponsor decision), an `application.yml` edit and test updates: a small backend task, protected surface, reviewed alone. Scheduled after Task 39+40 (queue: Task 39+40, then this). |
 | S-5 | Platform protection (SEC-F-003, SEC-F-005): protected `main`, `hygiene` as a required check, credential scoping | Repository side done; platform settings are the Sponsor's. |
 | S-7 | Delete the leftovers in the container root: `/x` and `/run1.log` | Created by review probes; the environment blocked their removal. Not part of the repository. |
 
@@ -27,11 +26,15 @@
 | T-33 wording, E-28 prelude | INFO | PM (see section 6) | SEC-F-195: Tomcat's first parse error logs one INFO line with the bad header or target. E-28: `FOO` without `Content-Type` gives 415, the Appendix D prelude sends JSON so the row is met. |
 | SEC-F-174 | INFO | 51 | Pin one cold-start run for nested JSON (first request of a JVM took 200 to 306 ms; T-31 bound is 300 ms; the PM words T-31 "after the first request of the JVM"). |
 | SEC-F-094 | LOW | 45 or earlier (frontend) | Extend the `sources.test.js` rules (template literals, array join, `Reflect.get`, `window.open`, `location`); the E2E XSS test is the real control. |
-| Liaison F-37-1 (handoff 193) | MINOR | 39+40 (E2E) or a frontend fix task | After `RATING_NOT_ALLOWED` the reloaded entry is Reading, the rating group is hidden and the focus restored to a radio is lost to the page body (plan assumption, not asserted). Record in the E2E exploration and have the focus fall back to the status select, or accept it. |
+| Liaison F-37-1 (handoffs 193, 197) | MINOR | PM (backlog) | After `RATING_NOT_ALLOWED` the focus lands on the page body (observed in Task 39+40, kept as a test annotation, not asserted). PM and Sponsor decide: accept, or a small frontend task (focus falls back to the status select of the reloaded entry) plus one E2E assertion. Liaison recommends the task. |
+| Liaison F-39-1 (handoff 197) | MINOR | 39+40 (before the commit is squashed) | `longTitle` in `us-012-delete.spec.ts` builds 494 code points, not 500; build exactly 500 and assert the length. |
 | SEC-F-138 | LOW | a later E2E task | `Set-Cookie` and `Location` absence assertions in the guard; the foreign-origin check sees http(s) only; also assert empty local, session storage and cookies after the add flows (not asserted in Task 29; checked once in handoff 174). |
 | SEC-F-133, SEC-F-134, SEC-F-135 | LOW | backlog | E2E launcher: assert mode 0700 and the owner of its temp dir; remove the empty temp dir when its own check fails; SIGHUP is not forwarded and a SIGKILL of the launcher orphans the java process. |
 | Liaison F-29-2 (handoff 181) | LOW | PM (backlog) | At 320x90 the duplicate dialog (UA `max-height`, `overflow: hidden`) hides its heading and question; buttons stay reachable. Decide whether a minimum height (for example 320x256, WCAG 1.4.10 reflow) is a requirement; if yes add one E2E assertion that heading and question are visible there. Any CSS change touches the US-014.6 containment rules: PM line first. |
 | Liaison F-1 to F-3 of handoff 173 | closed by handoff 181 (Task 29) | none | Messages-update counts, one POST on repeated submit, Tab and Shift+Tab after a text click, spec literals, hostile strings and CSP are asserted; the short-viewport remainder is F-29-2. |
+
+| `@slow` tag | LOW | 48 | Tag the 5,000-entry E2E test `@slow` and exclude it from the default run (`grepInvert` in `playwright.config.ts`, a Task 13 file); decided by the Sponsor 2026-11-13: Task 48. |
+| Playwright MCP (Sponsor decision 2026-11-13) | INFO | on the Sponsor's explicit order | Investigate why the Playwright tool server never reaches the agents. Do not start until the Sponsor says so. |
 
 ## 3. Standing rules (no task; every reviewer keeps them in mind)
 
@@ -80,6 +83,8 @@ SEC-F-152, SEC-F-154 (replace the regex matcher in `isWhiteSpace`), SEC-F-123 (l
 | Spec lines (handoff 173): the focus target after "Try again" and "Show all books" (the "Your books" heading, as the delete target of US-012.5); field-level failures write nothing to the "Messages" area (US-013.4, CR-5); the model field `everLoaded` is dead (Task 28 or later) | `spec.md`, `tasks.md` |
 
 ## Closed since the ledger was created
+
+Sponsor answers of 2026-11-13: S-3 confirmed (DEC-035, DEC-036, DEC-037: the PM marks them CONFIRMED in the Decision Log); R-27 stays accepted; F-29-2 stays a pending Sponsor decision (possibly a UI/UX review in the last phase).
 
 Handoff 194 (chunk 37 and 38 Security review, PASS): closed SEC-F-200 (busy record of a removed entry) and confirmed F-35-1 on the jar; no new finding; SEC-F-094 kept (the rules of `sources.test.js` were not extended).
 

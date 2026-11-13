@@ -1,7 +1,8 @@
 import { test, expect } from '../support/fixtures';
 import { SCRIPT_TITLE, uniqueTitle } from '../support/builders';
 import { holdLists, stubListBooks, type WireBook } from '../support/stubs';
-import { entries, listStatus, filterGroup, choose } from '../support/view';
+import { entries, listStatus, filterGroup, choose, controls, chooseStatus, shownStatus } from '../support/view';
+import { expectNoBrowserStorage } from '../support/storage';
 
 test.beforeEach(async ({ library }) => {
   await library.reset();
@@ -42,6 +43,7 @@ test('US-011.2 and M-1: a keyboard-only add shows the entry and the count @smoke
   testInfo.annotations.push({ type: 'M-1 keyboard add (ms)', description: String(elapsed) });
   console.log(`M-1 keyboard add took ${elapsed} ms`);
   expect(elapsed, 'M-1 bound, generous (spec target is 10 s for the user)').toBeLessThan(10_000);
+  await expectNoBrowserStorage(page);
 });
 
 test('US-014.6 T-12: <script>alert(1)</script> as a title is rendered as inert text @smoke', async ({ page, library }) => {
@@ -80,6 +82,40 @@ test('US-011.7 and .8, smoke 4: a duplicate add asks first, and Add anyway lists
   expect((await library.list()).total).toBe(2);
 });
 
+test('US-012.1, .2, .4, smoke 5: complete a book, rate it, replace the rating, clear it @smoke', async ({ page, library }) => {
+  const title = uniqueTitle('Smoke rate');
+  const book = await library.create({ title, author: 'Smoke Author' });
+  await page.goto('/');
+  const c = controls(page, title);
+  await expect(c.group).toHaveCount(0);
+  await chooseStatus(page, title, 'completed');
+  await expect(c.entry).toContainText('Not rated');
+  await c.star(4).check();
+  await expect(c.entry).toContainText('Rating: 4 of 5');
+  await c.star(2).check();
+  await expect(c.entry).toContainText('Rating: 2 of 5');
+  await c.clear.click();
+  await expect(c.entry).toContainText('Not rated');
+  expect(await library.find(book.id)).toMatchObject({ status: 'completed', rating: null });
+});
+
+test('US-012.5, smoke 6: delete a book after confirming; the entry goes and the heading has focus @smoke', async ({ page, library }) => {
+  const title = uniqueTitle('Smoke delete');
+  const book = await library.create({ title, author: 'Smoke Author' });
+  await library.create({ title: uniqueTitle('Smoke stays'), author: 'Other' });
+  await page.goto('/');
+  await controls(page, title).remove.click();
+  const dialog = page.getByRole('dialog', { name: 'Delete book' });
+  await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+  await dialog.getByRole('button', { name: 'Delete', exact: true }).click();
+  await expect(entries(page)).toHaveCount(1);
+  await expect(page.getByText('1 book', { exact: true })).toBeVisible();
+  await expect(page.getByRole('status', { name: 'Messages' })).toHaveText(`Book deleted: ${title}`);
+  await expect(page.getByRole('heading', { level: 2, name: 'Your books' })).toBeFocused();
+  expect(await library.find(book.id)).toBeNull();
+  await expectNoBrowserStorage(page);
+});
+
 const FAR_ZONES = [
   { zone: 'Pacific/Kiritimati', added: '2026-03-15', completed: '2026-03-16' },
   { zone: 'Pacific/Pago_Pago', added: '2026-03-14', completed: '2026-03-14' },
@@ -116,7 +152,7 @@ test('US-010.2 and .3 AC-1: loading text in a status region, then entries with t
   const entry = entries(page).first();
   await expect(entry).toContainText(reading.title);
   await expect(entry).toContainText('Entry Author');
-  await expect(entry.getByText('Reading', { exact: true })).toBeVisible();
+  await expect(shownStatus(entry, 'Reading')).toBeVisible();
   await expect(entry.getByText(/^Added: \d{4}-\d{2}-\d{2}$/)).toBeVisible();
   await expect(entry.getByText(/Completed:|Rating:|Not rated/)).toHaveCount(0);
   await expect(listStatus(page)).toHaveText('');
@@ -133,7 +169,7 @@ test('US-010.3 AC-3: rating texts for rated, unrated completed and other statuse
   await expect(byTitle(rated.title).getByText(/^Completed: \d{4}-\d{2}-\d{2}$/)).toBeVisible();
   await expect(byTitle(plain.title).getByText('Not rated', { exact: true })).toBeVisible();
   await expect(byTitle(unread.title).getByText(/Rating:|Not rated|Completed:/)).toHaveCount(0);
-  await expect(byTitle(unread.title).getByText('Unread', { exact: true })).toBeVisible();
+  await expect(shownStatus(byTitle(unread.title), 'Unread')).toBeVisible();
 });
 
 test('US-010.8 T-12: hostile strings and 500 code points are shown as inert text', async ({ page, library }) => {
