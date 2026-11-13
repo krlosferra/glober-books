@@ -7,7 +7,7 @@ import { bookReplaced, bookRemoved } from '../logic/listState.js';
 import { statusLabel } from '../logic/format.js';
 import { isBookId } from '../logic/ids.js';
 import { needsConfirmation, isChange } from '../logic/statusChange.js';
-import { parseRating, isRatingChange, deletedText } from '../logic/entryOps.js';
+import { parseRating, isRatingChange, deletedText, focusKeyAfterReload } from '../logic/entryOps.js';
 
 const entryOf = (ctx, id) => ctx.deps.getState().entries.find((e) => e.book.id === id) ?? null;
 const uiOf = (ctx, id) => ctx.ui.get(id) ?? IDLE;
@@ -50,7 +50,9 @@ function restoreFocus(ctx, id, key) {
   const item = findEntryItem(ctx.list, id);
   const active = document.activeElement;
   if (item !== null && (active === null || active === document.body || item.contains(active))) {
-    controlOf(item, key).focus();
+    const used = controlOf(item, key);
+    const target = focusKeyAfterReload(key, used !== null && used.closest('[hidden]') === null);
+    controlOf(item, target).focus();
   }
 }
 
@@ -67,7 +69,7 @@ function removeGone(ctx, id, text, reloadList = true) {
 }
 
 /** RATING_NOT_ALLOWED: fetch the entry again and show the server's values with the text (US-012.7). */
-async function reloadEntry(ctx, id, text) {
+async function reloadEntry(ctx, id, text, key) {
   let result;
   try {
     result = await getBook(id);
@@ -77,6 +79,7 @@ async function reloadEntry(ctx, id, text) {
   if (result.ok) {
     ctx.deps.setState(bookReplaced(ctx.deps.getState(), result.data).state);
     setUi(ctx, id, { busy: false, message: text });
+    restoreFocus(ctx, id, key);
   } else {
     failed(ctx, id, result.failure, 'status');
   }
@@ -90,7 +93,7 @@ function failed(ctx, id, failure, key) {
   } else if (entryOf(ctx, id) !== null) {
     setUi(ctx, id, { busy: false, message: text });
     restoreFocus(ctx, id, key);
-    return decision.reloadEntry === true ? reloadEntry(ctx, id, text) : undefined;
+    return decision.reloadEntry === true ? reloadEntry(ctx, id, text, key) : undefined;
   }
   return undefined;
 }
