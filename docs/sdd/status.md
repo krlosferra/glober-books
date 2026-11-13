@@ -102,6 +102,7 @@ Governance in force: constitution 1.7 (direct dispatch, compact deliveries, ledg
 | 39+40 | E2E status, rating and delete | frontend | DONE | sdd-frontend-developer | PR 54 (merged) | 2 | | ACCEPT (197) | PASS (reduced, orchestrator, 198) | | brief 195; delivery 196 |
 | 54 | Focus after RATING_NOT_ALLOWED | frontend | DONE | sdd-frontend-developer | PR 56 (merged) | 2 | ce4843f | ACCEPT (201) | PASS (202) | | Sponsor decision 2026-11-13 (F-37-1); brief 199; delivery 200 |
 | 55 | Remove the inert `static-locations` property | backend | DONE | sdd-java-architect | PR 57 (merged) | 3 | 7b8b7f5 | ACCEPT (205) | PASS (206) | | Sponsor decision 2026-11-13 (SEC-F-126); constitution 1.8 in the same PR; brief 203; delivery 204 |
+| 43 | Accessibility check (axe) and its pin | frontend | IN_PROGRESS | sdd-frontend-developer | `chore/task-43-accessibility-check` | 1 | | | | | Security: per task; brief 207 |
 
 ## Spec coverage
 
